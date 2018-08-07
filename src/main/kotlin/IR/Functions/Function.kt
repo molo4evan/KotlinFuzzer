@@ -1,11 +1,12 @@
 package IR.Functions
 
-import IR.Types.ClassType
+import IR.Types.Type
 import IR.IRNode
 import Information.FunctionInfo
 import Information.SymbolTable
+import Visitors.Visitor
 
-class Function(owner: ClassType, val functionInfo: FunctionInfo, args: List<IRNode>): IRNode(functionInfo.type) {
+class Function(owner: Type, val functionInfo: FunctionInfo, args: List<IRNode>): IRNode(functionInfo.type) {
     init {
         this.owner = owner
         addChildren(args)
@@ -33,7 +34,7 @@ class Function(owner: ClassType, val functionInfo: FunctionInfo, args: List<IRNo
         } else {*/
             if (owner == null) return argsComplexity + funComplexity
             for (child in owner!!.getAllChildren()) {
-                val childFuncs = SymbolTable.getAllCombined(child, FunctionInfo::class.java)
+                val childFuncs = SymbolTable.getAllCombined(child, FunctionInfo::class)
                 for (childFunc in childFuncs) {
                     if (childFunc.equals(functionInfo)) {
                         funComplexity = Math.max(funComplexity, (childFunc as FunctionInfo).complexity)
@@ -43,4 +44,6 @@ class Function(owner: ClassType, val functionInfo: FunctionInfo, args: List<IRNo
         //}
         return argsComplexity + funComplexity
     }
+
+    override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

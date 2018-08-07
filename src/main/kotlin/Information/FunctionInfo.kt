@@ -1,11 +1,10 @@
 package Information
 
-import IR.Types.ClassType
 import IR.Types.Type
 
 class FunctionInfo(                         //TODO: change static modifier to companion objects???
         name: String,
-        owner: ClassType?,
+        owner: Type?,
         retType: Type,
         val complexity: Long,
         flags: Int,
@@ -20,7 +19,7 @@ class FunctionInfo(                         //TODO: change static modifier to co
 
     constructor(
             name: String,
-            owner: ClassType?,
+            owner: Type?,
             retType: Type,
             complexity: Long,
             flags: Int,

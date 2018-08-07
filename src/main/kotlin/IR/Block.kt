@@ -1,10 +1,10 @@
 package IR
 
-import IR.Types.ClassType
 import IR.Types.Type
+import Visitors.Visitor
 import kotlin.math.max
 
-class Block(owner: ClassType, returnType: Type, content: List<out IRNode>): IRNode(returnType) {
+class Block(owner: Type, returnType: Type, content: List<out IRNode>): IRNode(returnType) {
     init {
         this.owner = owner
         addChildren(content)
@@ -16,4 +16,6 @@ class Block(owner: ClassType, returnType: Type, content: List<out IRNode>): IRNo
     override fun complexity() = children.stream().mapToLong(IRNode::complexity).sum()
 
     override fun countDepth() = max(level, super.countDepth())
+
+    override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

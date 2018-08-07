@@ -1,9 +1,10 @@
 package IR
 
+import IR.ControlFlow.If
+import IR.ControlFlow.When
 import IR.Loops.DoWhile
 import IR.Loops.For
 import IR.Loops.While
-import IR.Types.ClassType
 import IR.Types.Type
 import Visitors.Visitor
 import kotlin.math.max
@@ -12,10 +13,10 @@ abstract class IRNode(private val resultType: Type?) {
     var parent: IRNode? = null
         private set
 
-    val children = ArrayList<IRNode>()
+    val children = mutableListOf<IRNode>()
 
-    var owner: ClassType? = null
-        set(ow: ClassType?){
+    var owner: Type? = null
+        set(ow: Type?){
             field = ow
             if (null === ow){
                 println(this::class.qualifiedName.toString() + " null")     // whyyyyy?????
@@ -37,7 +38,7 @@ abstract class IRNode(private val resultType: Type?) {
 
     open fun getResultType(): Type? = resultType
 
-    fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
+    abstract fun <T> accept(visitor: Visitor<T>): T
 
     fun addChild(child: IRNode){
         children.add(child)
@@ -67,7 +68,7 @@ abstract class IRNode(private val resultType: Type?) {
 
     override fun toString() = getName()
 
-    fun getName() = this::class.qualifiedName.toString()
+    open fun getName() = this::class.qualifiedName.toString()
 
     open fun countDepth():Long {
         return countDepth(this.children)

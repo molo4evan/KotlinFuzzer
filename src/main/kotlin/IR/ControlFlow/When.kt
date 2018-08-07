@@ -1,5 +1,7 @@
-package IR
+package IR.ControlFlow
 
+import IR.IRNode
+import Visitors.Visitor
 import kotlin.math.max
 
 class When(level: Long, children: List<IRNode>, val caseBlockIndex: Int): IRNode(children.get(caseBlockIndex).getResultType()) {
@@ -19,4 +21,6 @@ class When(level: Long, children: List<IRNode>, val caseBlockIndex: Int): IRNode
     }
 
     override fun countDepth() = max(level, super.countDepth())
+
+    override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

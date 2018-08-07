@@ -2,6 +2,7 @@ package IR.Loops
 
 import IR.Block
 import IR.IRNode
+import Visitors.Visitor
 import kotlin.math.max
 
 // int counter = x;
@@ -59,4 +60,6 @@ class While(level: Long, private val loop: Loop, private val thisLoopIterLimit: 
         }
         return true
     }
+
+    override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

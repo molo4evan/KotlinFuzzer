@@ -1,4 +1,0 @@
-package Settings
-
-class Symboltable {
-}

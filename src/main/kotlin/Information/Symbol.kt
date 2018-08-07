@@ -1,9 +1,8 @@
 package Information
 
-import IR.Types.ClassType
 import IR.Types.Type
 
-open class Symbol(val name: String, val owner: ClassType?, val type: Type, val flags: Int) {
+open class Symbol(val name: String, val owner: Type?, val type: Type, val flags: Int) {
     //protected constructor(name: String) : this(name, null, null, NONE)
     protected constructor(other: Symbol): this(other.name, other.owner, other.type, other.flags)
 
@@ -39,7 +38,7 @@ open class Symbol(val name: String, val owner: ClassType?, val type: Type, val f
 
     fun isPrivate() = flags and PRIVATE > 0
 
-    protected open fun copy() = Symbol(this)
+    open fun copy() = Symbol(this)
 
     open fun deepCopy() = Symbol(this)
 }

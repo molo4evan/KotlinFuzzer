@@ -1,10 +1,11 @@
-package IR.Loops
+package IR.Functions
 
 import IR.IRNode
-import IR.Initialization
 import Information.VariableInfo
 import Visitors.Visitor
 
-class CounterInitializer(varInfo: VariableInfo, initExpr: IRNode): Initialization(varInfo, initExpr){
+class ArgumentDeclaration(val variableInfo: VariableInfo): IRNode(variableInfo.type) {
+    override fun complexity() = 0L
+
     override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

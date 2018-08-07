@@ -3,6 +3,7 @@ package IR.Loops
 import IR.Block
 import IR.IRNode
 import IR.Statement
+import Visitors.Visitor
 import kotlin.math.max
 
 // header;                       // [subblock]
@@ -68,4 +69,6 @@ class For(level: Long, private val loop: Loop, private val thisLoopIterLimit: Lo
         }
         return true
     }
+
+    override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

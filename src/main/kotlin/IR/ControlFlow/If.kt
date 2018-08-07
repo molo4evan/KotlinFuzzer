@@ -1,5 +1,8 @@
-package IR
+package IR.ControlFlow
 
+import IR.Block
+import IR.IRNode
+import Visitors.Visitor
 import kotlin.math.max
 
 class If(cond: IRNode, thenBlock: Block, elseBlock: Block, level: Long) : IRNode(thenBlock.getResultType()) {   //TODO: how to make then an expression?
@@ -25,4 +28,6 @@ class If(cond: IRNode, thenBlock: Block, elseBlock: Block, level: Long) : IRNode
     }
 
     override fun countDepth() = max(level, super.countDepth())
+
+    override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }
