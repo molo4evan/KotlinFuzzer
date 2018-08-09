@@ -25,9 +25,9 @@ class BinaryLogicOperatorFactory(
     override fun generateTypes() = Pair(resultType, resultType)
 
     override fun generateProduction(leftType: Type, rightType: Type): BinaryOperator {
-        val leftOpLimit = (PseudoRandom.randomDouble() * (operatorLimit - 1)).toInt()
+        val leftOpLimit = (PseudoRandom.random() * (operatorLimit - 1)).toInt()
         val rightOpLimit = operatorLimit - 1 - leftOpLimit
-        val leftComplLimit = (PseudoRandom.randomDouble() * (complexityLimit - 1)).toLong()
+        val leftComplLimit = (PseudoRandom.random() * (complexityLimit - 1)).toLong()
         val rightComplLimit = complexityLimit - 1 - leftComplLimit
 
         if (leftOpLimit == 0 || rightOpLimit == 0 || leftComplLimit == 0L || rightComplLimit == 0L) {
@@ -35,7 +35,7 @@ class BinaryLogicOperatorFactory(
         }
 
         val swap = PseudoRandom.randomBoolean()
-        val builder = IRNodeBuilder.setOwnerClass(owner).setExceptionSafe(exceptionSafe)
+        val builder = IRNodeBuilder().setOwnerClass(owner).setExceptionSafe(exceptionSafe)
 
         val leftOperand = builder.setComplexityLimit(leftComplLimit)
                 .setOperatorLimit(leftOpLimit)

@@ -2,7 +2,7 @@ package ir.functions
 
 import ir.IRNode
 import information.VariableInfo
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class ArgumentDeclaration(val variableInfo: VariableInfo): IRNode(variableInfo.type) {
     override fun complexity() = 0L

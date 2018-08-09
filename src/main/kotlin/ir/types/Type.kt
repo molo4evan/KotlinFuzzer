@@ -6,13 +6,13 @@ import utils.ProductionParams
 import information.Symbol
 import information.SymbolTable
 import information.TypeList
-import visitors.Visitor
+import providers.visitors.Visitor
 import java.util.*
 
 open class Type(val typename: String, private var flags: Int = 0x00): IRNode(null), Comparable<Type> {
     companion object {
         val NONE = 0x00
-        val OPEN = 0x01
+        val FINAL = 0x01
         val INTERFACE = 0x02
         val ABSTRACT = 0x04
         val BUILTIN = 0x04
@@ -64,8 +64,8 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
 
     open fun canExplicitlyCastTo(other: Type): Boolean {
         if (this == other) return true
-        if (isBuiltIn() || other.isBuiltIn())
-        if (other is Type && ProductionParams.disableDowncasts?.value()?.not() ?: throw NotInitializedOptionException("disableDowncasts")){
+        if (isBuiltIn() || other.isBuiltIn()) return false
+        if (ProductionParams.disableDowncasts?.value()?.not() ?: throw NotInitializedOptionException("disableDowncasts")){
             return getAllChildren().contains(other)
         }
         return false
@@ -80,17 +80,17 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
         return result
     }
 
-    fun isOpen() = flags and OPEN > 0
+    fun isOpen() = flags and FINAL == 0
 
-    fun isAbstract() = flags and ABSTRACT > 0
+    fun isAbstract() = flags and ABSTRACT != 0
 
     fun setAbstract(){
         flags = flags or ABSTRACT
     }
 
-    fun isInterface() = flags and INTERFACE > 0
+    fun isInterface() = flags and INTERFACE != 0
 
-    fun isBuiltIn() = flags and BUILTIN > 0
+    fun isBuiltIn() = flags and BUILTIN != 0
 
     override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

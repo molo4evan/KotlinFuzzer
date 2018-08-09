@@ -1,11 +1,11 @@
-package factories.controlflow
+package factories.control_flow
 
 import exceptions.ProductionFailedException
 import factories.SafeFactory
 import factories.utils.IRNodeBuilder
 import information.TypeList
 import ir.Block
-import ir.controlflow.If
+import ir.control_flow.If
 import ir.types.Type
 import utils.PseudoRandom
 
@@ -23,8 +23,8 @@ class IfFactory(
 
     override fun sproduce(): If {
         if (statementLimit > 0 && complexityLimit > 0){
-            val condCompLimit = (0.01 * PseudoRandom.randomDouble() * (complexityLimit - 1)).toLong()
-            val builder = IRNodeBuilder.setOwnerClass(ownerClass).setOperatorLimit(operatorLimit)
+            val condCompLimit = (0.01 * PseudoRandom.random() * (complexityLimit - 1)).toLong()
+            val builder = IRNodeBuilder().setOwnerClass(ownerClass).setOperatorLimit(operatorLimit)
             val condition = builder.
                     setComplexityLimit(condCompLimit).
                     setResultType(TypeList.BOOLEAN).
@@ -33,9 +33,9 @@ class IfFactory(
                     getLimitedExpressionFactory().produce()
 
             val remainder = complexityLimit - 1 - condition.complexity()
-            val ifBlockComplLimit = (PseudoRandom.randomDouble() * remainder).toLong()
+            val ifBlockComplLimit = (PseudoRandom.random() * remainder).toLong()
             val elseBlockComplLimit = remainder - ifBlockComplLimit
-            val ifBlockLimit = (PseudoRandom.randomDouble() * statementLimit).toInt()
+            val ifBlockLimit = (PseudoRandom.random() * statementLimit).toInt()
             val elseBlockLimit = statementLimit - ifBlockLimit
 
             val controlDeviation = if (ifBlockLimit > 0 && elseBlockLimit <= 0)

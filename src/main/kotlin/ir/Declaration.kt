@@ -1,6 +1,6 @@
 package ir
 
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class Declaration(declExpr: IRNode): IRNode(declExpr.getResultType()) {
     init {

@@ -21,7 +21,7 @@ class AssignmentOperatorFactory(
 ): Factory<Operator>() {
     private fun fillRule(resultType: Type): Rule<Operator> {
         val rule = Rule<Operator>("assignment")
-        val builder = IRNodeBuilder.
+        val builder = IRNodeBuilder().
                 setComplexityLimit(complexityLimit).
                 setOperatorLimit(operatorLimit).
                 setOwnerClass(ownerClass).

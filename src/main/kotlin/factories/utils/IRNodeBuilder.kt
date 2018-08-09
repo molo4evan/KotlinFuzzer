@@ -1,12 +1,13 @@
 package factories.utils
 
+import exceptions.NotInitializedOptionException
 import exceptions.ProductionFailedException
 import factories.BlockFactory
 import factories.Factory
 import factories.LiteralFactory
 import factories.ReturnFactory
-import factories.controlflow.IfFactory
-import factories.functoins.ArgumentDeclarationFactory
+import factories.control_flow.IfFactory
+import factories.functoins.*
 import factories.operators.*
 import factories.rules.*
 import factories.rules.operators.ArithmeticOperatorFactory
@@ -17,12 +18,7 @@ import factories.variables.VariableDeclarationBlockFactory
 import factories.variables.VariableDeclarationFactory
 import factories.variables.VariableInitializationFactory
 import ir.*
-import ir.controlflow.If
-import ir.functions.ArgumentDeclaration
-import ir.functions.Function
-import ir.functions.FunctionDeclaration
-import ir.functions.FunctionDeclarationBlock
-import ir.functions.Return
+import ir.control_flow.If
 import ir.operators.BinaryOperator
 import ir.operators.Operator
 import ir.operators.OperatorKind
@@ -32,11 +28,14 @@ import ir.types.Type
 import ir.variables.*
 import information.FunctionInfo
 import information.TypeList
+import ir.functions.*
+import ir.functions.Function
+import utils.ProductionParams
 import java.util.*
 
-object IRNodeBuilder {                                                  //TODO: mb replace optional with custom class (see getOwnerClass())
+class IRNodeBuilder() {                                                  //TODO: mb replace optional with custom class (see getOwnerClass())
     //private Optional<Type> variableType = Optional.empty();
-    private var argumentType = Optional.empty<Type>()
+    private var argumentType = Optional.empty<Type?>()
     private var variableNumber = Optional.empty<Int>()
     private var complexityLimit = Optional.empty<Long>()
     private var operatorLimit = Optional.empty<Int>()
@@ -180,6 +179,12 @@ object IRNodeBuilder {                                                  //TODO: 
 //                ProductionParams.operatorLimit.value())
 //    }
 
+    fun getMainFunctionFactory(): Factory<MainFunction> {
+        return MainFunctionFactory(getName(), getComplexityLimit(),
+                ProductionParams.statementLimit?.value() ?: throw NotInitializedOptionException("statementLimit"),
+                ProductionParams.operatorLimit?.value() ?: throw NotInitializedOptionException("operatorLimit"))
+    }
+
 //    fun getConstructorDefinitionBlockFactory(): Factory<ConstructorDefinitionBlock> {
 //        return ConstructorDefinitionBlockFactory(getOwnerClass(), getMemberFunctionsLimit(),
 //                ProductionParams.memberFunctionsArgLimit.value(), getComplexityLimit(),
@@ -204,7 +209,7 @@ object IRNodeBuilder {                                                  //TODO: 
 //        return CounterManipulatorFactory(getLocalVariable())
 //    }
 
-    fun getDeclarationFactory(): Factory<Declaration> {
+    fun getDeclarationFactory(): Factory<Declaration> {     //BlockFactory, VariableDeclarationBlockFactory
         return DeclarationFactory(getOwnerClass(), getComplexityLimit(), getOperatorLimit(),
                 getIsLocal(), getExceptionSafe())
     }
@@ -235,7 +240,7 @@ object IRNodeBuilder {                                                  //TODO: 
 //                getOperatorLimit(), getLevel(), getCanHaveReturn())
 //    }
 
-    fun getExpressionFactory(): Factory<IRNode> {
+    fun getExpressionFactory(): Factory<IRNode> {       //rule
         return ExpressionFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
                 getResultType(), getExceptionSafe(), getNoConsts())
     }
@@ -245,25 +250,25 @@ object IRNodeBuilder {                                                  //TODO: 
                 getMemberFunctionsArgLimit(), getLevel())
     }
 
-    fun getFunctionDeclarationFactory(): Factory<FunctionDeclaration> {
+    fun getFunctionDeclarationFactory(): Factory<FunctionDeclaration> {     //for FunctionDeclarationBlockFactory
         return FunctionDeclarationFactory(getName(), getOwnerClass(), resultType.orElse(TypeList.UNIT),
                 getMemberFunctionsArgLimit(), getFlags())
     }
 
-//    fun getFunctionDefinitionBlockFactory(): Factory<FunctionDefinitionBlock> {
-//        return FunctionDefinitionBlockFactory(getOwnerClass(), getMemberFunctionsLimit(),
-//                getMemberFunctionsArgLimit(), getComplexityLimit(), getStatementLimit(),
-//                getOperatorLimit(), getLevel(), getFlags())
-//    }
+    fun getFunctionDefinitionBlockFactory(): Factory<FunctionDefinitionBlock> {
+        return FunctionDefinitionBlockFactory(getOwnerClass(), getMemberFunctionsLimit(),
+                getMemberFunctionsArgLimit(), getComplexityLimit(), getStatementLimit(),
+                getOperatorLimit(), getLevel(), getFlags())
+    }
 
-//    fun getFunctionDefinitionFactory(): Factory<FunctionDefinition> {
-//        return FunctionDefinitionFactory(getName(), getOwnerClass(), resultType.orElse(TypeList.VOID),
-//                getComplexityLimit(), getStatementLimit(), getOperatorLimit(),
-//                getMemberFunctionsArgLimit(), getLevel(), getFlags())
-//    }
+    fun getFunctionDefinitionFactory(): Factory<FunctionDefinition> {
+        return FunctionDefinitionFactory(getName(), getOwnerClass(), resultType.orElse(TypeList.UNIT),
+                getComplexityLimit(), getStatementLimit(), getOperatorLimit(),
+                getMemberFunctionsArgLimit(), getLevel(), getFlags())
+    }
 
-    fun getFunctionFactory(): Factory<Function> {
-        return FunctionFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
+    fun getFunctionFactory(): Factory<Function> {   //used in rules
+        return FunctionCallFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
                 resultType.orElse(null), getExceptionSafe())
     }
 
@@ -374,8 +379,9 @@ object IRNodeBuilder {                                                  //TODO: 
 //                getCanHaveContinues(), getCanHaveReturn())
 //    }
 
-    fun setArgumentType(value: Type): IRNodeBuilder {
-        argumentType = Optional.of(value)
+    fun setArgumentType(value: Type?): IRNodeBuilder {
+        if (value != null) argumentType = Optional.of(value)
+        else argumentType = Optional.empty()
         return this
     }
 
@@ -399,8 +405,9 @@ object IRNodeBuilder {                                                  //TODO: 
         return this
     }
 
-    fun setOwnerClass(value: Type?): IRNodeBuilder {        //TODO: incorrect
-        ownerClass = Optional.of(value)
+    fun setOwnerClass(value: Type?): IRNodeBuilder {
+        if (value != null) ownerClass = Optional.of(value)
+        else ownerClass = Optional.empty()
         return this
     }
 
@@ -517,11 +524,8 @@ object IRNodeBuilder {                                                  //TODO: 
                 "Variable type wasn't set"));
     }*/
 
-    private fun getArgumentType(): Type {
-        return argumentType.orElseThrow {
-            IllegalArgumentException(
-                    "Argument type wasn't set")
-        }
+    private fun getArgumentType(): Type? {
+        return argumentType.orElse(null)
     }
 
     private fun getVariableNumber(): Int {
@@ -552,8 +556,8 @@ object IRNodeBuilder {                                                  //TODO: 
         }
     }
 
-    private fun getOwnerClass(): Type {                                                         //TODO: incorrect
-        return ownerClass.orElseThrow { IllegalArgumentException("Type_Klass wasn't set") }
+    private fun getOwnerClass(): Type? {                                                         //TODO: incorrect
+        return ownerClass.orElse(null)
     }
 
     private fun getResultType(): Type {

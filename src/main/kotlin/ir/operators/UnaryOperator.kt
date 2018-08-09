@@ -1,7 +1,7 @@
 package ir.operators
 
 import ir.IRNode
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class UnaryOperator(operatorKind: OperatorKind, expr: IRNode): Operator(operatorKind, expr.getResultType()) {
     init {

@@ -22,9 +22,9 @@ abstract class BinaryOperatorFactory protected constructor(
     protected abstract fun generateTypes(): Pair<Type, Type>
 
     protected open fun generateProduction(leftType: Type, rightType: Type): BinaryOperator{
-        val leftOpLimit = (PseudoRandom.randomDouble() * (operatorLimit - 1)).toInt()
+        val leftOpLimit = (PseudoRandom.random() * (operatorLimit - 1)).toInt()
         val rightOpLimit = operatorLimit - 1 - leftOpLimit
-        val leftComplLimit = (PseudoRandom.randomDouble() * (complexityLimit - 1)).toLong()
+        val leftComplLimit = (PseudoRandom.random() * (complexityLimit - 1)).toLong()
         val rightComplLimit = complexityLimit - 1 - leftComplLimit
 
         if (leftOpLimit == 0 || rightOpLimit == 0 || leftComplLimit == 0L || rightComplLimit == 0L){
@@ -33,7 +33,7 @@ abstract class BinaryOperatorFactory protected constructor(
 
         val swap = PseudoRandom.randomBoolean()
 
-        val builder = IRNodeBuilder.setExceptionSafe(exceptionSafe).setOwnerClass(owner).setNoConsts(!swap && noconsts)
+        val builder = IRNodeBuilder().setExceptionSafe(exceptionSafe).setOwnerClass(owner).setNoConsts(!swap && noconsts)
 
         val leftExpr = builder.setComplexityLimit(leftComplLimit).setOperatorLimit(leftOpLimit).setResultType(leftType).getExpressionFactory().produce()
 

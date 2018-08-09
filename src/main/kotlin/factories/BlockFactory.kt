@@ -7,8 +7,8 @@ import information.SymbolTable
 import information.TypeList
 import ir.Block
 import ir.IRNode
-import ir.controlflow.If
-import ir.controlflow.When
+import ir.control_flow.If
+import ir.control_flow.When
 import ir.loops.DoWhile
 import ir.loops.For
 import ir.loops.While
@@ -37,7 +37,7 @@ class BlockFactory(
             val slimit = PseudoRandom.randomNotZero(statementLimit)
             var climit = complexityLimit
 
-            val builder = IRNodeBuilder
+            val builder = IRNodeBuilder()
                     .setOperatorLimit(operatorLimit)
                     .setOwnerClass(owner)
                     .setResultType(returnType)
@@ -53,8 +53,8 @@ class BlockFactory(
 
             var i = 0
             while (i < slimit && climit > 0) {
-                val subLimit = (PseudoRandom.randomDouble() * (slimit - i - 1)) as Int
-                builder.setComplexityLimit((PseudoRandom.randomDouble() * climit) as Long)
+                val subLimit = (PseudoRandom.random() * (slimit - i - 1)) as Int
+                builder.setComplexityLimit((PseudoRandom.random() * climit) as Long)
                 rule = Rule("block")
                 rule.add("statement", builder.getStatementFactory(), 5.0)
                 if (ProductionParams.disableVarsInBlock?.value()?.not()  ?: throw Exception("Option disableVarsInBlock not initialized")) {

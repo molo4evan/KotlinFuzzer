@@ -27,7 +27,7 @@ class Rule<T : IRNode>(private val name: String) : Factory<T>(), Comparable<Rule
                 val sum = rulesList.stream()
                         .mapToDouble { r -> r.weight }
                         .sum()
-                val rnd = PseudoRandom.randomDouble() * sum
+                val rnd = PseudoRandom.random() * sum
                 val iterator = rulesList.iterator()
                 var ruleEntry: RuleEntry
                 var weightAccumulator = 0.0

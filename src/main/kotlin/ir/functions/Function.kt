@@ -4,7 +4,7 @@ import ir.types.Type
 import ir.IRNode
 import information.FunctionInfo
 import information.SymbolTable
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class Function(owner: Type?, val functionInfo: FunctionInfo, args: List<IRNode>): IRNode(functionInfo.type) {
     init {

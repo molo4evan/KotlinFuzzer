@@ -20,7 +20,7 @@ internal class DeclarationFactory(
     private val rule = Rule<IRNode>("declaration")
 
     init {
-        val builder = IRNodeBuilder.setOwnerClass(ownerClass)
+        val builder = IRNodeBuilder().setOwnerClass(ownerClass)
                 .setResultType(TypeList.UNIT)
                 .setIsLocal(isLocal)
                 .setComplexityLimit(complexityLimit)

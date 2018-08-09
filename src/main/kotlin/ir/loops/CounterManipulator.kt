@@ -2,7 +2,7 @@ package ir.loops
 
 import ir.IRNode
 import ir.Statement
-import visitors.Visitor
+import providers.visitors.Visitor
 
 /*
  * Note: Can be theoretically subclassed from Operator and have an          //???

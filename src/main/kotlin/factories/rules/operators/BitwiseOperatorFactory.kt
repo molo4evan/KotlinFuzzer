@@ -18,7 +18,7 @@ class BitwiseOperatorFactory(
     private val rule: Rule<Operator>
 
     init {
-        val builder = IRNodeBuilder
+        val builder = IRNodeBuilder()
                 .setComplexityLimit(complexityLimit)
                 .setOperatorLimit(operatorLimit)
                 .setOwnerClass(ownerClass)

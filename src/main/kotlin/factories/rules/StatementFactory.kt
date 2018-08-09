@@ -8,6 +8,7 @@ import ir.IRNode
 import ir.Statement
 import utils.PseudoRandom
 import ir.types.Type
+import utils.ProductionParams
 
 class StatementFactory(
         complexityLimit: Long,
@@ -19,7 +20,7 @@ class StatementFactory(
     private val rule: Rule<IRNode> = Rule("statement")
 
     init {
-        val builder = IRNodeBuilder
+        val builder = IRNodeBuilder()
                 .setComplexityLimit(complexityLimit)
                 .setOperatorLimit(operatorLimit)
                 .setOwnerClass(ownerClass)
@@ -28,7 +29,7 @@ class StatementFactory(
                 .setResultType(PseudoRandom.randomElement(TypeList.getAll()))
         //rule.add("array_creation", builder.getArrayCreationFactory())             //TODO: uncomment
         rule.add("assignment", builder.getAssignmentOperatorFactory())
-        rule.add("function", builder.getFunctionFactory(), 0.1)
+        rule.add("function", builder.getFunctionFactory(), ProductionParams.functionCallsPercent?.value() ?: 0.1)
     }
 
     override fun produce(): Statement {

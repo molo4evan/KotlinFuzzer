@@ -33,7 +33,7 @@ internal class VariableInitializationFactory(
             throw ProductionFailedException()
         }
         val resultType = types[0]
-        val b = IRNodeBuilder.setComplexityLimit(complexityLimit - 1)
+        val b = IRNodeBuilder().setComplexityLimit(complexityLimit - 1)
                 .setOperatorLimit(operatorLimit - 1)
                 .setOwnerClass(ownerClass)
                 .setResultType(resultType)

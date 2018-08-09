@@ -7,6 +7,7 @@ import factories.utils.ProductionLimiter
 import ir.IRNode
 import ir.operators.OperatorKind
 import ir.types.Type
+import utils.ProductionParams
 
 open class ExpressionFactory(
         complexityLimit: Long,
@@ -19,7 +20,7 @@ open class ExpressionFactory(
     private val rule = Rule<IRNode>("expression")
 
     init {
-        val builder = IRNodeBuilder.
+        val builder = IRNodeBuilder().
                 setComplexityLimit(complexityLimit).
                 setOperatorLimit(operatorLimit).
                 setOwnerClass(ownerClass).
@@ -38,7 +39,7 @@ open class ExpressionFactory(
             rule.add("logic", builder.getLogicOperatorFactory())
             rule.add("bitwise", BitwiseOperatorFactory(complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts))
             rule.add("assignment", builder.getAssignmentOperatorFactory())
-            rule.add("function", builder.getFunctionFactory(), 0.1)
+            rule.add("function", builder.getFunctionFactory(), ProductionParams.functionCallsPercent?.value() ?: 0.1)
             rule.add("str_plus", builder.setOperatorKind(OperatorKind.STRADD).getBinaryOperatorFactory())
         }
 //        if (!ProductionParams.disableArrays.value() && !exceptionSafe) {          //TODO: uncomment

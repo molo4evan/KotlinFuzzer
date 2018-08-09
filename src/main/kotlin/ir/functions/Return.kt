@@ -1,7 +1,7 @@
 package ir.functions
 
 import ir.IRNode
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class Return(val retExpr: IRNode): IRNode(retExpr.getResultType()) {
     init {

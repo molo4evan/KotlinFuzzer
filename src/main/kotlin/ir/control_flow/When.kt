@@ -1,7 +1,7 @@
-package ir.controlflow
+package ir.control_flow
 
 import ir.IRNode
-import visitors.Visitor
+import providers.visitors.Visitor
 import kotlin.math.max
 
 class When(level: Long, children: List<IRNode>, val caseBlockIndex: Int): IRNode(children.get(caseBlockIndex).getResultType()) {

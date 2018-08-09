@@ -3,7 +3,7 @@ package ir.functions
 import ir.IRNode
 import ir.types.Type
 import information.TypeList
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class FunctionDeclarationBlock(owner: Type?, content: List<IRNode>, level: Long): IRNode(TypeList.NOTHING) {    //TODO: is correct?
     init {

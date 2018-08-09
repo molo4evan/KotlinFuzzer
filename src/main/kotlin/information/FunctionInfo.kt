@@ -5,14 +5,14 @@ import ir.types.Type
 class FunctionInfo(                         //TODO: change static modifier to companion objects???
         name: String,
         owner: Type?,
-        retType: Type,
+        retType: Type?,
         val complexity: Long,
         flags: Int,
         val argTypes: List<VariableInfo>
 ): Symbol(name, owner, retType, flags) {
 
     companion object {
-        val OPEN = 0x20
+        val FINAL = 0x20
         val ABSTRACT = 0x40
         val NONRECURSIVE = 0x80     //nonrecursive is for not overrided functions. Do we need this flag?..
         val SYNCHRONIZED = 0x100
@@ -21,7 +21,7 @@ class FunctionInfo(                         //TODO: change static modifier to co
     constructor(
             name: String,
             owner: Type?,
-            retType: Type,
+            retType: Type?,
             complexity: Long,
             flags: Int,
             vararg argTypes: VariableInfo
@@ -71,15 +71,14 @@ class FunctionInfo(                         //TODO: change static modifier to co
 
     override fun hashCode() = name.hashCode()
 
-    fun isConstructor(): Boolean {                  //???
-        return name == owner?.getName() ?: false
-    }
+    fun isConstructor() =  name == owner?.getName() ?: false
 
-    override fun isStatic(): Boolean {
-        return flags and STATIC > 0
-    }
+    override fun isStatic() =  flags and STATIC != 0
 
+    fun isAbstract() = flags and ABSTRACT != 0
 
-    fun isOpen() = (flags and OPEN) > 0
+    fun isNonRecursive() = (flags and NONRECURSIVE) != 0
+
+    fun isOpen() = (flags and FINAL) == 0
 
 }

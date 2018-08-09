@@ -3,9 +3,9 @@ package ir.functions
 import ir.IRNode
 import ir.types.Type
 import information.TypeList
-import visitors.Visitor
+import providers.visitors.Visitor
 
-class FunctionDefinitionBlock(content: List<IRNode>, level: Long, owner: Type): IRNode(TypeList.NOTHING) {     //TODO: correct?
+class FunctionDefinitionBlock(content: List<IRNode>, level: Long, owner: Type?): IRNode(TypeList.NOTHING) {     //TODO: correct?
     init {
         this.owner = owner
         this.level = level
@@ -15,7 +15,7 @@ class FunctionDefinitionBlock(content: List<IRNode>, level: Long, owner: Type): 
     override fun complexity(): Long {
         var compl = 0L
         for (child in children){
-            compl += child.complexity()
+            compl += child?.complexity() ?: 0
         }
         return compl
     }

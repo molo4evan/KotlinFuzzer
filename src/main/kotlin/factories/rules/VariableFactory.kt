@@ -28,7 +28,7 @@ internal class VariableFactory(
             flags = flags or VariableInfo.INITIALIZED
         }
         rule = Rule("variable")
-        val b = IRNodeBuilder.setResultType(resultType)
+        val b = IRNodeBuilder().setResultType(resultType)
                 .setFlags(flags)
                 .setComplexityLimit(complexityLimit)
                 .setOperatorLimit(operatorLimit)

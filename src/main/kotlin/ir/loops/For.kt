@@ -3,7 +3,7 @@ package ir.loops
 import ir.Block
 import ir.IRNode
 import ir.Statement
-import visitors.Visitor
+import providers.visitors.Visitor
 import kotlin.math.max
 
 // header;                       // [subblock]

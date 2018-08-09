@@ -39,7 +39,7 @@ object SymbolTable {
     fun add(symbol: Symbol?){
         val vars = SYMBOL_STACK.peek()
         if (symbol != null){
-            if (!vars.containsKey(symbol.type)){
+            if (!vars.containsKey(symbol.type) && symbol.type != null){
                 vars[symbol.type] = mutableListOf()
             }
             vars[symbol.type]!!.add(symbol)

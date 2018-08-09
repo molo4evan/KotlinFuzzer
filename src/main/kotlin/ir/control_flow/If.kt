@@ -1,8 +1,8 @@
-package ir.controlflow
+package ir.control_flow
 
 import ir.Block
 import ir.IRNode
-import visitors.Visitor
+import providers.visitors.Visitor
 import kotlin.math.max
 
 class If(cond: IRNode, thenBlock: Block, elseBlock: Block?, level: Long) : IRNode(thenBlock.getResultType()) {   //TODO: how to make then an expression?

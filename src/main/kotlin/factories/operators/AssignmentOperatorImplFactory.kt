@@ -24,12 +24,12 @@ class AssignmentOperatorImplFactory(
     override fun generateTypes() = Pair(resultType, PseudoRandom.randomElement(TypeUtil.getImplicitlyCastable(TypeList.getAll(), resultType)))
 
     override fun generateProduction(leftType: Type, rightType: Type): ir.operators.BinaryOperator {
-        val leftOpLimit = (PseudoRandom.randomDouble() * (operatorLimit - 1)).toInt()
+        val leftOpLimit = (PseudoRandom.random() * (operatorLimit - 1)).toInt()
         val rightOpLimit = operatorLimit - 1 - leftOpLimit
-        val leftComplLimit = (PseudoRandom.randomDouble() * (complexityLimit - 1)).toLong()
+        val leftComplLimit = (PseudoRandom.random() * (complexityLimit - 1)).toLong()
         val rightComplLimit = complexityLimit - 1 - leftComplLimit
 
-        val builder = IRNodeBuilder.
+        val builder = IRNodeBuilder().
                 setOwnerClass(owner).
                 setExceptionSafe(exceptionSafe).
                 setNoConsts(noconsts).

@@ -35,7 +35,7 @@ internal class UnaryPlusMinusOperatorFactory(
     }
 
     override fun generateProduction(type: Type): UnaryOperator {
-        return UnaryOperator(opKind, IRNodeBuilder
+        return UnaryOperator(opKind, IRNodeBuilder()
                 .setComplexityLimit(complexityLimit)
                 .setOperatorLimit(operatorLimit)
                 .setOwnerClass(ownerClass)

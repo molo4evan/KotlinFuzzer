@@ -1,8 +1,8 @@
-package visitors
+package providers.visitors
 
 import ir.*
-import ir.controlflow.Break
-import ir.controlflow.*
+import ir.control_flow.Break
+import ir.control_flow.*
 import ir.functions.*
 import ir.functions.Function
 import ir.loops.*
@@ -10,7 +10,6 @@ import ir.operators.BinaryOperator
 import ir.operators.CastOperator
 import ir.operators.UnaryOperator
 import ir.types.Type
-import ir.types.TypeNothing
 import ir.variables.LocalVariable
 import ir.variables.VariableDeclaration
 import ir.variables.VariableDeclarationBlock
@@ -39,6 +38,7 @@ interface Visitor<T> {
     fun visit(node: FunctionDeclarationBlock): T
     fun visit(node: FunctionDefinition): T
     fun visit(node: FunctionDefinitionBlock): T
+    fun visit(node: MainFunction): T
 ////    fun visit(node: FunctionRedefinition): T
 ////    fun visit(node: FunctionRedefinitionBlock): T
     fun visit(node: If): T
@@ -50,7 +50,7 @@ interface Visitor<T> {
     fun visit(node: LoopingCondition): T
 ////    fun visit(node: MainKlass): T   //TODO: delete?
 ////    fun visit(node: NonStaticMemberVariable): T
-    fun visit(node: TypeNothing): T     //TODO: delete?
+    fun visit(node: NothingNode): T
 //    fun visit(node: PrintVariables): T    //TODO: delete?
     fun visit(node: Return): T
 //    fun visit(node: Throw): T

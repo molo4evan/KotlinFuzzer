@@ -1,7 +1,7 @@
 package ir
 
 import ir.types.Type
-import visitors.Visitor
+import providers.visitors.Visitor
 import kotlin.math.max
 
 class Block(owner: Type?, returnType: Type, content: List<IRNode>, leve: Long): IRNode(returnType) {

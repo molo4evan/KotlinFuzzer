@@ -1,7 +1,7 @@
 package ir.loops
 
 import ir.IRNode
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class LoopingCondition(val condition: IRNode): IRNode(condition.getResultType()) {
     init {

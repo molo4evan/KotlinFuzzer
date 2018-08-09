@@ -2,7 +2,7 @@ package information
 
 import ir.types.Type
 
-class VariableInfo(name: String, owner: Type?, type: Type, flags: Int): Symbol(name, owner, type, flags) {
+class VariableInfo(name: String, owner: Type?, type: Type?, flags: Int): Symbol(name, owner, type, flags) {
     constructor(value: VariableInfo): this(value.name, value.owner, value.type, value.flags)
     constructor(owner: Type, type: Type): this("", owner, type, Symbol.NONE)
 

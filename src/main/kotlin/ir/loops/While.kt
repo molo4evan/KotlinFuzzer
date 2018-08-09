@@ -2,7 +2,7 @@ package ir.loops
 
 import ir.Block
 import ir.IRNode
-import visitors.Visitor
+import providers.visitors.Visitor
 import kotlin.math.max
 
 // int counter = x;

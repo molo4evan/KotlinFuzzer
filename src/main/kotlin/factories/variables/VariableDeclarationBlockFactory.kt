@@ -20,8 +20,8 @@ internal class VariableDeclarationBlockFactory(
 
     override fun produce(): VariableDeclarationBlock {
         val content = ArrayList<Declaration>()
-        val limit = Math.ceil(PseudoRandom.randomDouble() * (ProductionParams.dataMemberLimit?.value() ?: throw NotInitializedOptionException("dataMemberLimit"))).toInt()
-        val declFactory = IRNodeBuilder
+        val limit = Math.ceil(PseudoRandom.random() * (ProductionParams.dataMemberLimit?.value() ?: throw NotInitializedOptionException("dataMemberLimit"))).toInt()
+        val declFactory = IRNodeBuilder()
                 .setOwnerClass(ownerClass)
                 .setComplexityLimit(complexityLimit)
                 .setOperatorLimit(operatorLimit)

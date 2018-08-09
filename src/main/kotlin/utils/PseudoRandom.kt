@@ -25,7 +25,7 @@ object PseudoRandom {
         random = Random(seed!!.hashCode().toLong())
     }
 
-    fun randomDouble() = random.nextDouble()
+    fun random() = random.nextDouble()
 
     // uniformly distributed boolean
     fun randomBoolean() = random.nextBoolean()

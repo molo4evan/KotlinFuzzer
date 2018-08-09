@@ -3,7 +3,7 @@ package ir.variables
 import ir.Declaration
 import ir.IRNode
 import information.TypeList
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class VariableDeclarationBlock(content: List<Declaration>, level: Long): IRNode(TypeList.NOTHING) {     //TODO: is correct?
     init {

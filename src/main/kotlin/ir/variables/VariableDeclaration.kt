@@ -2,7 +2,7 @@ package ir.variables
 
 import ir.IRNode
 import information.VariableInfo
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class VariableDeclaration(val variableInfo: VariableInfo): IRNode(variableInfo.type) {
     override fun getName() = variableInfo.name

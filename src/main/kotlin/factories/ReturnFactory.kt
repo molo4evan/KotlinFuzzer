@@ -13,7 +13,7 @@ internal class ReturnFactory(
 ) : SafeFactory<Return>() {
 
     override fun sproduce(): Return {
-        return Return(IRNodeBuilder.setComplexityLimit(complexityLimit - 1)
+        return Return(IRNodeBuilder().setComplexityLimit(complexityLimit - 1)
                 .setOperatorLimit(operatorLimit - 1)
                 .setOwnerClass(ownerClass)
                 .setResultType(resultType)

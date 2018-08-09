@@ -1,6 +1,6 @@
 package ir
 
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class Statement(body: IRNode): IRNode(body.getResultType()) {
     init {

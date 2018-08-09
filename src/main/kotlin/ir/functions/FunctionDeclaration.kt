@@ -2,7 +2,7 @@ package ir.functions
 
 import ir.IRNode
 import information.FunctionInfo
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class FunctionDeclaration(val functionInfo: FunctionInfo, argumentsDeclaration: List<ArgumentDeclaration>): IRNode(functionInfo.type) {
 

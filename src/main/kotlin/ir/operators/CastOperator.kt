@@ -2,7 +2,7 @@ package ir.operators
 
 import ir.IRNode
 import ir.types.Type
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class CastOperator(resultType: Type, casted: IRNode): Operator( OperatorKind.CAST, resultType) {
     init {

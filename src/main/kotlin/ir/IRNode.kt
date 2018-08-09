@@ -1,12 +1,12 @@
 package ir
 
-import ir.controlflow.If
-import ir.controlflow.When
+import ir.control_flow.If
+import ir.control_flow.When
 import ir.loops.DoWhile
 import ir.loops.For
 import ir.loops.While
 import ir.types.Type
-import visitors.Visitor
+import providers.visitors.Visitor
 import kotlin.math.max
 
 abstract class IRNode(private val resultType: Type?) {
@@ -40,9 +40,9 @@ abstract class IRNode(private val resultType: Type?) {
 
     abstract fun <T> accept(visitor: Visitor<T>): T
 
-    fun addChild(child: IRNode){
+    fun addChild(child: IRNode?){
         children.add(child)
-        child.parent = this
+        child?.parent = this
     }
 
      fun <T: IRNode> addChildren(children: List<T>){        // don't sure this is correct

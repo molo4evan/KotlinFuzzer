@@ -4,8 +4,7 @@ import ir.types.*
 import utils.ProductionParams
 
 object TypeList {
-    val ANY = Type("kotlin.Any", Type.OPEN)
-    val NUMBER = TypeNumber()
+    val ANY = Type("kotlin.Any")
     val BYTE = TypeByte()
     val SHORT = TypeShort()
     val INT = TypeInt()
@@ -16,7 +15,7 @@ object TypeList {
     val NOTHING = TypeNothing()
     val BOOLEAN = TypeBoolean()
     val CHAR = TypeChar()
-    val STRING = Type("kotlin.String")       //what means final??
+    val STRING = Type("kotlin.String", Type.FINAL)       //what means final??
 
     private val TYPES = mutableListOf<Type>()
     private val BUILTIN_TYPES = mutableListOf<Type>()
@@ -37,9 +36,8 @@ object TypeList {
 
         BUILTIN_TYPES.add(BOOLEAN)
         BUILTIN_TYPES.add(CHAR)
-        BUILTIN_TYPES.add(NUMBER)
-        BUILTIN_TYPES.add(UNIT)
-        BUILTIN_TYPES.add(NOTHING)
+        //BUILTIN_TYPES.add(UNIT)
+        //BUILTIN_TYPES.add(NOTHING)
 
 
         TYPES.addAll(BUILTIN_TYPES)
@@ -50,8 +48,6 @@ object TypeList {
 
         STRING.parents.add(ANY.getName())
         STRING.parentClass = ANY
-        //NUMBER.parents.add(ANY.getName())     //TODO: mb add parentness for other builtin types?
-        //NUMBER.parentClass = ANY
 
         add(STRING)
         add(ANY)

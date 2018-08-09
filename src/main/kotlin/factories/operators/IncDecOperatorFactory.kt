@@ -21,7 +21,7 @@ internal class IncDecOperatorFactory(
     }
 
     override fun generateProduction(l: Type): UnaryOperator {
-        return UnaryOperator(opKind, IRNodeBuilder.setComplexityLimit(complexityLimit - 1)
+        return UnaryOperator(opKind, IRNodeBuilder().setComplexityLimit(complexityLimit - 1)
                 .setOperatorLimit(operatorLimit - 1)
                 .setOwnerClass(ownerClass)
                 .setResultType(l)

@@ -1,7 +1,7 @@
 package ir.variables
 
 import information.VariableInfo
-import visitors.Visitor
+import providers.visitors.Visitor
 
 class LocalVariable(variableInfo: VariableInfo): VariableBase(variableInfo) {
     override fun complexity() = 1L

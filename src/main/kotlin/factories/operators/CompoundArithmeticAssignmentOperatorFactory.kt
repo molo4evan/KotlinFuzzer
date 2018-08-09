@@ -23,12 +23,12 @@ class CompoundArithmeticAssignmentOperatorFactory(
     override fun generateTypes() = Pair(resultType, PseudoRandom.randomElement(TypeUtil.getExplicitlyCastable(TypeList.getBuiltIn(), resultType)))
 
     override fun generateProduction(leftType: Type, rightType: Type): BinaryOperator {
-        val leftCompLimit = (PseudoRandom.randomDouble() * complexityLimit).toLong()
+        val leftCompLimit = (PseudoRandom.random() * complexityLimit).toLong()
         val rightCompLimit = complexityLimit - 1 - leftCompLimit
-        val leftOpLimit = (PseudoRandom.randomDouble() * operatorLimit).toInt()
+        val leftOpLimit = (PseudoRandom.random() * operatorLimit).toInt()
         val rightOpLimit = operatorLimit - 1 - leftOpLimit
 
-        val builder = IRNodeBuilder.setOwnerClass(owner).setExceptionSafe(exceptionSafe).setNoConsts(noconsts)
+        val builder = IRNodeBuilder().setOwnerClass(owner).setExceptionSafe(exceptionSafe).setNoConsts(noconsts)
 
         val rightExpr = builder.
                 setComplexityLimit(rightCompLimit).

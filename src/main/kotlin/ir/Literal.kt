@@ -1,7 +1,7 @@
 package ir
 
 import ir.types.Type
-import visitors.Visitor
+import providers.visitors.Visitor
 
 open class Literal(val value: Any, type: Type): IRNode(type) {
     override fun complexity() = 0L
