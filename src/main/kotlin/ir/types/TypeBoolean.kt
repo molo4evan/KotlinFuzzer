@@ -1,6 +1,6 @@
 package ir.types
 
-class TypeBoolean(): Type("kotlin.Boolean", Type.BUILTIN) {
+class TypeBoolean(): Type("Boolean", Type.BUILTIN) {
 
     override fun canImplicitlyCastTo(other: Type) =  this == other
 

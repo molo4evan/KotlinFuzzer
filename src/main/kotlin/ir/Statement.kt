@@ -7,7 +7,7 @@ class Statement(body: IRNode): IRNode(body.getResultType()) {
         addChild(body)
     }
 
-    override fun complexity() = getChild(0)?.complexity() ?: 0
+    override fun complexity() = getChild(0).complexity()
 
     override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

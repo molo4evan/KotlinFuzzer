@@ -13,8 +13,9 @@ internal class IncDecOperatorFactory(
         owner: Type?,
         resultType: Type,
         safe: Boolean,
-        noconsts: Boolean
-) : UnaryOperatorFactory(opKind, complexityLimit, operatorLimit, owner, resultType, safe, noconsts) {
+        noconsts: Boolean,
+        noAssignments: Boolean
+) : UnaryOperatorFactory(opKind, complexityLimit, operatorLimit, owner, resultType, safe, noconsts, noAssignments) {
 
     override fun isApplicable(resultType: Type): Boolean {
         return resultType.isBuiltIn() && resultType != TypeList.BOOLEAN

@@ -25,7 +25,7 @@ class IfFactory(
         if (statementLimit > 0 && complexityLimit > 0){
             val condCompLimit = (0.01 * PseudoRandom.random() * (complexityLimit - 1)).toLong()
             val builder = IRNodeBuilder().setOwnerClass(ownerClass).setOperatorLimit(operatorLimit)
-            val condition = builder.
+            val condition = builder.            //TODO: forbid assignment
                     setComplexityLimit(condCompLimit).
                     setResultType(TypeList.BOOLEAN).
                     setExceptionSafe(false).
@@ -71,15 +71,15 @@ class IfFactory(
                 if (elseBlockLimit > 0 && elseBlockComplLimit > 0) {
                     builder.setComplexityLimit(elseBlockComplLimit)
                             .setStatementLimit(elseBlockLimit)
-                    if (controlDeviation === If.IfPart.ELSE) {
-                        elseBlock = builder.setSubBlock(false)
+                    elseBlock = if (controlDeviation === If.IfPart.ELSE) {
+                        builder.setSubBlock(false)
                                 .setCanHaveBreaks(canHaveBreaks)
                                 .setCanHaveContinues(canHaveContinues)
                                 .setCanHaveReturn(canHaveReturn)
                                 .getBlockFactory()
                                 .produce()
                     } else {
-                        elseBlock = builder.setSubBlock(false)
+                        builder.setSubBlock(false)
                                 .setCanHaveBreaks(false)
                                 .setCanHaveContinues(false)
                                 .setCanHaveReturn(false)
@@ -87,6 +87,7 @@ class IfFactory(
                                 .produce()
                     }
                 }
+
 
                 return If(condition, thenBlock, elseBlock, level)
             }

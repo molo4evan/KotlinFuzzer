@@ -13,7 +13,7 @@ import utils.PseudoRandom
 import java.time.LocalTime
 import java.util.concurrent.TimeUnit
 
-val MINUTES_TO_WAIT = Integer.getInteger("jdk.test.lib.jittester", 3) //???
+val MINUTES_TO_WAIT = Integer.getInteger("jdk.test.lib.jittester", 3) //??????
 val MAX_WAIT_TIME = TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT.toLong())
 
 fun main(args: Array<String>) {
@@ -30,11 +30,11 @@ fun main(args: Array<String>) {
         val irTree = generateIRTreeWithoutOOP(name)
         System.out.printf(" %8d |", counter)
         val generationTime = System.currentTimeMillis() - start
-        System.out.printf(" %8.0f |", generationTime)
+        System.out.printf(" %8d |", generationTime)
         start = System.currentTimeMillis()
         val generatorThread = Thread {
             for (generator in generators) {
-                //generate code
+                generator.accept(irTree.first, irTree.second)
             }
         }
         generatorThread.start()
@@ -48,7 +48,7 @@ fun main(args: Array<String>) {
             generatorThread.interrupt()
         } else {
             val runTime = System.currentTimeMillis() - start
-            System.out.printf(" %8.0f |%n", runTime)
+            System.out.printf(" %8d |%n", runTime)
             if (runTime < MAX_WAIT_TIME) {
                 counter++
             }

@@ -11,7 +11,7 @@ import ir.types.Type
 import utils.PseudoRandom
 
 class FunctionDeclarationBlockFactory(
-        private val owner: Type?,
+        private val owner: Type,
         private val memberFunctionsLimit: Int,
         private val memberFunctionsArgLimit: Int,
         private val level: Long

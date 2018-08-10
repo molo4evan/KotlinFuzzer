@@ -3,7 +3,7 @@ package providers.tests_generators
 import ir.IRNode
 import providers.visitors.KotlinCodeVisitor
 
-class JavaCodeGenerator(
+class KotlinCodeGenerator(
         prefix: String,
         preRunActions: (String) -> Array<String>,
         jtDriverOptions: String
@@ -12,7 +12,7 @@ class JavaCodeGenerator(
 
 
     companion object {
-        private val DEFAULT_SUFFIX = "kotlin_tests"   //???
+        private val DEFAULT_SUFFIX = "kotlin_tests"
     }
 
     override fun accept(main: IRNode, other: IRNode?) {

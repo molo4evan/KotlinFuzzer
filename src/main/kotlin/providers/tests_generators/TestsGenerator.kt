@@ -3,6 +3,8 @@ package providers.tests_generators
 import exceptions.NotInitializedOptionException
 import ir.IRNode
 import utils.ProductionParams
+import java.io.FileWriter
+import java.io.IOException
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.function.BiConsumer
@@ -28,9 +30,18 @@ abstract class TestsGenerator protected constructor(
         fun getRoot() = Paths.get(ProductionParams.testbaseDir?.value() ?: throw NotInitializedOptionException("testbaseDir"))
 
         fun writeFile(target: Path, fileName: String, content: String) {
-            //uncompleted
+            var file: FileWriter? = null
+            try {
+                val fileInstance = target.resolve(fileName).toFile()
+                fileInstance.createNewFile()
+                file = FileWriter(fileInstance)
+                file.write(content)
+            } catch (ex: IOException) {
+                ex.printStackTrace()
+            } finally {
+                file?.close()
+            }
         }
-
     }
 
     //TODO: uncompleted

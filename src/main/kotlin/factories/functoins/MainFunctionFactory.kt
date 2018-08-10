@@ -34,6 +34,6 @@ class MainFunctionFactory (
         } finally {
             SymbolTable.pop()
         }
-        return MainFunction(body)
+        return MainFunction(name, body)
     }
 }

@@ -53,8 +53,8 @@ class BlockFactory(
 
             var i = 0
             while (i < slimit && climit > 0) {
-                val subLimit = (PseudoRandom.random() * (slimit - i - 1)) as Int
-                builder.setComplexityLimit((PseudoRandom.random() * climit) as Long)
+                val subLimit = (PseudoRandom.random() * (slimit - i - 1)).toInt()
+                builder.setComplexityLimit((PseudoRandom.random() * climit).toLong())
                 rule = Rule("block")
                 rule.add("statement", builder.getStatementFactory(), 5.0)
                 if (ProductionParams.disableVarsInBlock?.value()?.not()  ?: throw Exception("Option disableVarsInBlock not initialized")) {
@@ -103,11 +103,11 @@ class BlockFactory(
             if (canHaveReturn && !subBlock && !returnType.equals(TypeList.UNIT)) {
                 rule.add("return", builder.setComplexityLimit(climit).getReturnFactory())
             }
-            if (canHaveThrow && !subBlock) {
-                var rtException = TypeList.find("java.lang.RuntimeException")
-                rtException = PseudoRandom.randomElement(TypeUtil.getImplicitlyCastable(TypeList.getAll(), rtException))
-                //rule.add("throw", builder.setResultType(rtException).setComplexityLimit(Math.max(climit, 5)).setOperatorLimit(Math.max(operatorLimit, 5)).getThrowFactory())
-            }
+//            if (canHaveThrow && !subBlock) {
+//                var rtException = TypeList.find("java.lang.RuntimeException")
+//                rtException = PseudoRandom.randomElement(TypeUtil.getImplicitlyCastable(TypeList.getAll(), rtException))
+//                //rule.add("throw", builder.setResultType(rtException).setComplexityLimit(Math.max(climit, 5)).setOperatorLimit(Math.max(operatorLimit, 5)).getThrowFactory())
+//            }
 
             try {
                 if (rule.size() > 0) {

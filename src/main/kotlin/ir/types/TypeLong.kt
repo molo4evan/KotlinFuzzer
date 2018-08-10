@@ -1,3 +1,3 @@
 package ir.types
 
-class TypeLong: Type("kotlin.Long", Type.BUILTIN)
+class TypeLong: Type("Long", Type.BUILTIN)

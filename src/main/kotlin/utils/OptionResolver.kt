@@ -16,7 +16,7 @@ object OptionResolver {
             var curArg = args[pos]
             if (curArg.startsWith("-")){
                 var valueArg: String? = null
-                var opt = 0
+                var opt: Int
                 if (curArg.startsWith("--")){
                     opt = curArg.indexOf("=")
                     if (opt != -1){
@@ -24,20 +24,22 @@ object OptionResolver {
                         curArg = curArg.substring(0, opt)
                     }
                 } else if (curArg.length > 2){
-                    for (opt in 1 until curArg.length){
+                    opt = 1
+                    while (opt < curArg.length){
                         val key = curArg[opt]
                         val flagOpt = options["-$key"] ?: throw IllegalArgumentException("Unknown option: $key")
 
                         if (!flagOpt.isFlag()) throw IllegalArgumentException("Not a flag option: $key")
 
                         values[flagOpt] = true
+                        opt++
                     }
                     pos++
                     continue
                 }
 
                 val curOpt = options[curArg] ?: throw IllegalArgumentException("Unknown option: $curArg")
-                var value: Any? = null
+                var value: Any?
                 if (!curOpt.isFlag()){
                     if (valueArg == null){
                         pos++
@@ -55,7 +57,7 @@ object OptionResolver {
             pos++
         }
 
-        if (propertyFileOption != null && values.containsKey(propertyFileOption)){
+        if (propertyFileOption != null && !values.containsKey(propertyFileOption)){
             parseProperties(propertyFileOption.value())
         }
     }

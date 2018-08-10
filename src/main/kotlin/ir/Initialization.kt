@@ -8,7 +8,7 @@ abstract class Initialization protected constructor(val variableInfo: VariableIn
         addChild(initExpr)
     }
 
-    override fun complexity() = getChild(0)?.complexity()?.plus(1) ?: 0L
+    override fun complexity() = getChild(0).complexity().plus(1)
 
     override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

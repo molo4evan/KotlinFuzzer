@@ -4,7 +4,7 @@ import ir.types.*
 import utils.ProductionParams
 
 object TypeList {
-    val ANY = Type("kotlin.Any")
+    val ANY = Type("Any")
     val BYTE = TypeByte()
     val SHORT = TypeShort()
     val INT = TypeInt()
@@ -15,9 +15,10 @@ object TypeList {
     val NOTHING = TypeNothing()
     val BOOLEAN = TypeBoolean()
     val CHAR = TypeChar()
-    val STRING = Type("kotlin.String", Type.FINAL)       //what means final??
+    val STRING = Type("String", Type.FINAL)       //what means final??
 
     private val TYPES = mutableListOf<Type>()
+    private val TYPES_FOR_FUNS = mutableListOf<Type>()
     private val BUILTIN_TYPES = mutableListOf<Type>()
     private val BUILTIN_INT_TYPES = mutableListOf<Type>()
     private val BUILTIN_FP_TYPES = mutableListOf<Type>()
@@ -51,9 +52,14 @@ object TypeList {
 
         add(STRING)
         add(ANY)
+
+        TYPES_FOR_FUNS.addAll(TYPES)
+        TYPES_FOR_FUNS.add(UNIT)
     }
 
     fun getAll() = TYPES
+
+    fun getAllForFunctions() = TYPES_FOR_FUNS
 
     fun getBuiltIn() = BUILTIN_TYPES
 

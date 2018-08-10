@@ -29,7 +29,6 @@ class BitwiseOperatorFactory(
         rule.add("and", builder.setOperatorKind(OperatorKind.BIT_AND).getBinaryOperatorFactory())
         rule.add("or", builder.setOperatorKind(OperatorKind.BIT_OR).getBinaryOperatorFactory())
         rule.add("xor", builder.setOperatorKind(OperatorKind.BIT_XOR).getBinaryOperatorFactory())
-        rule.add("not", builder.setOperatorKind(OperatorKind.BIT_NOT).getUnaryOperatorFactory())
         rule.add("shl", builder.setOperatorKind(OperatorKind.SHL).getBinaryOperatorFactory())
         rule.add("shr", builder.setOperatorKind(OperatorKind.SHR).getBinaryOperatorFactory())
         rule.add("ushr", builder.setOperatorKind(OperatorKind.USHR).getBinaryOperatorFactory())

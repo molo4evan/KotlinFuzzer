@@ -7,29 +7,25 @@ import information.FunctionInfo
 import information.SymbolTable
 import ir.IRNode
 import ir.types.Type
-import ir.functions.Function
+import ir.functions.FunctionCall
 import utils.PseudoRandom
 
 class FunctionCallFactory(
         private val complexityLimit: Long,
         private val operatorLimit: Int,
         private val owner: Type?,
-        private val resultType: Type?,
+        private val resultType: Type,
         private val exceptionSafe: Boolean
-): SafeFactory<Function>() {
+): SafeFactory<FunctionCall>() {
     private val functionInfo = FunctionInfo("", null, resultType, 0, 0)
 
-    override fun sproduce(): Function {
+    override fun sproduce(): FunctionCall {
         // Currently no function is exception-safe
         if (exceptionSafe) {
             throw ProductionFailedException()
         }
 
-        val allFunctions = if (functionInfo.type == null) {
-            SymbolTable.getAllCombined(FunctionInfo::class)
-        } else {
-            SymbolTable.get(functionInfo.type, FunctionInfo::class)
-        }
+        val allFunctions = SymbolTable.get(functionInfo.type, FunctionInfo::class)
 
         if (!allFunctions.isEmpty()){
             PseudoRandom.shuffle(allFunctions)
@@ -65,7 +61,7 @@ class FunctionCallFactory(
                 if (owner != null) {
                     if (owner == functionInfo.owner || classHierarchy != null && classHierarchy.contains(functionInfo.owner)) {
                         inHierarchy = classHierarchy!!.contains(functionInfo.owner)
-                        if (functionInfo.isOpen() && !functionInfo.isStatic() && !functionInfo.isNonRecursive()) {  //TODO: what happens here?
+                        if (!functionInfo.isFinal() && !functionInfo.isStatic() && !functionInfo.isNonRecursive()) {  //TODO: what happens here?
                             continue
                         }
                         if (inHierarchy && functionInfo.isPrivate()) {
@@ -109,11 +105,10 @@ class FunctionCallFactory(
                                     setExceptionSafe(exceptionSafe).
                                     setNoConsts(noconsts)
                             for (argType in functionInfo.argTypes){
-                                if (argType.type == null) continue                                              //TODO: is it correct? See ir.control_flow.If
                                 accum.add(builder.setResultType(argType.type).getExpressionFactory().produce())
                             }
                         }
-                        return Function(owner, functionInfo, accum)
+                        return FunctionCall(owner, functionInfo, accum)
                     } catch (ex: ProductionFailedException){}
                 }
             }

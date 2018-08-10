@@ -5,7 +5,7 @@ import ir.types.Type
 class FunctionInfo(                         //TODO: change static modifier to companion objects???
         name: String,
         owner: Type?,
-        retType: Type?,
+        retType: Type,
         val complexity: Long,
         flags: Int,
         val argTypes: List<VariableInfo>
@@ -21,7 +21,7 @@ class FunctionInfo(                         //TODO: change static modifier to co
     constructor(
             name: String,
             owner: Type?,
-            retType: Type?,
+            retType: Type,
             complexity: Long,
             flags: Int,
             vararg argTypes: VariableInfo
@@ -79,6 +79,6 @@ class FunctionInfo(                         //TODO: change static modifier to co
 
     fun isNonRecursive() = (flags and NONRECURSIVE) != 0
 
-    fun isOpen() = (flags and FINAL) == 0
+    fun isFinal() = (flags and FINAL) != 0
 
 }

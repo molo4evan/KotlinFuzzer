@@ -1,10 +1,11 @@
 package providers.visitors
 
+import information.Symbol
 import ir.*
 import ir.control_flow.Break
 import ir.control_flow.*
 import ir.functions.*
-import ir.functions.Function
+import ir.functions.FunctionCall
 import ir.loops.*
 import ir.operators.BinaryOperator
 import ir.operators.CastOperator
@@ -33,7 +34,7 @@ interface Visitor<T> {
     fun visit(node: Declaration): T
     fun visit(node: DoWhile): T
     fun visit(node: For): T
-    fun visit(node: Function): T
+    fun visit(node: FunctionCall): T
     fun visit(node: FunctionDeclaration): T
     fun visit(node: FunctionDeclarationBlock): T
     fun visit(node: FunctionDefinition): T
@@ -66,4 +67,5 @@ interface Visitor<T> {
     fun visit(node: While): T
 //    fun visit(node: CatchBlock): T
 //    fun visit(node: TryCatchBlock): T
+    //TODO: add companion object block (for static functions and variables)
 }

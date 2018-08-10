@@ -15,7 +15,8 @@ open class ExpressionFactory(
         ownerClass: Type?,
         resultType: Type,
         exceptionSafe: Boolean,
-        noconsts: Boolean
+        noconsts: Boolean,
+        noAssignments: Boolean
 ): SafeFactory<IRNode>() {
     private val rule = Rule<IRNode>("expression")
 
@@ -32,14 +33,14 @@ open class ExpressionFactory(
             rule.add("literal", builder.getLiteralFactory())
             rule.add("constant", builder.setIsConstant(true).setIsInitialized(true)/*.setVariableType(resultType)*/.getVariableFactory())
         }
-        rule.add("variable", builder.setIsConstant(false).setIsInitialized(true).getVariableFactory())
+        rule.add("variable", builder.setIsConstant(false).setIsInitialized(true).getVariableFactory(), 15.0) //TODO: add options
         if (operatorLimit > 0 && complexityLimit > 0){
             //rule.add("cast", builder.getCastOperatorFactory(), 0.1)                   //TODO: uncomment
             rule.add("arithmetic", builder.getArithmeticOperatorFactory())
             rule.add("logic", builder.getLogicOperatorFactory())
             rule.add("bitwise", BitwiseOperatorFactory(complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts))
-            rule.add("assignment", builder.getAssignmentOperatorFactory())
-            rule.add("function", builder.getFunctionFactory(), ProductionParams.functionCallsPercent?.value() ?: 0.1)
+            if (!noAssignments) rule.add("assignment", builder.getAssignmentOperatorFactory())
+            rule.add("function", builder.getFunctionFactory(), ProductionParams.functionCallsPercent?.value() ?: 3.0)
             rule.add("str_plus", builder.setOperatorKind(OperatorKind.STRADD).getBinaryOperatorFactory())
         }
 //        if (!ProductionParams.disableArrays.value() && !exceptionSafe) {          //TODO: uncomment

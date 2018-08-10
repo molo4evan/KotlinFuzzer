@@ -39,7 +39,7 @@ object SymbolTable {
     fun add(symbol: Symbol?){
         val vars = SYMBOL_STACK.peek()
         if (symbol != null){
-            if (!vars.containsKey(symbol.type) && symbol.type != null){
+            if (!vars.containsKey(symbol.type)){
                 vars[symbol.type] = mutableListOf()
             }
             vars[symbol.type]!!.add(symbol)
@@ -122,10 +122,10 @@ object SymbolTable {
     fun getAll(type: Type, classToCheck: KClass<*>): HashMap<Type, List<Symbol>> {
         val result = mutableMapOf<Type, MutableList<Symbol>>()
 
-        for (type in SYMBOL_STACK.peek().keys) {
+        for (typeClass in SYMBOL_STACK.peek().keys) {
             val symbolsOfType = SYMBOL_STACK.peek()[type]
             for (symbol in symbolsOfType!!) {
-                if (classToCheck.isInstance(symbol) && type == symbol.owner) {
+                if (classToCheck.isInstance(symbol) && typeClass == symbol.owner) {
                     if (!result.containsKey(type)) {
                         result[type] = mutableListOf()
                     }
@@ -165,13 +165,13 @@ object SymbolTable {
         return result
     }
 
-    fun getAllCombined(type: Type, classToCheck: KClass<*>): List<Symbol> {
+    fun getAllCombined(typeClass: Type, classToCheck: KClass<*>): List<Symbol> {
         val result = mutableListOf<Symbol>()
 
         for (type in SYMBOL_STACK.peek().keys) {
             val symbolsOfType = SYMBOL_STACK.peek()[type]
             for (symbol in symbolsOfType!!) {
-                if (classToCheck.isInstance(symbol) && type == symbol.owner) {
+                if (classToCheck.isInstance(symbol) && typeClass == symbol.owner) {
                     result.add(symbol)
                 }
             }

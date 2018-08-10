@@ -5,18 +5,20 @@ import ir.types.Type
 import information.FunctionInfo
 import information.Symbol
 import information.SymbolTable
+import ir.NothingNode
 import providers.visitors.Visitor
 
 class FunctionDefinition(
         val functionInfo: FunctionInfo,
         argumentDeclarations: List<ArgumentDeclaration>,
-        body: IRNode?,
+        body: IRNode,
         ret: Return?
 ): IRNode(functionInfo.type) {
     init {
         owner = functionInfo.owner
         addChild(body)
-        addChild(ret)
+        if (ret == null) addChild(NothingNode())
+        else addChild(ret)
         addChildren(argumentDeclarations)
     }
 
@@ -45,7 +47,7 @@ class FunctionDefinition(
                     if (f2.isNonRecursive()
                             || f1.isAbstract() && !f2.isAbstract()
                             || f1.isStatic() != f2.isStatic()
-                            || !f2.isOpen()
+                            || f2.isFinal()
                             || f1.flags and Symbol.ACCESS_ATTRS_MASK < f2.flags and Symbol.ACCESS_ATTRS_MASK) {
                         return true
                     }
@@ -61,9 +63,9 @@ class FunctionDefinition(
         try {
             ret = getChild(1)
         } catch (ex: ArrayIndexOutOfBoundsException){
-            return body?.complexity() ?: 0
+            return body.complexity()
         }
-        return (body?.complexity() ?: 0) + (ret?.complexity() ?: 0)
+        return (body.complexity()) + (ret.complexity())
     }
 
     override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)

@@ -13,9 +13,9 @@ class When(level: Long, children: List<IRNode>, val caseBlockIndex: Int): IRNode
 
     override fun complexity(): Long {
         val whenExpr = getChild(0)
-        var compl = whenExpr?.complexity() ?: 0
+        var compl = whenExpr.complexity()
         for (i in caseBlockIndex until children.size){
-            compl += getChild(i)?.complexity() ?: 0
+            compl += getChild(i).complexity()
         }
         return compl
     }

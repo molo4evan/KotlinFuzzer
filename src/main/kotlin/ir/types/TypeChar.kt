@@ -1,3 +1,3 @@
 package ir.types
 
-class TypeChar: Type("kotlin.Char", Type.BUILTIN)
+class TypeChar: Type("Char", Type.BUILTIN)

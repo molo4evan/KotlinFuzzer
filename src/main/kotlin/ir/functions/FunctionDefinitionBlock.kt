@@ -15,7 +15,7 @@ class FunctionDefinitionBlock(content: List<IRNode>, level: Long, owner: Type?):
     override fun complexity(): Long {
         var compl = 0L
         for (child in children){
-            compl += child?.complexity() ?: 0
+            compl += child.complexity()
         }
         return compl
     }

@@ -29,7 +29,8 @@ import ir.variables.*
 import information.FunctionInfo
 import information.TypeList
 import ir.functions.*
-import ir.functions.Function
+import ir.functions.FunctionCall
+import ir.types.TypeNothing
 import utils.ProductionParams
 import java.util.*
 
@@ -43,6 +44,7 @@ class IRNodeBuilder() {                                                  //TODO:
     private var resultType = Optional.empty<Type>()
     private var safe = Optional.empty<Boolean>()
     private var noConsts = Optional.empty<Boolean>()
+    private var noAssignments = Optional.of(false)
     private var opKind = Optional.empty<OperatorKind>()
     private var statementLimit = Optional.empty<Int>()
     private var subBlock = Optional.empty<Boolean>()
@@ -98,7 +100,7 @@ class IRNodeBuilder() {                                                  //TODO:
         val o = getOperatorKind()
         when (o) {
             ASSIGN -> return AssignmentOperatorImplFactory(getComplexityLimit(), getOperatorLimit(),
-                    getOwnerClass(), resultType.orElse(null), getExceptionSafe(), getNoConsts())
+                    getOwnerClass(), resultType.orElse(TypeNothing()), getExceptionSafe(), getNoConsts())
             AND, OR -> return BinaryLogicOperatorFactory(o, getComplexityLimit(), getOperatorLimit(),
                     getOwnerClass(), resultType.orElse(null), getExceptionSafe(), getNoConsts())
             BIT_OR, BIT_XOR, BIT_AND -> return BinaryBitwiseOperatorFactory(o, getComplexityLimit(), getOperatorLimit(),
@@ -118,7 +120,7 @@ class IRNodeBuilder() {                                                  //TODO:
             STRADD -> return BinaryConcatOperatorFactory(getComplexityLimit(), getOperatorLimit(),
                     getOwnerClass(), resultType.orElse(null), getExceptionSafe(), getNoConsts())
             COMPOUND_ADD, COMPOUND_SUB, COMPOUND_MUL, COMPOUND_DIV, COMPOUND_MOD -> return CompoundArithmeticAssignmentOperatorFactory(o, getComplexityLimit(),
-                    getOperatorLimit(), getOwnerClass(), resultType.orElse(null), getExceptionSafe(),
+                    getOperatorLimit(), getOwnerClass(), resultType.orElse(TypeNothing()), getExceptionSafe(),
                     getNoConsts())
             else -> throw ProductionFailedException()
         }
@@ -126,18 +128,15 @@ class IRNodeBuilder() {                                                  //TODO:
 
     fun getUnaryOperatorFactory(): Factory<UnaryOperator> {
         val o = getOperatorKind()
-        when (o) {
-            NOT -> return LogicalInversionOperatorFactory(getComplexityLimit(),
+        return when (o) {
+            NOT -> LogicalInversionOperatorFactory(getComplexityLimit(),
                     getOperatorLimit(), getOwnerClass(), resultType.orElse(null), getExceptionSafe(),
-                    getNoConsts())
-            BIT_NOT -> return BitwiseInversionOperatorFactory(getComplexityLimit(),
+                    getNoConsts(), getNoAssignments())
+            UNARY_PLUS, UNARY_MINUS -> UnaryPlusMinusOperatorFactory(o, getComplexityLimit(),
                     getOperatorLimit(), getOwnerClass(), resultType.orElse(null), getExceptionSafe(),
-                    getNoConsts())
-            UNARY_PLUS, UNARY_MINUS -> return UnaryPlusMinusOperatorFactory(o, getComplexityLimit(),
-                    getOperatorLimit(), getOwnerClass(), resultType.orElse(null), getExceptionSafe(),
-                    getNoConsts())
-            PRE_DEC, POST_DEC, PRE_INC, POST_INC -> return IncDecOperatorFactory(o, getComplexityLimit(), getOperatorLimit(),
-                    getOwnerClass(), resultType.orElse(null), getExceptionSafe(), getNoConsts())
+                    getNoConsts(), getNoAssignments())
+            PRE_DEC, POST_DEC, PRE_INC, POST_INC -> IncDecOperatorFactory(o, getComplexityLimit(), getOperatorLimit(),
+                    getOwnerClass(), resultType.orElse(TypeNothing()), getExceptionSafe(), getNoConsts(), getNoAssignments())
             else -> throw ProductionFailedException()
         }
     }
@@ -242,16 +241,18 @@ class IRNodeBuilder() {                                                  //TODO:
 
     fun getExpressionFactory(): Factory<IRNode> {       //rule
         return ExpressionFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
-                getResultType(), getExceptionSafe(), getNoConsts())
+                getResultType(), getExceptionSafe(), getNoConsts(), getNoAssignments())
     }
 
     fun getFunctionDeclarationBlockFactory(): Factory<FunctionDeclarationBlock> {
-        return FunctionDeclarationBlockFactory(getOwnerClass(), getMemberFunctionsLimit(),
+        return FunctionDeclarationBlockFactory(getOwnerClass() ?: throw IllegalArgumentException("Function declaration must have an owner"),
+                getMemberFunctionsLimit(),
                 getMemberFunctionsArgLimit(), getLevel())
     }
 
     fun getFunctionDeclarationFactory(): Factory<FunctionDeclaration> {     //for FunctionDeclarationBlockFactory
-        return FunctionDeclarationFactory(getName(), getOwnerClass(), resultType.orElse(TypeList.UNIT),
+        return FunctionDeclarationFactory(getName(), getOwnerClass() ?: throw IllegalArgumentException("Function declaration must have an owner"),
+                resultType.orElse(TypeList.UNIT),
                 getMemberFunctionsArgLimit(), getFlags())
     }
 
@@ -267,7 +268,7 @@ class IRNodeBuilder() {                                                  //TODO:
                 getMemberFunctionsArgLimit(), getLevel(), getFlags())
     }
 
-    fun getFunctionFactory(): Factory<Function> {   //used in rules
+    fun getFunctionFactory(): Factory<FunctionCall> {   //used in rules
         return FunctionCallFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
                 resultType.orElse(null), getExceptionSafe())
     }
@@ -296,7 +297,7 @@ class IRNodeBuilder() {                                                  //TODO:
 
     fun getLimitedExpressionFactory(): Factory<IRNode> {
         return LimitedExpressionFactory(getComplexityLimit(), getOperatorLimit(),
-                getOwnerClass(), getResultType(), getExceptionSafe(), getNoConsts())
+                getOwnerClass(), getResultType(), getExceptionSafe(), getNoConsts(), getNoAssignments())
     }
 
     fun getLiteralFactory(): Factory<Literal> {
@@ -425,6 +426,11 @@ class IRNodeBuilder() {                                                  //TODO:
     // TODO: check is noconsts is always false in current implementation
     fun setNoConsts(value: Boolean): IRNodeBuilder {
         noConsts = Optional.of(value)
+        return this
+    }
+
+    fun setNoAssignments(value: Boolean): IRNodeBuilder {
+        noAssignments = Optional.of(value)
         return this
     }
 
@@ -570,6 +576,10 @@ class IRNodeBuilder() {                                                  //TODO:
 
     private fun getNoConsts(): Boolean {
         return noConsts.orElseThrow { IllegalArgumentException("NoConsts wasn't set") }
+    }
+
+    private fun getNoAssignments(): Boolean {
+        return noAssignments.orElseThrow{ IllegalArgumentException("NoAssignments wasn't set") }
     }
 
     private fun getOperatorKind(): OperatorKind {

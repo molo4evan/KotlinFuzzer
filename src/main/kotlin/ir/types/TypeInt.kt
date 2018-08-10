@@ -1,3 +1,3 @@
 package ir.types
 
-class TypeInt: Type("kotlin.Int", Type.BUILTIN)
+class TypeInt: Type("Int", Type.BUILTIN)

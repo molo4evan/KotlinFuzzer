@@ -6,7 +6,7 @@ import information.FunctionInfo
 import information.SymbolTable
 import providers.visitors.Visitor
 
-class Function(owner: Type?, val functionInfo: FunctionInfo, args: List<IRNode>): IRNode(functionInfo.type) {
+class FunctionCall(owner: Type?, val functionInfo: FunctionInfo, args: List<IRNode>): IRNode(functionInfo.type) {
     init {
         this.owner = owner
         addChildren(args)

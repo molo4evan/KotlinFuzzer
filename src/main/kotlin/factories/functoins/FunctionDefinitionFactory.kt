@@ -25,7 +25,7 @@ class FunctionDefinitionFactory (
     override fun produce(): FunctionDefinition {
         var resType = resultType
         if (resType == null) {
-            val types = TypeList.getAll()
+            val types = TypeList.getAllForFunctions()
             types.add(TypeList.UNIT)
             resType = PseudoRandom.randomElement(types)
         }
@@ -33,7 +33,7 @@ class FunctionDefinitionFactory (
         val argNumber = (PseudoRandom.random() * memberFunctionsArgLimit).toInt()
         val argDecl = mutableListOf<ArgumentDeclaration>()
         val argInfo = mutableListOf<VariableInfo>()
-        if ((flags and Symbol.STATIC) != 0) {
+        if ((flags and Symbol.STATIC) != 0 && ownerClass != null) {
             argInfo.add(VariableInfo("this", ownerClass, ownerClass, VariableInfo.CONST or VariableInfo.LOCAL or VariableInfo.INITIALIZED))
         }
         var body: IRNode? = null
@@ -94,6 +94,6 @@ class FunctionDefinitionFactory (
         functionInfo = FunctionInfo(name, ownerClass, resType, if (body == null) 0 else body.complexity(), flags, argInfo)
         // If it's all ok, add the function to the symbol table.
         SymbolTable.add(functionInfo)
-        return FunctionDefinition(functionInfo, argDecl, body, returnNode)
+        return FunctionDefinition(functionInfo, argDecl, body ?: NothingNode(), returnNode)
     }
 }

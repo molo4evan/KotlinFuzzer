@@ -9,22 +9,15 @@ import ir.types.Type
 import providers.visitors.Visitor
 import kotlin.math.max
 
+// Production is base class for all elements of the IR-tree.
+
 abstract class IRNode(private val resultType: Type?) {
     var parent: IRNode? = null
         private set
 
-    val children = mutableListOf<IRNode?>()
+    val children = ArrayList<IRNode>()
 
     var owner: Type? = null
-        set(ow: Type?){
-            field = ow
-            if (null === ow){
-                println(this::class.qualifiedName.toString() + " null")     // whyyyyy?????
-                for (t in Thread.currentThread().stackTrace){
-                    println(t)
-                }
-            }
-        }
 
     private val isCDFDeviation: Boolean by lazy {
         this is If || this is When
@@ -33,16 +26,16 @@ abstract class IRNode(private val resultType: Type?) {
                 || (this is Block && this.parent is Block)
     }
 
-    var level = 0L
+    var level = 0L      //used to print tabulation in code
 
 
     open fun getResultType(): Type? = resultType
 
     abstract fun <T> accept(visitor: Visitor<T>): T
 
-    fun addChild(child: IRNode?){
+    fun addChild(child: IRNode){
         children.add(child)
-        child?.parent = this
+        child.parent = this
     }
 
      fun <T: IRNode> addChildren(children: List<T>){        // don't sure this is correct
@@ -51,9 +44,10 @@ abstract class IRNode(private val resultType: Type?) {
 
     fun getChild(index: Int) = if (index < children.size) children[index] else throw ArrayIndexOutOfBoundsException(index)
 
-    fun setChild(index: Int, child: IRNode?){
-        children[index] = child
-        child?.parent = this
+    fun setChild(index: Int, child: IRNode){
+        children.add(index, child)
+        //children[index] = child
+        child.parent = this
     }
 
     open fun removeSelf() = parent?.children?.remove(this) ?: false

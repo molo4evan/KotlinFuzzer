@@ -1,3 +1,3 @@
 package ir.types
 
-class TypeFloat: Type("kotlin.Float", Type.BUILTIN)
+class TypeFloat: Type("Float", Type.BUILTIN)

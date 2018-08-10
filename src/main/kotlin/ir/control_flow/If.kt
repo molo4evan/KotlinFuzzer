@@ -2,6 +2,7 @@ package ir.control_flow
 
 import ir.Block
 import ir.IRNode
+import ir.NothingNode
 import providers.visitors.Visitor
 import kotlin.math.max
 
@@ -15,7 +16,8 @@ class If(cond: IRNode, thenBlock: Block, elseBlock: Block?, level: Long) : IRNod
     init {
         setChild(IfPart.CONDITION.ordinal, cond)
         setChild(IfPart.THEN.ordinal, thenBlock)
-        setChild(IfPart.ELSE.ordinal, elseBlock)
+        if (elseBlock == null) setChild(IfPart.ELSE.ordinal, NothingNode())
+        else setChild(IfPart.ELSE.ordinal, elseBlock)
         this.level = level
     }
 
@@ -24,7 +26,7 @@ class If(cond: IRNode, thenBlock: Block, elseBlock: Block?, level: Long) : IRNod
         val thenBlock = getChild(IfPart.THEN.ordinal)
         val elseBlock = getChild(IfPart.ELSE.ordinal)
 
-        return (cond?.complexity() ?: 0) + (thenBlock?.complexity() ?: 0) + (elseBlock?.complexity() ?: 0)
+        return cond.complexity() + thenBlock.complexity() + elseBlock.complexity()
     }
 
     override fun countDepth() = max(level, super.countDepth())

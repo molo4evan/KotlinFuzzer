@@ -2,7 +2,7 @@ package information
 
 import ir.types.Type
 
-open class Symbol(val name: String, val owner: Type?, val type: Type?, var flags: Int) {
+open class Symbol(val name: String, val owner: Type?, val type: Type, var flags: Int) {
     //protected constructor(name: String) : this(name, null, null, NONE)
     protected constructor(other: Symbol): this(other.name, other.owner, other.type, other.flags)
 
@@ -13,7 +13,7 @@ open class Symbol(val name: String, val owner: Type?, val type: Type?, var flags
         val PROTECTED = 0x04
         val PUBLIC = 0x08
         val ACCESS_ATTRS_MASK = PRIVATE + PROTECTED + INTERNAL + PUBLIC
-        val STATIC = 0x10                                                   //TODO: incorrect
+        val STATIC = 0x10
     }
 
     override fun equals(other: Any?): Boolean {

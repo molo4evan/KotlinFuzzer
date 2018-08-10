@@ -3,15 +3,17 @@ package ir.functions
 import information.FunctionInfo
 import information.TypeList
 import ir.IRNode
+import ir.NothingNode
 import providers.visitors.Visitor
 
-class MainFunction(body: IRNode?): IRNode(TypeList.UNIT) {
+class MainFunction(private val name: String, body: IRNode?): IRNode(TypeList.UNIT) {
     init {
         owner = null
-        addChild(body)
+        addChild(body ?: NothingNode())
     }
 
-    override fun complexity() = getChild(0)?.complexity() ?: 0L
+    override fun getName() = name
+    override fun complexity() = getChild(0).complexity()
 
     override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

@@ -1,3 +1,3 @@
 package ir.types
 
-class TypeShort: Type("kotlin.Short", Type.BUILTIN)
+class TypeShort: Type("Short", Type.BUILTIN)

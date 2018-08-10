@@ -14,7 +14,7 @@ import utils.PseudoRandom
 
 class FunctionDeclarationFactory(
         private val name: String,
-        private val ownerClass: Type?,
+        private val ownerClass: Type,
         private val resultType: Type?,
         private val memberFunctionsArgLimit: Int,
         private val flags: Int
@@ -22,15 +22,13 @@ class FunctionDeclarationFactory(
     override fun produce(): FunctionDeclaration {
         var resType = resultType
         if (resType == null) {
-            val types = TypeList.getAll()
+            val types = TypeList.getAllForFunctions()
             types.add(TypeList.UNIT)
             resType = PseudoRandom.randomElement(types)
         }
         val argNumber = (PseudoRandom.random() * memberFunctionsArgLimit).toInt()
         val argInfo = mutableListOf<VariableInfo>()
-        if (ownerClass != null) {
-            argInfo.add(VariableInfo("this", ownerClass, ownerClass, VariableInfo.CONST or VariableInfo.LOCAL or VariableInfo.INITIALIZED))
-        }
+        argInfo.add(VariableInfo("this", ownerClass, ownerClass, VariableInfo.CONST or VariableInfo.LOCAL or VariableInfo.INITIALIZED))
         val argumentsDeclaration = mutableListOf<ArgumentDeclaration>()
         SymbolTable.push()
         var functionInfo: FunctionInfo
@@ -43,19 +41,17 @@ class FunctionDeclarationFactory(
                 argInfo.add(d.variableInfo)
                 i++
             }
-            if (ownerClass != null) {
-                val thisClassFun = SymbolTable.getAllCombined(ownerClass, FunctionInfo::class)
-                val parentFun = FunctionDefinition.getFuncsFromParents(ownerClass)
-                while (true) {
-                    functionInfo = FunctionInfo(name, ownerClass, resType, 0L, flags, argInfo)
-                    if (thisClassFun.contains(functionInfo) || FunctionDefinition.isInvalidOverride(functionInfo, parentFun)) {
-                        // try changing the signature, and go checking again.
-                        val d = builder.setVariableNumber(i++).getArgumentDeclarationFactory().produce()
-                        argumentsDeclaration.add(d)
-                        argInfo.add(d.variableInfo)
-                    } else {
-                        break
-                    }
+            val thisClassFun = SymbolTable.getAllCombined(ownerClass, FunctionInfo::class)
+            val parentFun = FunctionDefinition.getFuncsFromParents(ownerClass)
+            while (true) {
+                functionInfo = FunctionInfo(name, ownerClass, resType, 0L, flags, argInfo)
+                if (thisClassFun.contains(functionInfo) || FunctionDefinition.isInvalidOverride(functionInfo, parentFun)) {
+                    // try changing the signature, and go checking again.
+                    val d = builder.setVariableNumber(i++).getArgumentDeclarationFactory().produce()
+                    argumentsDeclaration.add(d)
+                    argInfo.add(d.variableInfo)
+                } else {
+                    break
                 }
             }
         } finally {

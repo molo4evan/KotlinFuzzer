@@ -6,6 +6,7 @@ import utils.ProductionParams
 import information.Symbol
 import information.SymbolTable
 import information.TypeList
+import ir.NothingNode
 import providers.visitors.Visitor
 import java.util.*
 
@@ -23,7 +24,7 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
     val childrenSet: MutableSet<String> = HashSet()
     private val symbols: MutableSet<Symbol> = HashSet()
 
-    override fun getResultType(): Type? = this
+    override fun getResultType(): Type = this
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -55,9 +56,9 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
 
     fun getAllParents(): Set<Type>{
         val result = TreeSet<Type>()
-        parents.stream().map { TypeList.find(it) }.map { it as Type }.forEach {
+        parents.stream().map { TypeList.find(it) }.forEach {
             result.add(it)
-            result.addAll(getAllParents())
+            result.addAll(it.getAllParents())
         }
         return result
     }

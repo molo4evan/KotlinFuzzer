@@ -29,7 +29,7 @@ class StatementFactory(
                 .setResultType(PseudoRandom.randomElement(TypeList.getAll()))
         //rule.add("array_creation", builder.getArrayCreationFactory())             //TODO: uncomment
         rule.add("assignment", builder.getAssignmentOperatorFactory())
-        rule.add("function", builder.getFunctionFactory(), ProductionParams.functionCallsPercent?.value() ?: 0.1)
+        rule.add("function", builder.getFunctionFactory(), ProductionParams.functionCallsPercent?.value() ?: 1.0)
     }
 
     override fun produce(): Statement {

@@ -19,10 +19,9 @@ object PseudoRandom {
     }
 
     fun reset(seed: String?){
-        lateinit var _seed: String
-        if (seed == null || seed.isEmpty()) _seed = System.currentTimeMillis().toString()
-        else _seed = seed
-        random = Random(seed!!.hashCode().toLong())
+        val newSeed = if (seed == null || seed.isEmpty()) System.currentTimeMillis().toString()
+        else seed
+        random = Random(newSeed.hashCode().toLong())
     }
 
     fun random() = random.nextDouble()

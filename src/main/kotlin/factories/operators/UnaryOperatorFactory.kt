@@ -13,7 +13,8 @@ abstract class UnaryOperatorFactory protected constructor(
         protected val ownerClass: Type?,
         protected val resultType: Type,
         exceptionSafe: Boolean,
-        noconsts: Boolean
+        noconsts: Boolean,
+        val noAssignments: Boolean
 ) : OperatorFactory<UnaryOperator>(opKind.priority, complexityLimit, operatorLimit, exceptionSafe, noconsts) {
 
     protected open fun generateType(): Type {

@@ -12,8 +12,9 @@ internal class LogicalInversionOperatorFactory(
         ownerType: Type?,
         resultType: Type,
         exceptionSafe: Boolean,
-        noconsts: Boolean
-) : UnaryOperatorFactory(OperatorKind.NOT, complexityLimit, operatorLimit, ownerType, resultType, exceptionSafe, noconsts) {
+        noconsts: Boolean,
+        noAssignments: Boolean
+) : UnaryOperatorFactory(OperatorKind.NOT, complexityLimit, operatorLimit, ownerType, resultType, exceptionSafe, noconsts, noAssignments) {
 
     override fun isApplicable(resultType: Type) = resultType == TypeList.BOOLEAN
 
@@ -23,5 +24,6 @@ internal class LogicalInversionOperatorFactory(
             ownerClass,
             resultType,
             exceptionSafe,
-            noconsts).produce())
+            noconsts,
+            noAssignments).produce())
 }

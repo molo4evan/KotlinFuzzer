@@ -57,8 +57,6 @@ enum class OperatorKind(val priority: Int, val isPrefix: Boolean) {
     CAST(13),
     /** !a  */
     NOT(14),
-    /** ~a  */
-    BIT_NOT(14),
     /** +a  */
     UNARY_PLUS(14),
     /** -a  */
@@ -75,7 +73,6 @@ enum class OperatorKind(val priority: Int, val isPrefix: Boolean) {
     constructor(priority: Int): this(priority, true)
 
     fun isUnary() = this == NOT ||
-                        this == BIT_NOT ||
                         this == UNARY_PLUS ||
                         this == UNARY_MINUS ||
                         this == PRE_INC ||

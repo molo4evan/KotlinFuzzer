@@ -11,8 +11,9 @@ class LimitedExpressionFactory(
         ownerClass: Type?,
         resultType: Type,
         exceptionSafe: Boolean,
-        noconsts: Boolean
-) : ExpressionFactory(complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts) {
+        noconsts: Boolean,
+        noAssignments: Boolean
+) : ExpressionFactory(complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts, noAssignments) {
 
     override fun sproduce(): IRNode {
         ProductionLimiter.setLimit()
