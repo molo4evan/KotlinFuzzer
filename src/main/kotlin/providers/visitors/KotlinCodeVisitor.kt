@@ -272,13 +272,16 @@ class KotlinCodeVisitor: Visitor<String> {
 
     override fun visit(node: Initialization): String {      //TODO: what should i do with val/var?
         val vi = node.variableInfo
+        val init = node.getChild(0)
         return attributes(vi) +
                 (if (vi.isConst()) "val " else "var ") +
                 vi.name +
                 ": " +
                 vi.type.accept(this) +
                 " = " +
-                (node.getChild(0).accept(this))
+                (if (vi.type.isBuiltIn() && vi.type != init.getResultType()) "(" else "") +
+                (init.accept(this)) +
+                (if (vi.type.isBuiltIn() && vi.type != init.getResultType()) ").to${vi.type}()" else "")
     }
 
     override fun visit(node: Literal): String {
@@ -286,8 +289,8 @@ class KotlinCodeVisitor: Visitor<String> {
         val value = node.value
         return when (resType) {
             TypeList.LONG -> value.toString() + "L"
-            TypeList.FLOAT -> "%EF".format(value.toString().toDouble())
-            TypeList.DOUBLE -> "%E".format(value.toString().toDouble())
+            TypeList.FLOAT -> value.toString()
+            TypeList.DOUBLE -> value.toString()
             TypeList.CHAR -> if (value as Char == '\\') "\'\\\\\'" else "\'$value\'"
             TypeList.SHORT -> "$value.toShort()"
             TypeList.BYTE ->"$value.toByte()"

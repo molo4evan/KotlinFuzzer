@@ -58,7 +58,7 @@ class FunctionDefinitionBlockFactory(
                 }
 
                 when ((PseudoRandom.random() * 4).toInt()) {
-                    0 -> flags = flags or Symbol.PRIVATE
+                    0 -> flags = if (flags and FunctionInfo.FINAL != 0) flags or Symbol.PRIVATE else flags or Symbol.PUBLIC
                     1 -> flags = if (ownerClass != null) flags or Symbol.PROTECTED else flags or Symbol.PUBLIC
                     2 -> flags = flags or Symbol.INTERNAL
                     3 -> flags = flags or Symbol.PUBLIC
