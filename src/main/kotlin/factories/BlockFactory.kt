@@ -56,12 +56,12 @@ class BlockFactory(
                 val subLimit = (PseudoRandom.random() * (slimit - i - 1)).toInt()
                 builder.setComplexityLimit((PseudoRandom.random() * climit).toLong())
                 rule = Rule("block")
-                rule.add("statement", builder.getStatementFactory(), 5.0)
+                rule.add("statement", builder.getStatementFactory(), 3.0)
                 if (ProductionParams.disableVarsInBlock?.value()?.not()  ?: throw Exception("Option disableVarsInBlock not initialized")) {
                     rule.add("decl", builder.setIsLocal(true).getDeclarationFactory())
                 }
                 if (subLimit > 0) {
-                    builder.setStatementLimit(subLimit).setLevel(level + 1)
+                    builder.setStatementLimit(subLimit).setLevel(level)
                     if (ProductionParams.disableNestedBlocks?.value()?.not() ?: throw Exception("Option disableNestedBlocks not initialized")) {
                         rule.add("block", builder.setCanHaveReturn(false)
                                 .setCanHaveThrow(false)
@@ -100,7 +100,7 @@ class BlockFactory(
 //            if (canHaveContinues && !subBlock) {
 //                rule.add("continue", builder.getContinueFactory())
 //            }
-            if (canHaveReturn && !subBlock && !returnType.equals(TypeList.UNIT)) {
+            if (canHaveReturn && !subBlock && returnType != TypeList.UNIT) {
                 rule.add("return", builder.setComplexityLimit(climit).getReturnFactory())
             }
 //            if (canHaveThrow && !subBlock) {

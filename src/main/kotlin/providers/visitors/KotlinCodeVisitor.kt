@@ -128,13 +128,9 @@ class KotlinCodeVisitor: Visitor<String> {
             if (!s.isEmpty()) {
                 val level = node.level
                 if (i is Block) {
-                    code.append(PrintingUtils.align(level + 1)).
-                            append("{\n").
-                            append(s).
-                            append(PrintingUtils.align(level + 1)).
-                            append("}")
+                    code.append(s)
                 } else {
-                    code.append(PrintingUtils.align(level + 1)).append(s)
+                    code.append(PrintingUtils.align(level)).append(s)
                 }
                 code.append(addComplexityInfo(i))
                 code.append("\n")
@@ -172,25 +168,34 @@ class KotlinCodeVisitor: Visitor<String> {
 
     override fun visit(node: FunctionCall): String {
         val funVal = node.functionInfo
-        val nameAndArgs = "${funVal.name}(${
+        val nameAndArgs = if (node.owner != null) "${funVal.name}(${
             node.children.stream().
                     skip(if (funVal.isConstructor() || funVal.isStatic()) 0 else 1).
                     map { it?.accept(this) ?: throw IllegalArgumentException("Function argument can't be null") }.
                     collect(Collectors.joining(", "))
         })"
+        else "${funVal.name}(${
+                node.children.stream().
+                map { it?.accept(this) ?: throw IllegalArgumentException("Function argument can't be null") }.
+                collect(Collectors.joining(", "))
+        })"
+
+
         var prefix = ""
-        if (funVal.isStatic()) {
-            if (node.owner == funVal.owner) {
-                prefix = "${funVal.owner!!.getName()}."
-            }
-        } else {
-            val obj = node.getChild(0)
-            val objectString = obj.accept(this)
-            if (objectString != "this") {
-                if (obj is VariableBase || obj is FunctionCall || obj is Literal) {
-                    prefix = "$objectString."
-                } else {
-                    prefix = "($objectString)."
+        if (funVal.owner != null) {
+            if (funVal.isStatic()) {
+                if (node.owner == funVal.owner) {
+                    prefix = "${funVal.owner!!.getName()}."
+                }
+            } else {
+                val obj = node.getChild(0)
+                val objectString = obj.accept(this)
+                if (objectString != "this") {
+                    if (obj is VariableBase || obj is FunctionCall || obj is Literal) {
+                        prefix = "$objectString."
+                    } else {
+                        prefix = "($objectString)."
+                    }
                 }
             }
         }
@@ -237,8 +242,8 @@ class KotlinCodeVisitor: Visitor<String> {
                 append(functionInfo.type.accept(this)).
                 append(" {\n").
                 append(body.accept(this)).
-                append(if (ret !is NothingNode) PrintingUtils.align(node.level + 2) + ret.accept(this) + "\n" else "").
-                append(PrintingUtils.align(node.level + 1)).
+                append(if (ret !is NothingNode) PrintingUtils.align(node.level + 1) + ret.accept(this) + "\n" else "").
+                append(PrintingUtils.align(node.level)).
                 append("}\n").toString()
     }
 
@@ -261,7 +266,7 @@ class KotlinCodeVisitor: Visitor<String> {
 
         var elseBlock: String? = null
         if (node.getChild(If.IfPart.ELSE.ordinal) !is NothingNode) {
-            elseBlock = PrintingUtils.align(node.level) + "{\n" +
+            elseBlock = "{\n" +
                     (node.getChild(If.IfPart.ELSE.ordinal).accept(this)) +
                     PrintingUtils.align(node.level) + "}"
         }
@@ -279,9 +284,9 @@ class KotlinCodeVisitor: Visitor<String> {
                 ": " +
                 vi.type.accept(this) +
                 " = " +
-                (if (vi.type.isBuiltIn() && vi.type != init.getResultType()) "(" else "") +
+                (if (vi.type.isBuiltIn() && vi.type != TypeList.BOOLEAN) "(" else "") +
                 (init.accept(this)) +
-                (if (vi.type.isBuiltIn() && vi.type != init.getResultType()) ").to${vi.type}()" else "")
+                (if (vi.type.isBuiltIn() && vi.type != TypeList.BOOLEAN) ").to${vi.type}()" else "")
     }
 
     override fun visit(node: Literal): String {
@@ -289,11 +294,11 @@ class KotlinCodeVisitor: Visitor<String> {
         val value = node.value
         return when (resType) {
             TypeList.LONG -> value.toString() + "L"
-            TypeList.FLOAT -> value.toString()
+            TypeList.FLOAT -> value.toString() + "F"
             TypeList.DOUBLE -> value.toString()
             TypeList.CHAR -> if (value as Char == '\\') "\'\\\\\'" else "\'$value\'"
-            TypeList.SHORT -> "$value.toShort()"
-            TypeList.BYTE ->"$value.toByte()"
+            TypeList.SHORT -> "($value).toShort()"
+            TypeList.BYTE ->"($value).toByte()"
             TypeList.STRING -> "\"${value.toString().replace("\n", "\\n")}\""
             else -> value.toString()
         }

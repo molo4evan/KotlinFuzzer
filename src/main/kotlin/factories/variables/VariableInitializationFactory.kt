@@ -42,7 +42,7 @@ internal class VariableInitializationFactory(
         val rule = Rule<IRNode>("initializer")
         rule.add("literal_initializer", b.getLiteralFactory())
         if (ProductionParams.disableExprInInit?.value()?.not() ?: throw NotInitializedOptionException("disableExprInInit")) {
-            rule.add("expression", b.getLimitedExpressionFactory())
+            rule.add("expression", b.setResultType(resultType).getLimitedExpressionFactory())
         }
         var thisSymbol: Symbol? = null
         if (isStatic) {

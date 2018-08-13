@@ -34,6 +34,7 @@ internal class VariableFactory(
                 .setOperatorLimit(operatorLimit)
                 .setOwnerClass(ownerClass)
                 .setExceptionSafe(exceptionSafe)
+                .setNoConsts(noconsts)
         //rule.add("non_static_member_variable", b.getNonStaticMemberVariableFactory())     //TODO: uncomment
         //rule.add("static_member_variable", b.getStaticMemberVariableFactory())
         rule.add("local_variable", b.getLocalVariableFactory())

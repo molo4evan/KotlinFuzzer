@@ -41,27 +41,32 @@ class FunctionDefinitionBlockFactory(
 
                 if (ownerClass != null) {
                     if (PseudoRandom.randomBoolean()) {
-                        flags = flags or Symbol.STATIC      //TODO: mp do another thing???
+                        flags = flags or Symbol.STATIC
                     }
                     if (PseudoRandom.randomBoolean() &&
                             ProductionParams.disableFinalMethods?.value()?.not()
                             ?: throw NotInitializedOptionException("disableFinalMethods")) {
                         flags = flags or FunctionInfo.FINAL
                     }
+                    if (PseudoRandom.randomBoolean()) {
+                        flags = flags or FunctionInfo.SYNCHRONIZED
+                    }
+                } else {
+                    flags = flags or FunctionInfo.FINAL
                 }
 
                 if (PseudoRandom.randomBoolean()) {
                     flags = flags or FunctionInfo.NONRECURSIVE
                 }
-                if (PseudoRandom.randomBoolean()) {
-                    flags = flags or FunctionInfo.SYNCHRONIZED
-                }
 
-                when ((PseudoRandom.random() * 4).toInt()) {
-                    0 -> flags = if (flags and FunctionInfo.FINAL != 0) flags or Symbol.PRIVATE else flags or Symbol.PUBLIC
-                    1 -> flags = if (ownerClass != null) flags or Symbol.PROTECTED else flags or Symbol.PUBLIC
-                    2 -> flags = flags or Symbol.INTERNAL
-                    3 -> flags = flags or Symbol.PUBLIC
+                if (ownerClass == null) flags = flags or Symbol.PUBLIC
+                else {
+                    when ((PseudoRandom.random() * 4).toInt()) {
+                        0 -> flags = if (flags and FunctionInfo.FINAL != 0) flags or Symbol.PRIVATE else flags or Symbol.PUBLIC
+                        1 -> flags = flags or Symbol.PROTECTED
+                        2 -> flags = flags or Symbol.INTERNAL
+                        3 -> flags = flags or Symbol.PUBLIC
+                    }
                 }
 
                 var thisSymbol: Symbol? = null

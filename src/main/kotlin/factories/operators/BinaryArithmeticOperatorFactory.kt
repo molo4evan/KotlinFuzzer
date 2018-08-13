@@ -19,7 +19,6 @@ internal class BinaryArithmeticOperatorFactory(opKind: OperatorKind, complexityL
             PseudoRandom.randomElement(castableFromResultType)
         else
             resultType
-        //TODO: is there sense to swap them randomly as it was done in original code?
         return if (PseudoRandom.randomBoolean()) Pair(leftType, rightType) else Pair(rightType, leftType)
     }
 }

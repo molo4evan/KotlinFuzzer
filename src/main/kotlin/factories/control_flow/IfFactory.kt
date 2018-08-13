@@ -48,7 +48,7 @@ class IfFactory(
             if (ifBlockLimit > 0 && ifBlockComplLimit > 0) {
                 val thenBlock: Block
                 builder.setResultType(returnType)
-                        .setLevel(level)
+                        .setLevel(level + 1)
                         .setComplexityLimit(ifBlockComplLimit)
                         .setStatementLimit(ifBlockLimit)
                 if (controlDeviation == If.IfPart.THEN) {

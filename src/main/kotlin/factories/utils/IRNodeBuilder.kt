@@ -102,15 +102,15 @@ class IRNodeBuilder() {                                                  //TODO:
             ASSIGN -> return AssignmentOperatorImplFactory(getComplexityLimit(), getOperatorLimit(),
                     getOwnerClass(), resultType.orElse(TypeNothing()), getExceptionSafe(), getNoConsts())
             AND, OR -> return BinaryLogicOperatorFactory(o, getComplexityLimit(), getOperatorLimit(),
-                    getOwnerClass(), resultType.orElse(null), getExceptionSafe(), getNoConsts())
+                    getOwnerClass(), getExceptionSafe(), getNoConsts())
             BIT_OR, BIT_XOR, BIT_AND -> return BinaryBitwiseOperatorFactory(o, getComplexityLimit(), getOperatorLimit(),
                     getOwnerClass(), resultType.orElse(null), getExceptionSafe(), getNoConsts())
 
             EQ, NE -> return BinaryEqualityOperatorFactory(o, getComplexityLimit(),
-                    getOperatorLimit(), getOwnerClass(), resultType.orElse(null), getExceptionSafe(),
+                    getOperatorLimit(), getOwnerClass(), getExceptionSafe(),
                     getNoConsts())
             GT, LT, GE, LE -> return BinaryComparsionOperatorFactory(o, getComplexityLimit(),
-                    getOperatorLimit(), getOwnerClass(), resultType.orElse(null), getExceptionSafe(),
+                    getOperatorLimit(), getOwnerClass(), getExceptionSafe(),
                     getNoConsts())
             SHR, SHL, USHR -> return BinaryShiftOperatorFactory(o, getComplexityLimit(), getOperatorLimit(),
                     getOwnerClass(), resultType.orElse(null), getExceptionSafe(), getNoConsts())
@@ -130,7 +130,7 @@ class IRNodeBuilder() {                                                  //TODO:
         val o = getOperatorKind()
         return when (o) {
             NOT -> LogicalInversionOperatorFactory(getComplexityLimit(),
-                    getOperatorLimit(), getOwnerClass(), resultType.orElse(null), getExceptionSafe(),
+                    getOperatorLimit(), getOwnerClass(), getExceptionSafe(),
                     getNoConsts(), getNoAssignments())
             UNARY_PLUS, UNARY_MINUS -> UnaryPlusMinusOperatorFactory(o, getComplexityLimit(),
                     getOperatorLimit(), getOwnerClass(), resultType.orElse(null), getExceptionSafe(),
@@ -263,12 +263,12 @@ class IRNodeBuilder() {                                                  //TODO:
     }
 
     fun getFunctionDefinitionFactory(): Factory<FunctionDefinition> {
-        return FunctionDefinitionFactory(getName(), getOwnerClass(), resultType.orElse(TypeList.UNIT),
+        return FunctionDefinitionFactory(getName(), getOwnerClass(), resultType.orElse(null),
                 getComplexityLimit(), getStatementLimit(), getOperatorLimit(),
                 getMemberFunctionsArgLimit(), getLevel(), getFlags())
     }
 
-    fun getFunctionFactory(): Factory<FunctionCall> {   //used in rules
+    fun getFunctionCallFactory(): Factory<FunctionCall> {   //used in rules
         return FunctionCallFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
                 resultType.orElse(null), getExceptionSafe())
     }
@@ -309,8 +309,7 @@ class IRNodeBuilder() {                                                  //TODO:
     }
 
     fun getLogicOperatorFactory(): Factory<Operator> {
-        return LogicOperatorFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
-                getResultType(), getExceptionSafe(), getNoConsts())
+        return LogicOperatorFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(), getExceptionSafe(), getNoConsts())
     }
 
 //    fun getLoopingConditionFactory(_limiter: Literal): Factory<LoopingCondition> {

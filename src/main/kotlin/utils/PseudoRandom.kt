@@ -21,6 +21,7 @@ object PseudoRandom {
     fun reset(seed: String?){
         val newSeed = if (seed == null || seed.isEmpty()) System.currentTimeMillis().toString()
         else seed
+        println("Current seed: $newSeed")
         random = Random(newSeed.hashCode().toLong())
     }
 

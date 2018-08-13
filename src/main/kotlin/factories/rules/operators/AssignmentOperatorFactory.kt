@@ -25,6 +25,7 @@ class AssignmentOperatorFactory(
                 setComplexityLimit(complexityLimit).
                 setOperatorLimit(operatorLimit).
                 setOwnerClass(ownerClass).
+                setResultType(resultType).
                 setExceptionSafe(exceptionSafe).
                 setNoConsts(noconsts)
 

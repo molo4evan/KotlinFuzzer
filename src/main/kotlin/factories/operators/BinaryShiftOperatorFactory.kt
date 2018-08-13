@@ -16,15 +16,7 @@ internal class BinaryShiftOperatorFactory(
         noconsts: Boolean
 ) : BinaryOperatorFactory(opKind, complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts) {
 
-    override fun isApplicable(resultType: Type): Boolean {
-        return resultType.equals(TypeList.INT) || resultType.equals(TypeList.LONG)
-    }
+    override fun isApplicable(resultType: Type) = resultType == TypeList.INT || resultType == TypeList.LONG
 
-    override fun generateTypes(): Pair<Type, Type> {
-        val leftType = if (resultType == TypeList.INT){
-            PseudoRandom.randomElement(TypeUtil.getImplicitlyCastable(TypeList.getBuiltInInt(), resultType))
-        } else resultType
-        val rightType = PseudoRandom.randomElement(TypeUtil.getImplicitlyCastable(TypeList.getBuiltInInt(), TypeList.LONG))
-        return Pair(leftType, rightType)
-    }
+    override fun generateTypes() = Pair(resultType, TypeList.INT)
 }

@@ -11,7 +11,7 @@ import ir.functions.Return
 import ir.types.Type
 import utils.PseudoRandom
 
-class FunctionDefinitionFactory (
+class FunctionDefinitionFactory (               //TODO: add result types
         private val name: String,
         private val ownerClass: Type?,
         private val resultType: Type?,
@@ -26,7 +26,6 @@ class FunctionDefinitionFactory (
         var resType = resultType
         if (resType == null) {
             val types = TypeList.getAllForFunctions()
-            types.add(TypeList.UNIT)
             resType = PseudoRandom.randomElement(types)
         }
 
@@ -36,7 +35,7 @@ class FunctionDefinitionFactory (
         if ((flags and Symbol.STATIC) != 0 && ownerClass != null) {
             argInfo.add(VariableInfo("this", ownerClass, ownerClass, VariableInfo.CONST or VariableInfo.LOCAL or VariableInfo.INITIALIZED))
         }
-        var body: IRNode? = null
+        val body: IRNode
         var returnNode: Return? = null
         var functionInfo: FunctionInfo
 
@@ -47,7 +46,9 @@ class FunctionDefinitionFactory (
             while (i < argNumber){
                 val d = builder.setVariableNumber(i).getArgumentDeclarationFactory().produce()
                 argDecl.add(d)
-                argInfo.add(d.variableInfo)
+                val info = d.variableInfo
+                info.setConst()
+                argInfo.add(info)
                 i++
             }
 
@@ -73,7 +74,7 @@ class FunctionDefinitionFactory (
                     setComplexityLimit(blockCompLimit).
                     setStatementLimit(statementLimit).
                     setOperatorLimit(operatorLimit).
-                    setLevel(level).
+                    setLevel(level + 1).
                     setSubBlock(true).
                     setCanHaveBreaks(false).
                     setCanHaveContinues(false).
@@ -91,7 +92,7 @@ class FunctionDefinitionFactory (
         } finally {
             SymbolTable.pop()
         }
-        functionInfo = FunctionInfo(name, ownerClass, resType, if (body == null) 0 else body.complexity(), flags, argInfo)
+        functionInfo = FunctionInfo(name, ownerClass, resType, body.complexity(), flags, argInfo)
         // If it's all ok, add the function to the symbol table.
         SymbolTable.add(functionInfo)
         return FunctionDefinition(functionInfo, argDecl, body ?: NothingNode(), returnNode)

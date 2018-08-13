@@ -15,16 +15,15 @@ class BinaryLogicOperatorFactory(
         complexityLimit: Long,
         operatorLimit: Int,
         ownerClass: Type?,
-        resultType: Type,
         exceptionSafe: Boolean,
         noconsts: Boolean
-): BinaryOperatorFactory(opKind, complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts) {
+): BinaryOperatorFactory(opKind, complexityLimit, operatorLimit, ownerClass, TypeList.BOOLEAN, exceptionSafe, noconsts) {
 
     override fun isApplicable(resultType: Type) = resultType == TypeList.BOOLEAN
 
-    override fun generateTypes() = Pair(resultType, resultType)
+    override fun generateTypes() = Pair(TypeList.BOOLEAN, TypeList.BOOLEAN)
 
-    override fun generateProduction(leftType: Type, rightType: Type): BinaryOperator {
+    override fun generateProduction(t1: Type, t2: Type): BinaryOperator {
         val leftOpLimit = (PseudoRandom.random() * (operatorLimit - 1)).toInt()
         val rightOpLimit = operatorLimit - 1 - leftOpLimit
         val leftComplLimit = (PseudoRandom.random() * (complexityLimit - 1)).toLong()
@@ -39,7 +38,7 @@ class BinaryLogicOperatorFactory(
 
         val leftOperand = builder.setComplexityLimit(leftComplLimit)
                 .setOperatorLimit(leftOpLimit)
-                .setResultType(leftType)
+                .setResultType(TypeList.BOOLEAN)
                 .setNoConsts(swap && noconsts)
                 .getExpressionFactory()
                 .produce()
@@ -49,7 +48,7 @@ class BinaryLogicOperatorFactory(
         try {
             rightOperand = builder.setComplexityLimit(rightComplLimit)
                     .setOperatorLimit(rightOpLimit)
-                    .setResultType(rightType)
+                    .setResultType(TypeList.BOOLEAN)
                     .setNoConsts(!swap && noconsts)
                     .getExpressionFactory()
                     .produce()

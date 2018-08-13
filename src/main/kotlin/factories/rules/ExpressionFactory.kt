@@ -4,9 +4,11 @@ import factories.SafeFactory
 import factories.rules.operators.BitwiseOperatorFactory
 import factories.utils.IRNodeBuilder
 import factories.utils.ProductionLimiter
+import information.TypeList
 import ir.IRNode
 import ir.operators.OperatorKind
 import ir.types.Type
+import ir.types.TypeLong
 import utils.ProductionParams
 
 open class ExpressionFactory(
@@ -33,15 +35,16 @@ open class ExpressionFactory(
             rule.add("literal", builder.getLiteralFactory())
             rule.add("constant", builder.setIsConstant(true).setIsInitialized(true)/*.setVariableType(resultType)*/.getVariableFactory())
         }
-        rule.add("variable", builder.setIsConstant(false).setIsInitialized(true).getVariableFactory(), 15.0) //TODO: add options
+        rule.add("variable", builder.setIsConstant(false).setIsInitialized(true).getVariableFactory()) //TODO: add options
         if (operatorLimit > 0 && complexityLimit > 0){
             //rule.add("cast", builder.getCastOperatorFactory(), 0.1)                   //TODO: uncomment
-            rule.add("arithmetic", builder.getArithmeticOperatorFactory())
-            rule.add("logic", builder.getLogicOperatorFactory())
-            rule.add("bitwise", BitwiseOperatorFactory(complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts))
-            if (!noAssignments) rule.add("assignment", builder.getAssignmentOperatorFactory())
-            rule.add("function", builder.getFunctionFactory(), ProductionParams.functionCallsPercent?.value() ?: 3.0)
-            rule.add("str_plus", builder.setOperatorKind(OperatorKind.STRADD).getBinaryOperatorFactory())
+            if (resultType != TypeList.BOOLEAN) rule.add("arithmetic", builder.getArithmeticOperatorFactory())
+            if (resultType == TypeList.BOOLEAN) rule.add("logic", builder.getLogicOperatorFactory())
+            if (resultType != TypeList.BOOLEAN) rule.add("bitwise", BitwiseOperatorFactory(complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts))
+            //if (!noAssignments && resultType != TypeList.BOOLEAN) rule.add("assignment", builder.getAssignmentOperatorFactory())      // assignment isn't expression (?)
+            if (resultType != TypeList.BOOLEAN) rule.add("str_plus", builder.setOperatorKind(OperatorKind.STRADD).getBinaryOperatorFactory())
+            rule.add("function", builder.getFunctionCallFactory(), ProductionParams.functionCallsPercent?.value() ?: 0.1)
+
         }
 //        if (!ProductionParams.disableArrays.value() && !exceptionSafe) {          //TODO: uncomment
 //            //rule.add("array_creation", builder.getArrayCreationFactory());

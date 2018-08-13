@@ -12,7 +12,6 @@ class LogicOperatorFactory(
         complexityLimit: Long,
         operatorLimit: Int,
         ownerClass: Type?,
-        resultType: Type,
         exceptionSafe: Boolean,
         noconsts: Boolean
 ) : Factory<Operator>() {
@@ -23,10 +22,9 @@ class LogicOperatorFactory(
                 .setComplexityLimit(complexityLimit)
                 .setOperatorLimit(operatorLimit)
                 .setOwnerClass(ownerClass)
-                .setResultType(resultType)
                 .setExceptionSafe(exceptionSafe)
                 .setNoConsts(noconsts)
-        rule = Rule("arithmetic")
+        rule = Rule("logic")
         rule.add("land", builder.setOperatorKind(OperatorKind.AND).getBinaryOperatorFactory())
         rule.add("lor", builder.setOperatorKind(OperatorKind.OR).getBinaryOperatorFactory())
         rule.add("greater", builder.setOperatorKind(OperatorKind.GT).getBinaryOperatorFactory())

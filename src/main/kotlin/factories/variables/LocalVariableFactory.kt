@@ -17,7 +17,7 @@ internal class LocalVariableFactory(private val type: Type, private val flags: I
             PseudoRandom.shuffle(allVariables)
             for (symbol in allVariables) {
                 val varInfo = symbol as VariableInfo
-                if (varInfo.flags and VariableInfo.CONST == flags and VariableInfo.CONST                        //TODO: what should i do?!
+                if (varInfo.flags and VariableInfo.CONST == flags and VariableInfo.CONST
                         && varInfo.flags and VariableInfo.INITIALIZED == flags and VariableInfo.INITIALIZED
                         && varInfo.flags and VariableInfo.LOCAL > 0) {
                     return LocalVariable(varInfo)

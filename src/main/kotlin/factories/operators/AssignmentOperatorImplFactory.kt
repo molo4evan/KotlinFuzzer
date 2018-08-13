@@ -34,6 +34,7 @@ class AssignmentOperatorImplFactory(
                 setExceptionSafe(exceptionSafe).
                 setNoConsts(noconsts).
                 setComplexityLimit(leftComplLimit).
+                setOperatorLimit(leftOpLimit).
                 setResultType(leftType).
                 setIsConstant(false)
 

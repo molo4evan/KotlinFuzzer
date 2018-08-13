@@ -11,26 +11,29 @@ import utils.OptionResolver
 import utils.ProductionParams
 import utils.PseudoRandom
 import java.time.LocalTime
+import java.util.*
 import java.util.concurrent.TimeUnit
 
-val MINUTES_TO_WAIT = Integer.getInteger("jdk.test.lib.jittester", 3) //??????
-val MAX_WAIT_TIME = TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT.toLong())
+val MINUTES_TO_WAIT = 3L
+val MAX_WAIT_TIME = TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT)
 
 fun main(args: Array<String>) {
     initializeTestGenerators(args)
     var counter = 0
-    System.out.printf(" %13s | %8s | %8s | %8s |%n", "start time", "count", "generat",
+    System.out.printf(" %13s | %8s | %11s | %8s |%n", "start time", "count", "generating",
             "running")
-    System.out.printf(" %13s | %8s | %8s | %8s |%n", "---", "---", "---", "---")
+    System.out.printf(" %13s | %8s | %11s | %8s |%n", "---", "---", "---", "---")
     val generators = getTestGenerators()
+    val names = mutableListOf<String>()
     do {
         var start = System.currentTimeMillis()
         print("[" + LocalTime.now() + "] |")
         val name = "Test_$counter"
         val irTree = generateIRTreeWithoutOOP(name)
+        names.add(irTree.first.getName())
         System.out.printf(" %8d |", counter)
         val generationTime = System.currentTimeMillis() - start
-        System.out.printf(" %8d |", generationTime)
+        System.out.printf(" %11d |", generationTime)
         start = System.currentTimeMillis()
         val generatorThread = Thread {
             for (generator in generators) {
@@ -54,6 +57,9 @@ fun main(args: Array<String>) {
             }
         }
     } while (counter < ProductionParams.numberOfTests?.value() ?: throw NotInitializedOptionException("numberOfTests"))
+
+    val noErrors = printBadCompilsAndRuns(generators, names)
+    if (noErrors) println("No compilation or running errors on all tests")
 }
 
 fun initializeTestGenerators(args: Array<String>) {
@@ -91,7 +97,7 @@ fun getTestGenerators(): List<TestsGenerator> {
     return result
 }
 
-fun generateIRTreeWithoutOOP(name: String): Pair<IRNode, IRNode> {    //TODO: add top-level function calls from other functions
+fun generateIRTreeWithoutOOP(name: String): Pair<IRNode, IRNode> {
     SymbolTable.removeAll()
     TypeList.removeAll()
 
@@ -107,7 +113,7 @@ fun generateIRTreeWithoutOOP(name: String): Pair<IRNode, IRNode> {    //TODO: ad
                 setComplexityLimit(topFunComplexity).
                 setStatementLimit(ProductionParams.statementLimit?.value() ?: throw NotInitializedOptionException("statementLimit")).
                 setOperatorLimit(ProductionParams.operatorLimit?.value() ?: throw NotInitializedOptionException("operatorLimit")).
-                setLevel(1).
+                setLevel(0).
                 setFlags(Symbol.NONE).
                 getFunctionDefinitionBlockFactory().produce()
     } catch (ex: ProductionFailedException) {
@@ -125,4 +131,33 @@ fun generateIRTreeWithoutOOP(name: String): Pair<IRNode, IRNode> {    //TODO: ad
     }
 
     return Pair(mainFunction, topLevelFunctions)
+}
+
+fun printBadCompilsAndRuns(gens: List<TestsGenerator>, names: List<String>): Boolean {
+    var allCorrect = true
+    for (i in 0 until (ProductionParams.numberOfTests?.value() ?: throw NotInitializedOptionException("numberOfTests"))) {
+        for (gen in gens) {
+            val compliation = gen.generatorDir.resolve(names[i]).resolve("compile").resolve("${names[i]}.exit").toFile()
+            val runtime = gen.generatorDir.resolve(names[i]).resolve("runtime").resolve("${names[i]}.exit").toFile()
+            var comReader: Scanner? = null
+            var runReader: Scanner? = null
+            try {
+                comReader = Scanner(compliation)
+                if (comReader.nextInt() != 0) {
+                    println("$gen: compilation error in ${names[i]} folder")
+                    allCorrect = false
+                }
+
+                runReader = Scanner(runtime)
+                if (runReader.nextInt() != 0) {
+                    println("$gen: program running error in ${names[i]} folder")
+                    allCorrect = false
+                }
+            } finally {
+                comReader?.close()
+                runReader?.close()
+            }
+        }
+    }
+    return allCorrect
 }

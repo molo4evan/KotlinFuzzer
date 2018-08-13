@@ -55,7 +55,6 @@ object ProductionParams {
     var generatorsFactories: Option<String>? = null
     var functionCallsPercent: Option<Double>? = null
 
-    //TODO: ADD INITIALIZATION!!!
     fun register() {
         productionLimit = OptionResolver.addIntOption('l', "production-limit", 100, "Limit on steps in the production of an expression")
         dataMemberLimit = OptionResolver.addIntOption('v', "data-member-limit", 10, "Upper limit on data members")

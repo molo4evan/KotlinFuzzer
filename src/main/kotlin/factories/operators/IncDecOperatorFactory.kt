@@ -29,7 +29,7 @@ internal class IncDecOperatorFactory(
                 .setIsConstant(false)
                 .setIsInitialized(true)
                 .setExceptionSafe(exceptionSafe)
-                .setNoConsts(exceptionSafe)
+                .setNoConsts(noconsts)
                 .getVariableFactory()
                 .produce())
     }

@@ -105,7 +105,8 @@ class FunctionCallFactory(
                                     setExceptionSafe(exceptionSafe).
                                     setNoConsts(noconsts)
                             for (argType in functionInfo.argTypes){
-                                accum.add(builder.setResultType(argType.type).getExpressionFactory().produce())
+                                val ai = builder.setResultType(argType.type).getExpressionFactory().produce()
+                                accum.add(ai)
                             }
                         }
                         return FunctionCall(owner, functionInfo, accum)

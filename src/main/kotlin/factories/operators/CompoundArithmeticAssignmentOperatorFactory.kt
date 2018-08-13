@@ -18,9 +18,9 @@ class CompoundArithmeticAssignmentOperatorFactory(
         noconsts: Boolean
 ): BinaryOperatorFactory(opKind, complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts) {
 
-    override fun isApplicable(resultType: Type) = resultType.isBuiltIn() && resultType !=  TypeList.BOOLEAN
+    override fun isApplicable(resultType: Type) = resultType == TypeList.INT || resultType == TypeList.LONG
 
-    override fun generateTypes() = Pair(resultType, PseudoRandom.randomElement(TypeUtil.getExplicitlyCastable(TypeList.getBuiltIn(), resultType)))
+    override fun generateTypes() = Pair(resultType, resultType)
 
     override fun generateProduction(leftType: Type, rightType: Type): BinaryOperator {
         val leftCompLimit = (PseudoRandom.random() * complexityLimit).toLong()

@@ -4,7 +4,7 @@ import ir.types.Type
 import providers.visitors.Visitor
 import kotlin.math.max
 
-class Block(owner: Type?, returnType: Type, content: List<IRNode>, leve: Long): IRNode(returnType) {
+class Block(owner: Type?, returnType: Type, content: List<IRNode>, level: Long): IRNode(returnType) {
     init {
         this.owner = owner
         addChildren(content)

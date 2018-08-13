@@ -63,6 +63,8 @@ object TypeList {
 
     fun getBuiltIn() = BUILTIN_TYPES
 
+    fun isNumber(t: Type) = BUILTIN_FP_TYPES.contains(t) || BUILTIN_INT_TYPES.contains(t)
+
     fun getBuiltInInt()= BUILTIN_INT_TYPES
 
     fun getBuiltInFP() = BUILTIN_FP_TYPES

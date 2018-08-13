@@ -14,8 +14,8 @@ abstract class BinaryOperatorFactory protected constructor(
         operatorLimit: Int,
         protected val owner: Type?,
         protected  val resultType: Type,
-        exceptionSafe: Boolean,     //TODO: ???
-        noConsts: Boolean           //TODO: ???
+        exceptionSafe: Boolean,
+        noConsts: Boolean
 ): OperatorFactory<BinaryOperator>(opKind.priority, complexitylimit, operatorLimit, exceptionSafe, noConsts) {
     protected abstract fun isApplicable(resultType: Type): Boolean
 

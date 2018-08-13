@@ -23,6 +23,10 @@ class VariableInfo(name: String, owner: Type?, type: Type, flags: Int): Symbol(n
 
     fun isConst() = flags and CONST != 0
 
+    fun setConst() {
+        flags = flags or CONST
+    }
+
     fun isiInitialized() = flags and INITIALIZED != 0
 
     fun initialize(){
