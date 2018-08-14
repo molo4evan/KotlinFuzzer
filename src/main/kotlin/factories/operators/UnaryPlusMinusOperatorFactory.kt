@@ -16,9 +16,8 @@ internal class UnaryPlusMinusOperatorFactory(
         ownerClass: Type?,
         resultType: Type,
         exceptionSafe: Boolean,
-        noconsts: Boolean,
-        noAssignments: Boolean
-) : UnaryOperatorFactory(opKind, complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts, noAssignments) {
+        noconsts: Boolean
+) : UnaryOperatorFactory(opKind, complexityLimit, operatorLimit, ownerClass, resultType, exceptionSafe, noconsts) {
 
     override fun isApplicable(resultType: Type): Boolean {
         if (!resultType.isBuiltIn() || resultType == TypeList.BOOLEAN) {

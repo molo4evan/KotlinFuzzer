@@ -36,7 +36,7 @@ class FunctionDefinitionBlockFactory(
                     setOperatorLimit(operatorLimit).
                     setMemberFunctionsArgLimit(memberFunctionsArgLimit).
                     setLevel(level)
-            for (i in 0 until memFunLimit) {
+            for (i in 0 until memFunLimit) {        //TODO: getNextFunctionNumer() from SymbolTable?
                 var flags = initialFlags
 
                 if (ownerClass != null) {

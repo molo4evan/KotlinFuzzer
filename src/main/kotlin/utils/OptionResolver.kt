@@ -102,6 +102,12 @@ object OptionResolver {
         return option
     }
 
+    fun addDoubleOption(key: Char?, name: String, defaultValue: Double, description: String): Option<Double> {
+        val option = DoubleOption(key, name, defaultValue, description)
+        register(option)
+        return option
+    }
+
     fun addIntOption(name: String, defaultValue: Int, description: String): Option<Int> {
         return addIntOption(null, name, defaultValue, description)
     }
@@ -112,6 +118,10 @@ object OptionResolver {
 
     fun addBooleanOption(name: String, description: String): Option<Boolean> {
         return addBooleanOption(null, name, false, description)
+    }
+
+    fun addDoubleOption(name: String, defaultValue: Double, description: String): Option<Double> {
+        return addDoubleOption(null, name, defaultValue, description)
     }
 
 
@@ -131,6 +141,7 @@ object OptionResolver {
             val defaultValue: T,
             val description: String
     ){
+        fun haveShort() = shortName != null
 
         fun value() = values.getOrDefault(this, defaultValue) as T
 
@@ -190,7 +201,20 @@ object OptionResolver {
 
         override fun parseFromString(arg: String?): Boolean {
             //null and empty value is considered true, as option is flag and value could be absent
-            return "" == arg || "1".equals(arg, ignoreCase = true) || "true".equals(arg, ignoreCase = true)
+            return "" == arg || "true".equals(arg, ignoreCase = true)
+        }
+    }
+
+    private class DoubleOption internal constructor(
+            short: Char?,
+            long: String,
+            default: Double,
+            description: String
+    ): Option<Double>(short, long, default, description) {
+        override fun parseFromString(arg: String?): Double {
+            val d = arg?.toDouble() ?: throw NumberFormatException(arg)
+            if (d < 0.0 || d > 1.0) throw NumberFormatException(arg)
+            return d
         }
     }
 

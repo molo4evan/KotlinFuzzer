@@ -221,7 +221,7 @@ object SymbolTable {
     }
 
     fun push() {
-        // Do deep cloning..    //???
+        // Do deep cloning..
         val prev = SYMBOL_STACK.peek()
         val top = mutableMapOf<Type, MutableList<Symbol>>()
         SYMBOL_STACK.push(top)

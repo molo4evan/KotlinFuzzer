@@ -51,15 +51,15 @@ class IfFactory(
                         .setLevel(level + 1)
                         .setComplexityLimit(ifBlockComplLimit)
                         .setStatementLimit(ifBlockLimit)
-                if (controlDeviation == If.IfPart.THEN) {
-                    thenBlock = builder.setSubBlock(false)
+                thenBlock = if (controlDeviation == If.IfPart.THEN) {
+                    builder.setSubBlock(false)
                             .setCanHaveBreaks(canHaveBreaks)
                             .setCanHaveContinues(canHaveContinues)
                             .setCanHaveReturn(canHaveReturn)
                             .getBlockFactory()
                             .produce()
                 } else {
-                    thenBlock = builder.setSubBlock(false)
+                    builder.setSubBlock(false)
                             .setCanHaveBreaks(false)
                             .setCanHaveContinues(false)
                             .setCanHaveReturn(false)

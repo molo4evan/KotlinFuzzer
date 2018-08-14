@@ -139,8 +139,8 @@ class BlockFactory(
 //        if (ProductionParams.disableFor?.value()?.not() ?: throw Exception("Option disableFor not initialized")) {
 //            rule.add("for", builder.getForFactory())
 //        }
-//        if (ProductionParams.disableWhen?.value()?.not() ?: throw Exception("Option disableWhen not initialized")) {
-//            rule.add("switch", builder.getSwitchFactory(), 0.1)
-//        }
+        if (ProductionParams.disableWhen?.value()?.not() ?: throw Exception("Option disableWhen not initialized")) {
+            rule.add("when", builder.getWhenFactory())
+        }
     }
 }

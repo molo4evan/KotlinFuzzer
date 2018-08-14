@@ -16,7 +16,8 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
         val FINAL = 0x01
         val INTERFACE = 0x02
         val ABSTRACT = 0x04
-        val BUILTIN = 0x04
+        val BUILTIN = 0x08
+        val ENUM = 0x10
     }
 
     lateinit var parentClass: Type
@@ -92,6 +93,8 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
     fun isInterface() = flags and INTERFACE != 0
 
     fun isBuiltIn() = flags and BUILTIN != 0
+
+    fun isEnum() = flags and ENUM != 0
 
     override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
 }

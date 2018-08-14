@@ -83,23 +83,19 @@ class KotlinCodeVisitor: Visitor<String> {
             NOT -> "!"
             PRE_DEC, POST_DEC -> "--"
             PRE_INC, POST_INC -> "++"
-            CAST -> throw IllegalArgumentException("Can't convert cast operator to code this way")
+            CAST, TYPE_CHECK -> throw IllegalArgumentException("Can't convert cast or check operator to code this way")
     }
 
-    private fun expressionToKotlinCode(operator: Operator, part: IRNode, order: Operator.Order): String {
-        var result: String
-        try {
+    private fun expressionToKotlinCode(operator: Operator, part: IRNode, order: Operator.Order) = try {
             if ((order == Operator.Order.LEFT && (part as Operator).priority < operator.priority)
-                || (order == Operator.Order.RIGHT && (part as Operator).priority <= operator.priority)) {
-                result = "(${part.accept(this)})"
+                    || (order == Operator.Order.RIGHT && (part as Operator).priority <= operator.priority)) {
+                "(${part.accept(this)})"
             } else {
-                result = part.accept(this)
+                part.accept(this)
             }
         } catch (ex: Exception) {
-            result = part.accept(this)
+            part.accept(this)
         }
-        return result
-    }
 
     private fun addComplexityInfo(node: IRNode) = if (ProductionParams.printComplexity?.value()
                     ?: throw NotInitializedOptionException("printComplexity"))
@@ -142,8 +138,10 @@ class KotlinCodeVisitor: Visitor<String> {
     override fun visit(node: Break) = "break"
 
     override fun visit(node: CastOperator): String {
-        return expressionToKotlinCode(node, node.getChild(0), Operator.Order.LEFT) +
+        return if (!node.isBuiltIn && node.getResultType() != TypeList.STRING) expressionToKotlinCode(node, node.getChild(0), Operator.Order.RIGHT) +
                 " as ${node.getResultType()?.accept(this) ?: throw IllegalArgumentException("Can't cast to target without a type")}"
+        else "(" + expressionToKotlinCode(node, node.getChild(0), Operator.Order.RIGHT) +
+                ").to${node.getResultType()?.accept(this) ?: throw IllegalArgumentException("Can't cast to target without a type")}()"
     }
 
     override fun visit(node: Continue) = "continue"
@@ -358,7 +356,16 @@ class KotlinCodeVisitor: Visitor<String> {
     }
 
     override fun visit(node: When): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val code = StringBuilder()
+        val expr = node.getChild(0)
+        code.append("when (${expr.accept(this)}) {\n")
+        for (i in 0 until node.caseBlockIndex - 1) {
+            code.append(PrintingUtils.align(node.level + 1)).
+                    append( if (node.getChild(i + 1) !is NothingNode) node.getChild(i + 1).accept(this) else "else").
+                    append(" -> {\n").append(node.getChild(i + node.caseBlockIndex).accept(this)).
+                    append(PrintingUtils.align(node.level + 1)).append("}\n")
+        }
+        return code.append(PrintingUtils.align(node.level)).append("}").toString()
     }
 
     override fun visit(node: While): String {

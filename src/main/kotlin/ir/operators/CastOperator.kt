@@ -4,7 +4,7 @@ import ir.IRNode
 import ir.types.Type
 import providers.visitors.Visitor
 
-class CastOperator(resultType: Type, casted: IRNode): Operator( OperatorKind.CAST, resultType) {
+class CastOperator(resultType: Type, casted: IRNode, val isBuiltIn: Boolean): Operator( OperatorKind.CAST, resultType) {
     init {
         addChild(casted)
     }

@@ -68,7 +68,9 @@ enum class OperatorKind(val priority: Int, val isPrefix: Boolean) {
     /** ++a  */
     PRE_INC(16, true),
     /** a++  */
-    POST_INC(16, false);
+    POST_INC(16, false),
+    /** a is Type */
+    TYPE_CHECK(17);
 
     constructor(priority: Int): this(priority, true)
 

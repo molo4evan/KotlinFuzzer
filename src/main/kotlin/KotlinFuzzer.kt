@@ -18,6 +18,10 @@ val MINUTES_TO_WAIT = 3L
 val MAX_WAIT_TIME = TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT)
 
 fun main(args: Array<String>) {
+    if (!args.isEmpty() && (args[0] == "-h" || args[0] == "--help")){
+        showHelp()
+        return
+    }
     initializeTestGenerators(args)
     var counter = 0
     System.out.printf(" %13s | %8s | %11s | %8s |%n", "start time", "count", "generating",
@@ -160,4 +164,34 @@ fun printBadCompilsAndRuns(gens: List<TestsGenerator>, names: List<String>): Boo
         }
     }
     return allCorrect
+}
+
+fun showHelp(){
+    println("Option formats:")
+    println("-<short name> <expected value>")
+    println("--<long name> <expected value>")
+    println("Example: --dimensions-limit 4\n")
+    println("Also you can add options by its long names to file \"conf/default.properties\" according to pattern <option name>=<option value>\n")
+    println(" <short name> |         <long name>        |     <expected value>    |      <default value>     | <description>")
+    ProductionParams.register()
+    val options = OptionResolver.getRegisteredOptions()
+    for (option in options) {
+        val def = option.defaultValue
+        val expected = when (def) {
+            is Char -> "char symbol"
+            is Int -> "integer number    "
+            is Long -> "long integer     "
+            is Double -> "number from 0.0 to 1.0"
+            is String -> "string        "
+            is Boolean -> "true/false (optionally)"
+            else -> ""
+        }
+        val space_str = StringBuilder()
+        for (i in 0 until (24 - option.defaultValue.toString().length) / 2){
+            space_str.append(" ")
+        }
+        if (option.haveShort()) System.out.printf("           -%c | %-26s | %23s | %24s | %s\n",
+                option.shortName, option.longName, expected, option.defaultValue.toString() + space_str.toString(), option.description)
+        else System.out.printf(" %12s | %-26s | %23s | %24s | %s\n", "", option.longName, expected, option.defaultValue.toString() + space_str.toString(), option.description)
+    }
 }
