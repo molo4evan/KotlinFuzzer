@@ -91,8 +91,23 @@ abstract class TestsGenerator protected constructor(
         }
     }
 
+    fun compilePrinterJVM() {
+        val root = getRoot()
+        val pb = ProcessBuilder(KOTLINC_JVM, "src/main/kotlin/utils/Printer.kt", "-d", generatorDir.toString())
+        try {
+            val exitCode = runProcess(pb, root.resolve("Printer").toString())
+            if (exitCode != 0) {
+                throw Error("Printer compilation returned exit code $exitCode")
+            }
+        } catch (e: IOException) {
+            throw Error("Can't compile printer", e)
+        } catch (e: InterruptedException) {
+            throw Error("Can't compile printer", e)
+        }
+    }
+
     fun runProgramJVM(mainName: String) {
-        val pb = ProcessBuilder(KOTLIN, "-cp", "$classPath/$mainName", "${mainName}Kt")
+        val pb = ProcessBuilder(KOTLIN, "-cp", "$classPath/$mainName:$generatorDir", "${mainName}Kt")
         try {
             ensureExisting(generatorDir.resolve(mainName).resolve("runtime"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve(mainName).toString())

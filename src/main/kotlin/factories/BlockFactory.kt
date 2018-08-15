@@ -84,7 +84,6 @@ class BlockFactory(
                     } else {
                         i++
                     }
-                    //climit -= subBlockComplLimit; // very approximate. to obnain a precise value, change to p.complexity()
                     climit -= choiceResult.complexity()
                     content.add(choiceResult)
                 } catch (e: ProductionFailedException) {
@@ -116,7 +115,7 @@ class BlockFactory(
             } catch (e: ProductionFailedException) {
             }
 
-            if (!subBlock) {
+            if (!subBlock) {        // if !subblock add vars to outer table, else hide upper vars...
                 SymbolTable.pop()
             } else {
                 SymbolTable.merge()

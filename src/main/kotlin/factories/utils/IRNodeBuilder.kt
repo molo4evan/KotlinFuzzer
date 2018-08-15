@@ -299,10 +299,6 @@ class IRNodeBuilder() {                                                  //TODO:
         return LiteralFactory(getResultType())
     }
 
-    fun getNothingFactory(): Factory<NothingNode> {
-        return NothingFactory()
-    }
-
     fun getLocalVariableFactory(): Factory<LocalVariable> {
         return LocalVariableFactory(/*getVariableType()*/getResultType(), getFlags())
     }
@@ -321,13 +317,13 @@ class IRNodeBuilder() {                                                  //TODO:
 //                getOwnerClass(), /*getVariableType()*/getResultType(), getFlags(), getExceptionSafe())
 //    }
 
-//    fun getNothingFactory(): Factory<Nothing> {       //???
-//        return NothingFactory()
-//    }
+    fun getNothingFactory(): Factory<NothingNode> {
+        return NothingFactory()
+    }
 
-//    fun getPrintVariablesFactory(): Factory<PrintVariables> {
-//        return PrintVariablesFactory(getOwnerClass(), getLevel())
-//    }
+    fun getPrintVariablesFactory(): Factory<PrintVariables> {
+        return PrintVariablesFactory(getOwnerClass(), getLevel())
+    }
 
     fun getReturnFactory(): Factory<Return> {
         return ReturnFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),

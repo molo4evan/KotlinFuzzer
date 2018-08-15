@@ -310,15 +310,21 @@ class KotlinCodeVisitor: Visitor<String> {
 
     override fun visit(node: MainFunction): String {
         val body = node.getChild(0)
+        val pv = node.getChild(1)
         return StringBuilder().
                 append("fun main(args: Array<String>) {\n").
                 append(body.accept(this)).
-                append("} ").
                 append(addComplexityInfo(body)).
+                append("\n").
+                append(pv.accept(this)).
+                append("}").
+                append(addComplexityInfo(pv)).
                 append("\n").toString()
     }
 
     override fun visit(node: NothingNode) = ""
+
+    override fun visit(node: PrintVariables) = PrintingUtils.printVariablesAsBlock(node).accept(this)
 
     override fun visit(node: Return) = "return ${node.retExpr.accept(this)}"
 
