@@ -1,8 +1,9 @@
 package providers.tests_generators
 
+import exceptions.UnsuccessfullRunningException
 import ir.IRNode
 import providers.visitors.KotlinCodeVisitor
-import java.io.File
+import utils.ProductionParams
 import java.io.IOException
 
 class KotlinCodeGenerator(
@@ -20,8 +21,15 @@ class KotlinCodeGenerator(
     override fun accept(main: IRNode, other: IRNode?) {
         val mainName = main.getName()
         generateSources(main, other)
-        compileKotlinFile(mainName)
-        generateGoldenOut(mainName)
+        if (ProductionParams.useNative?.value() == true) {
+            compileKotlinFileNative(mainName)
+            runProgramNative(mainName)
+        } else {
+            try {
+                compileKotlinFileJVM(mainName)
+                runProgramJVM(mainName)
+            } catch (ex: UnsuccessfullRunningException) {}
+        }
     }
 
     private fun generateSources(main: IRNode, other: IRNode?){
@@ -37,11 +45,24 @@ class KotlinCodeGenerator(
         writeFile(generatorDir.resolve(mainName), "$mainName.kt", code.toString())
     }
 
-    private fun compileKotlinFile(mainName: String) {
-        val pb = ProcessBuilder(KOTLINC, generatorDir.resolve(mainName).resolve("$mainName.kt").toString(), "-d", generatorDir.resolve(mainName).toString())
+    private fun compileKotlinFileJVM(mainName: String) {
+        val pb = ProcessBuilder(KOTLINC_JVM, generatorDir.resolve(mainName).resolve("$mainName.kt").toString(), "-nowarn", "-d", generatorDir.resolve(mainName).toString())
         try {
             ensureExisting(generatorDir.resolve(mainName).resolve("compile"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve(mainName).toString())
+        } catch (e: IOException) {
+            throw Error("Can't compile sources ", e)
+        } catch (e: InterruptedException) {
+            throw Error("Can't compile sources ", e)
+        }
+    }
+
+    private fun compileKotlinFileNative(mainName: String) {
+        val pb = ProcessBuilder(KOTLINC_NATIVE, generatorDir.resolve(mainName).resolve("$mainName.kt").toString(), "-nowarn", "-o", generatorDir.resolve(mainName).resolve("$mainName.kexe").toString())
+        try {
+            ensureExisting(generatorDir.resolve(mainName).resolve("compile"))
+            val exit = runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve(mainName).toString())
+            if (exit != 0) throw UnsuccessfullRunningException()
         } catch (e: IOException) {
             throw Error("Can't compile sources ", e)
         } catch (e: InterruptedException) {

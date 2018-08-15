@@ -39,7 +39,7 @@ class FunctionCallFactory(
                     continue
                 }
 
-                // We don't call methods from the same class which are not final, because if we
+                // We don't call methods from the same class which are not final, because if we     // deleted NONRECURSIVE, FINAL is exhaustive
                 // do this may produce an infinite recursion. Simple example:
                 // class  A
                 // {
@@ -53,7 +53,7 @@ class FunctionCallFactory(
                 // }
                 //
                 // However the same example is obviously safe for static and final functions
-                // Also we introduce a special flag NONRECURSIVE to mark functions that                 //TODO: i don't think it's needed in Kotlin
+                // Also we introduce a special flag NONRECURSIVE to mark functions that
                 // are not overrided. We may also call such functions.
 
                 // If it's a local call.. or it's a call using some variable to some object of some type in our hierarchy   //whaaaaat???
@@ -61,7 +61,7 @@ class FunctionCallFactory(
                 if (owner != null) {
                     if (owner == functionInfo.owner || classHierarchy != null && classHierarchy.contains(functionInfo.owner)) {
                         inHierarchy = classHierarchy!!.contains(functionInfo.owner)
-                        if (!functionInfo.isFinal() && !functionInfo.isStatic() && !functionInfo.isNonRecursive()) {  //TODO: what happens here?
+                        if (!functionInfo.isFinal() && !functionInfo.isStatic()) {  //TODO: what happens here?
                             continue
                         }
                         if (inHierarchy && functionInfo.isPrivate()) {

@@ -57,6 +57,7 @@ object ProductionParams {
     var functionCallsPercent: Option<Double>? = null
 
     var useNative: Option<Boolean>? = null
+    var nativePath: Option<String>? = null
 
     fun register() {
         memberFunctionsArgLimit = OptionResolver.addIntOption('a', "member-functions-arg-limit", 5, "Upper limit on the number of member function args")
@@ -89,6 +90,7 @@ object ProductionParams {
         // disableFinals = OptionResolver.addBooleanOption("disable-finals", "Don\'t use finals");
         disableFor = OptionResolver.addBooleanOption("disable-for", "Don\'t use for")//
         disableFunctions = OptionResolver.addBooleanOption("disable-functions", "Don\'t use functions")//        disableIf = OptionResolver.addBooleanOption("disable-if", "Don\'t use conditionals")//
+        disableIf = addBooleanOption("disable-if", "Don\'t use if")
         disableInheritance = OptionResolver.addBooleanOption("disable-inheritance", "Disable inheritance")
         disableInterfaces = OptionResolver.addBooleanOption("disable-interfaces", "Disable generation of interfaces")
         disableNestedBlocks = OptionResolver.addBooleanOption("disable-nested-blocks", "Disable generation of nested blocks")
@@ -104,6 +106,7 @@ object ProductionParams {
         generatorsFactories = OptionResolver.addStringOption("generators-factories", "", "Comma-separated list of generators factories fully qualified class names")
         maxCfgDepth = OptionResolver.addIntOption("max-cfg-depth", 3, "A non-negative decimal integer used to restrict the upper bound of depth of control flow graph")
         minCfgDepth = OptionResolver.addIntOption("min-cfg-depth", 2, "A non-negative decimal integer used to restrict the lower bound of depth of control flow graph")
+        nativePath = OptionResolver.addStringOption("native-path", "", "Kotlin/Native home directory (used if \'use-native\' option is \'true\')")
         printComplexity = OptionResolver.addBooleanOption("print-complexity", "Print complexity of each statement")
         printHierarchy = OptionResolver.addBooleanOption("print-hierarchy", "Print resulting class hierarchy")
         seed = OptionResolver.addStringOption("seed", "", "User seed (for the same seed, the same sequence of tests are generated)")

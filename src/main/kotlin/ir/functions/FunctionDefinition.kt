@@ -44,8 +44,7 @@ class FunctionDefinition(
                     if (f1.type != f2.type) {
                         return true
                     }
-                    if (f2.isNonRecursive()
-                            || f1.isAbstract() && !f2.isAbstract()
+                    if (f1.isAbstract() && !f2.isAbstract()
                             || f1.isStatic() != f2.isStatic()
                             || f2.isFinal()
                             || f1.flags and Symbol.ACCESS_ATTRS_MASK < f2.flags and Symbol.ACCESS_ATTRS_MASK) {

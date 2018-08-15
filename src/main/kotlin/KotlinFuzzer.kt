@@ -14,7 +14,7 @@ import java.time.LocalTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-val MINUTES_TO_WAIT = 3L
+const val MINUTES_TO_WAIT = 3L
 val MAX_WAIT_TIME = TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT)
 
 fun main(args: Array<String>) {
@@ -146,16 +146,20 @@ fun printBadCompilsAndRuns(gens: List<TestsGenerator>, names: List<String>): Boo
             var comReader: Scanner? = null
             var runReader: Scanner? = null
             try {
-                comReader = Scanner(compliation)
-                if (comReader.nextInt() != 0) {
-                    println("$gen: compilation error in ${names[i]} folder")
-                    allCorrect = false
+                if (compliation.exists()) {
+                    comReader = Scanner(compliation)
+                    if (comReader.nextInt() != 0) {
+                        println("$gen: compilation error in ${names[i]} folder")
+                        allCorrect = false
+                    }
                 }
 
-                runReader = Scanner(runtime)
-                if (runReader.nextInt() != 0) {
-                    println("$gen: program running error in ${names[i]} folder")
-                    allCorrect = false
+                if (runtime.exists()) {
+                    runReader = Scanner(runtime)
+                    if (runReader.nextInt() != 0) {
+                        println("$gen: program running error in ${names[i]} folder")
+                        allCorrect = false
+                    }
                 }
             } finally {
                 comReader?.close()
@@ -186,12 +190,12 @@ fun showHelp(){
             is Boolean -> "true/false (optionally)"
             else -> ""
         }
-        val space_str = StringBuilder()
+        val spaceStr = StringBuilder()
         for (i in 0 until (24 - option.defaultValue.toString().length) / 2){
-            space_str.append(" ")
+            spaceStr.append(" ")
         }
         if (option.haveShort()) System.out.printf("           -%c | %-26s | %23s | %24s | %s\n",
-                option.shortName, option.longName, expected, option.defaultValue.toString() + space_str.toString(), option.description)
-        else System.out.printf(" %12s | %-26s | %23s | %24s | %s\n", "", option.longName, expected, option.defaultValue.toString() + space_str.toString(), option.description)
+                option.shortName, option.longName, expected, option.defaultValue.toString() + spaceStr.toString(), option.description)
+        else System.out.printf(" %12s | %-26s | %23s | %24s | %s\n", "", option.longName, expected, option.defaultValue.toString() + spaceStr.toString(), option.description)
     }
 }

@@ -165,7 +165,7 @@ object SymbolTable {
         return result
     }
 
-    fun getAllCombined(typeClass: Type, classToCheck: KClass<*>): List<Symbol> {
+    fun getAllCombined(typeClass: Type?, classToCheck: KClass<*>): List<Symbol> {
         val result = mutableListOf<Symbol>()
 
         for (type in SYMBOL_STACK.peek().keys) {

@@ -77,8 +77,6 @@ class FunctionInfo(                         //TODO: change static modifier to co
 
     fun isAbstract() = flags and ABSTRACT != 0
 
-    fun isNonRecursive() = (flags and NONRECURSIVE) != 0
-
     fun isFinal() = (flags and FINAL) != 0
 
 }

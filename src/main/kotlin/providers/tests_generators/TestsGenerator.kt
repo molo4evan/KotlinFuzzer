@@ -30,8 +30,11 @@ abstract class TestsGenerator protected constructor(
 
     companion object {
         private val KOTLIN_BIN = getKotlinHome()
-        val KOTLINC = Paths.get(KOTLIN_BIN, "kotlinc-jvm").toString()
+        val KOTLINC_JVM = Paths.get(KOTLIN_BIN, "kotlinc-jvm").toString()
         val KOTLIN = Paths.get(KOTLIN_BIN, "kotlin").toString()
+        private val KOTLIN_NATIVE_BIN = (ProductionParams.nativePath?.value() ?: throw NotInitializedOptionException("nativePath")) + "/bin/"
+        val KOTLINC_NATIVE = Paths.get(KOTLIN_NATIVE_BIN, "kotlinc-native").toString()
+
 
         fun getRoot() = Paths.get(ProductionParams.testbaseDir?.value() ?: throw NotInitializedOptionException("testbaseDir"))
 
@@ -88,8 +91,20 @@ abstract class TestsGenerator protected constructor(
         }
     }
 
-    fun generateGoldenOut(mainName: String) {
+    fun runProgramJVM(mainName: String) {
         val pb = ProcessBuilder(KOTLIN, "-cp", "$classPath/$mainName", "${mainName}Kt")
+        try {
+            ensureExisting(generatorDir.resolve(mainName).resolve("runtime"))
+            runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve(mainName).toString())
+        } catch (ex: InterruptedException) {
+            throw Error("Can't run generated program ", ex)
+        } catch (ex: IOException) {
+            throw Error("Can't run generated program ", ex)
+        }
+    }
+
+    fun runProgramNative(mainName: String) {
+        val pb = ProcessBuilder(generatorDir.resolve(mainName).resolve("$mainName.kexe").toString())
         try {
             ensureExisting(generatorDir.resolve(mainName).resolve("runtime"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve(mainName).toString())

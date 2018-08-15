@@ -55,10 +55,6 @@ class FunctionDefinitionBlockFactory(
                     flags = flags or FunctionInfo.FINAL
                 }
 
-                if (PseudoRandom.randomBoolean()) {
-                    flags = flags or FunctionInfo.NONRECURSIVE
-                }
-
                 if (ownerClass == null) flags = flags or Symbol.PUBLIC
                 else {
                     when ((PseudoRandom.random() * 4).toInt()) {

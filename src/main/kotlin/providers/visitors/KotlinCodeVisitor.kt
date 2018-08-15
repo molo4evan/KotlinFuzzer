@@ -37,9 +37,9 @@ class KotlinCodeVisitor: Visitor<String> {
         if (s.isInternal()) {
             attrs.append("internal ")
         }
-        if (s is VariableInfo && s.isConst() && !s.isLocal()) {
-            attrs.append("const ")
-        }
+//        if (s is VariableInfo && s.isConst() && !s.isLocal()) {
+//            attrs.append("const ")
+//        }
         if (s is FunctionInfo) {
             if (s.isAbstract()) {
                 attrs.append("abstract ")
