@@ -1,9 +1,11 @@
 package factories.functoins
 
+import exceptions.ProductionFailedException
 import factories.Factory
 import factories.utils.IRNodeBuilder
 import information.*
 import ir.IRNode
+import ir.PrintVariables
 import ir.functions.MainFunction
 import utils.PseudoRandom
 
@@ -15,6 +17,7 @@ class MainFunctionFactory (
 ): Factory<MainFunction>() {
     override fun produce(): MainFunction {
         var body: IRNode? = null
+        var printVars: PrintVariables? = null
 
         SymbolTable.push()
         try {
@@ -31,9 +34,11 @@ class MainFunctionFactory (
                     setCanHaveContinues(false).
                     setCanHaveReturn(true).
                     getBlockFactory().produce()
+            printVars = builder.getPrintVariablesFactory().produce()
         } finally {
             SymbolTable.pop()
         }
-        return MainFunction(name, body)
+
+        return MainFunction(name, body, printVars ?: throw ProductionFailedException())
     }
 }

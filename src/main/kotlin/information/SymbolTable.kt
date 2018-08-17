@@ -7,7 +7,7 @@ import java.util.stream.Collectors
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 
-object SymbolTable {
+object SymbolTable {                                                            //TODO: can't see all local vars, fix
     private val SYMBOL_STACK = Stack<MutableMap<Type, MutableList<Symbol>>>()
     private var VARIABLE_AMOUNT = 0
     private var FUNCTION_AMOUNT = 0

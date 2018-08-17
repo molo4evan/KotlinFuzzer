@@ -52,7 +52,7 @@ interface Visitor<T> {
 ////    fun visit(node: MainKlass): T   //TODO: delete?
 ////    fun visit(node: NonStaticMemberVariable): T
     fun visit(node: NothingNode): T
-//    fun visit(node: PrintVariables): T    //TODO: delete?
+    fun visit(node: PrintVariables): T
     fun visit(node: Return): T
 //    fun visit(node: Throw): T
     fun visit(node: Statement): T

@@ -26,6 +26,7 @@ class KotlinCodeGenerator(
             runProgramNative(mainName)
         } else {
             try {
+                compilePrinterJVM()                         //TODO: move it out of cycle
                 compileKotlinFileJVM(mainName)
                 runProgramJVM(mainName)
             } catch (ex: UnsuccessfullRunningException) {}
@@ -46,7 +47,13 @@ class KotlinCodeGenerator(
     }
 
     private fun compileKotlinFileJVM(mainName: String) {
-        val pb = ProcessBuilder(KOTLINC_JVM, generatorDir.resolve(mainName).resolve("$mainName.kt").toString(), "-nowarn", "-d", generatorDir.resolve(mainName).toString())
+        val pb = ProcessBuilder(
+                KOTLINC_JVM,
+                generatorDir.resolve(mainName).resolve("$mainName.kt").toString(),
+                "-nowarn",
+                "-d", generatorDir.resolve(mainName).toString(),
+                "-cp", generatorDir.toString()
+        )
         try {
             ensureExisting(generatorDir.resolve(mainName).resolve("compile"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve(mainName).toString())
