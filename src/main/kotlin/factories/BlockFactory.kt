@@ -61,7 +61,7 @@ class BlockFactory(
                     rule.add("decl", builder.setIsLocal(true).getDeclarationFactory())
                 }
                 if (subLimit > 0) {
-                    builder.setStatementLimit(subLimit).setLevel(level)
+                    builder.setStatementLimit(subLimit).setLevel(level + 1)
                     if (ProductionParams.disableNestedBlocks?.value()?.not() ?: throw Exception("Option disableNestedBlocks not initialized")) {
                         rule.add("block", builder.setCanHaveReturn(false)
                                 .setCanHaveThrow(false)

@@ -18,7 +18,7 @@ object PrintingUtils {
     fun align(l: Long): String {    //adding tabulation
         val shift = StringBuilder()
         for (i in 0 until l) {
-            shift.append("\t")
+            shift.append("    ")
         }
         return shift.toString()
     }
@@ -35,7 +35,7 @@ object PrintingUtils {
 
         val printerClass = Type(Printer.javaClass.name)
 
-        var thisInfo: VariableInfo? = null
+        val thisInfo: VariableInfo
         var thisVar: LocalVariable? = null
         if (owner != null) {
             thisInfo = VariableInfo("this", owner, owner, VariableInfo.LOCAL or VariableInfo.INITIALIZED)

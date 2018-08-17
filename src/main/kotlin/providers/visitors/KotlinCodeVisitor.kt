@@ -124,12 +124,15 @@ class KotlinCodeVisitor: Visitor<String> {
             if (!s.isEmpty()) {
                 val level = node.level
                 if (i is Block) {
-                    code.append(s)
+                    code.append(PrintingUtils.align(level))
+                            .append("run {\n")
+                            .append(s)
+                            .append(PrintingUtils.align(level))
+                            .append("}\n")
                 } else {
                     code.append(PrintingUtils.align(level)).append(s)
                 }
-                code.append(addComplexityInfo(i))
-                code.append("\n")
+                code.append(addComplexityInfo(i)).append("\n")
             }
         }
         return code.toString()
@@ -183,7 +186,7 @@ class KotlinCodeVisitor: Visitor<String> {
         if (funVal.owner != null) {
             if (funVal.isStatic()) {
                 if (node.owner == funVal.owner) {
-                    prefix = "${funVal.owner!!.getName()}."
+                    prefix = "${funVal.owner.getName()}."
                 }
             } else {
                 val obj = node.getChild(0)
@@ -258,19 +261,17 @@ class KotlinCodeVisitor: Visitor<String> {
     }
 
     override fun visit(node: If): String {
-        val thenBlock = PrintingUtils.align(node.level) + "{\n" +
-                node.getChild(If.IfPart.THEN.ordinal).accept(this) +
-                PrintingUtils.align(node.level) + "}"
+        val thenBlock = node.getChild(If.IfPart.THEN.ordinal).accept(this) +
+                PrintingUtils.align(node.level - 1) + "}"
 
         var elseBlock: String? = null
         if (node.getChild(If.IfPart.ELSE.ordinal) !is NothingNode) {
-            elseBlock = "{\n" +
-                    (node.getChild(If.IfPart.ELSE.ordinal).accept(this)) +
-                    PrintingUtils.align(node.level) + "}"
+            elseBlock = (node.getChild(If.IfPart.ELSE.ordinal).accept(this)) +
+                    PrintingUtils.align(node.level - 1) + "}\n"
         }
 
-        return "if (" + node.getChild(If.IfPart.CONDITION.ordinal).accept(this) + ")\n" + thenBlock +
-                (if (elseBlock != null) "\n" + PrintingUtils.align(node.level) + "else " + elseBlock else "")
+        return "if (" + node.getChild(If.IfPart.CONDITION.ordinal).accept(this) + ") {\n" + thenBlock +
+                (if (elseBlock != null) "\n" + PrintingUtils.align(node.level - 1) + "else {\n" + elseBlock else "")
     }
 
     override fun visit(node: Initialization): String {      //TODO: what should i do with val/var?
@@ -366,12 +367,12 @@ class KotlinCodeVisitor: Visitor<String> {
         val expr = node.getChild(0)
         code.append("when (${expr.accept(this)}) {\n")
         for (i in 0 until node.caseBlockIndex - 1) {
-            code.append(PrintingUtils.align(node.level + 1)).
+            code.append(PrintingUtils.align(node.level)).
                     append( if (node.getChild(i + 1) !is NothingNode) node.getChild(i + 1).accept(this) else "else").
                     append(" -> {\n").append(node.getChild(i + node.caseBlockIndex).accept(this)).
-                    append(PrintingUtils.align(node.level + 1)).append("}\n")
+                    append(PrintingUtils.align(node.level)).append("}\n")
         }
-        return code.append(PrintingUtils.align(node.level)).append("}").toString()
+        return code.append(PrintingUtils.align(node.level - 1)).append("}\n").toString()
     }
 
     override fun visit(node: While): String {

@@ -55,7 +55,7 @@ class WhenFactory(
                     }
 
                     var currentCompLimit = (PseudoRandom.random() * (complexityLimit - accumulatedComplexity)).toLong()
-                    var currentStatLimit = 0
+                    var currentStatLimit: Int
 
                     val whenExpr = builder.
                             setComplexityLimit(currentCompLimit).
@@ -82,7 +82,7 @@ class WhenFactory(
                         rule.add("block", builder.
                                 setComplexityLimit(currentCompLimit).
                                 setStatementLimit(currentStatLimit).
-                                setLevel(level + 2).
+                                setLevel(level + 1).
                                 getBlockFactory())
                         rule.add("nothing", builder.getNothingFactory(), 0.3)    // mb decrease percentage of empty case blocks?
                         val chosenResult = rule.produce()
@@ -100,7 +100,7 @@ class WhenFactory(
                         caseConds.add(NothingNode())
                         caseBlocks.add(builder.
                                 setComplexityLimit(elseCompLimit).
-                                setLevel(level + 2).
+                                setLevel(level + 1).
                                 setStatementLimit(elseStatLimit).
                                 getBlockFactory().produce())
                     }
