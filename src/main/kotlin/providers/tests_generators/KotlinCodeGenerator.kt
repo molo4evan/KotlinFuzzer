@@ -10,7 +10,7 @@ class KotlinCodeGenerator(
         prefix: String,
         preRunActions: (String) -> Array<String>,
         jtDriverOptions: String
-): TestsGenerator(prefix, preRunActions, jtDriverOptions) {
+): TestGenerator(prefix, preRunActions, jtDriverOptions) {
     constructor(): this(DEFAULT_SUFFIX, {arrayOf("@compile $it.kt")}, "")  //???  TODO: figure out how prerun works
 
 
@@ -21,15 +21,21 @@ class KotlinCodeGenerator(
     override fun accept(main: IRNode, other: IRNode?) {
         val mainName = main.getName()
         generateSources(main, other)
-        if (ProductionParams.useNative?.value() == true) {
+        if (ProductionParams.joinTest?.value() == true) {
             compileKotlinFileNative(mainName)
             runProgramNative(mainName)
+            compileKotlinFileJVM(mainName)
+            runProgramJVM(mainName)
         } else {
-            try {
-                compilePrinterJVM()                         //TODO: move it out of cycle
-                compileKotlinFileJVM(mainName)
-                runProgramJVM(mainName)
-            } catch (ex: UnsuccessfullRunningException) {}
+            if (ProductionParams.useNative?.value() == true) {
+                compileKotlinFileNative(mainName)
+                runProgramNative(mainName)
+            } else {
+                try {
+                    compileKotlinFileJVM(mainName)
+                    runProgramJVM(mainName)
+                } catch (ex: UnsuccessfullRunningException) {}
+            }
         }
     }
 
@@ -55,8 +61,8 @@ class KotlinCodeGenerator(
                 "-cp", generatorDir.toString()
         )
         try {
-            ensureExisting(generatorDir.resolve(mainName).resolve("compile"))
-            runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve(mainName).toString())
+            ensureExisting(generatorDir.resolve(mainName).resolve("compile").resolve("jvm"))
+            runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve("jvm").resolve(mainName).toString())
         } catch (e: IOException) {
             throw Error("Can't compile sources ", e)
         } catch (e: InterruptedException) {
@@ -65,11 +71,19 @@ class KotlinCodeGenerator(
     }
 
     private fun compileKotlinFileNative(mainName: String) {
-        val pb = ProcessBuilder(KOTLINC_NATIVE, generatorDir.resolve(mainName).resolve("$mainName.kt").toString(), "-nowarn", "-o", generatorDir.resolve(mainName).resolve("$mainName.kexe").toString())
+        val pb = ProcessBuilder(
+                KOTLINC_NATIVE,
+                generatorDir.resolve(mainName).resolve("$mainName.kt").toString(),
+                "-nowarn",
+                "-o",
+                generatorDir.resolve(mainName).resolve("$mainName.kexe").toString(),
+                "-l",
+                generatorDir.resolve("Printer.klib").toString()
+        )
         try {
-            ensureExisting(generatorDir.resolve(mainName).resolve("compile"))
-            val exit = runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve(mainName).toString())
-            if (exit != 0) throw UnsuccessfullRunningException()
+            ensureExisting(generatorDir.resolve(mainName).resolve("compile").resolve("native"))
+            /*val exit = */runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve("native").resolve(mainName).toString())
+           /* if (exit != 0) throw UnsuccessfullRunningException()*/
         } catch (e: IOException) {
             throw Error("Can't compile sources ", e)
         } catch (e: InterruptedException) {

@@ -6,7 +6,7 @@ import information.Symbol
 import information.SymbolTable
 import information.TypeList
 import ir.IRNode
-import providers.tests_generators.TestsGenerator
+import providers.tests_generators.TestGenerator
 import utils.OptionResolver
 import utils.ProductionParams
 import utils.PseudoRandom
@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit
 
 const val MINUTES_TO_WAIT = 3L
 val MAX_WAIT_TIME = TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT)
+const val JVM_DEVIATION = 1
+const val NATIVE_DEVIATION = 1
 
 fun main(args: Array<String>) {
     if (!args.isEmpty() && (args[0] == "-h" || args[0] == "--help")){
@@ -27,7 +29,25 @@ fun main(args: Array<String>) {
     System.out.printf(" %13s | %8s | %11s | %8s |%n", "start time", "count", "generating",
             "running")
     System.out.printf(" %13s | %8s | %11s | %8s |%n", "---", "---", "---", "---")
+
     val generators = getTestGenerators()
+    TestGenerator.ensureExisting(TestGenerator.getRoot())
+    if (generators.isEmpty()) {
+        throw Error("No generators loaded")
+    }
+    else {
+        if (ProductionParams.joinTest?.value() == true) {
+            generators[0].compilePrinterNative()
+            generators[0].compilePrinterJVM()
+        } else {
+            if (ProductionParams.useNative?.value() == true) {
+                generators[0].compilePrinterNative()
+            } else {
+                generators[0].compilePrinterJVM()
+            }
+        }
+    }
+
     val names = mutableListOf<String>()
     do {
         var start = System.currentTimeMillis()
@@ -63,7 +83,7 @@ fun main(args: Array<String>) {
     } while (counter < ProductionParams.numberOfTests?.value() ?: throw NotInitializedOptionException("numberOfTests"))
 
     val noErrors = printBadCompilsAndRuns(generators, names)
-    if (noErrors) println("No compilation or running errors on all tests")
+    if (noErrors) println("No compilation or running errors on all tests${if (ProductionParams.joinTest?.value() == true) ", no difference in behaviour" else ""}")
 }
 
 fun initializeTestGenerators(args: Array<String>) {
@@ -71,7 +91,7 @@ fun initializeTestGenerators(args: Array<String>) {
             'p',
             "property-file",
             "conf/default.properties",
-            "File to read properties from")
+            "File to read properties from")     //TODO: bad, move to ProductionParams
     ProductionParams.register()
     OptionResolver.parse(args, propertyFileOpt)
     PseudoRandom.reset(ProductionParams.seed?.value())
@@ -82,17 +102,17 @@ fun initializeTestGenerators(args: Array<String>) {
     }
 }
 
-fun getTestGenerators(): List<TestsGenerator> {
-    val result = mutableListOf<TestsGenerator>()
+fun getTestGenerators(): List<TestGenerator> {
+    val result = mutableListOf<TestGenerator>()
     var factoryClass: Class<*>
-    var factory: (List<String>) -> List<TestsGenerator>
+    var factory: (List<String>) -> List<TestGenerator>
     val factoryClassNames = ProductionParams.generatorsFactories?.value()?.split(",") ?: throw NotInitializedOptionException("generatorsFactories")
     val generatorNames = ProductionParams.generators?.value()?.split(",") ?: throw NotInitializedOptionException("generators")
 
     for (factoryClassName in factoryClassNames) {
         try {
             factoryClass = Class.forName(factoryClassName)
-            factory = factoryClass.newInstance() as (List<String>) -> List<TestsGenerator>
+            factory = factoryClass.newInstance() as (List<String>) -> List<TestGenerator>
         } catch (ex: ReflectiveOperationException) {
             throw Error("Can't instantiate generators factory", ex)
         }
@@ -137,33 +157,84 @@ fun generateIRTreeWithoutOOP(name: String): Pair<IRNode, IRNode> {
     return Pair(mainFunction, topLevelFunctions)
 }
 
-fun printBadCompilsAndRuns(gens: List<TestsGenerator>, names: List<String>): Boolean {
+fun printBadCompilsAndRuns(gens: List<TestGenerator>, names: List<String>): Boolean {
     var allCorrect = true
     for (i in 0 until (ProductionParams.numberOfTests?.value() ?: throw NotInitializedOptionException("numberOfTests"))) {
         for (gen in gens) {
-            val compliation = gen.generatorDir.resolve(names[i]).resolve("compile").resolve("${names[i]}.exit").toFile()
-            val runtime = gen.generatorDir.resolve(names[i]).resolve("runtime").resolve("${names[i]}.exit").toFile()
-            var comReader: Scanner? = null
-            var runReader: Scanner? = null
+            val compliation = gen.generatorDir.resolve(names[i]).resolve("compile")
+            val jvmCompile = compliation.resolve("jvm").resolve("${names[i]}.exit").toFile()
+            val nativeCompile = compliation.resolve("native").resolve("${names[i]}.exit").toFile()
+            val runtime = gen.generatorDir.resolve(names[i]).resolve("runtime")
+            val jvmRuntime = runtime.resolve("jvm").resolve("${names[i]}.exit").toFile()
+            val nativeRuntime = runtime.resolve("native").resolve("${names[i]}.exit").toFile()
+            var jvmReader: Scanner? = null
+            var nativeReader: Scanner? = null
+            var compileDifference = 0
+            var runtimeDifference = 0
             try {
-                if (compliation.exists()) {
-                    comReader = Scanner(compliation)
-                    if (comReader.nextInt() != 0) {
-                        println("$gen: compilation error in ${names[i]} folder")
+                if (jvmCompile.exists()) {
+                    jvmReader = Scanner(jvmCompile)
+                    if (jvmReader.nextInt() != 0) {
+                        println("$gen: <Kotlin JVM> compilation error in ${names[i]} folder")
                         allCorrect = false
+                        compileDifference = compileDifference xor JVM_DEVIATION
                     }
                 }
 
-                if (runtime.exists()) {
-                    runReader = Scanner(runtime)
-                    if (runReader.nextInt() != 0) {
-                        println("$gen: program running error in ${names[i]} folder")
+                if (nativeCompile.exists()) {
+                    nativeReader = Scanner(nativeCompile)
+                    if (nativeReader.nextInt() != 0) {
+                        println("$gen: <Kotlin/Native> compilation error in ${names[i]} folder")
                         allCorrect = false
+                        compileDifference = compileDifference xor NATIVE_DEVIATION
+                    }
+                }
+
+                if (jvmRuntime.exists()) {
+                    jvmReader = Scanner(jvmRuntime)
+                    if (jvmReader.nextInt() != 0) {
+                        println("$gen: <Kotlin JVM> program running error in ${names[i]} folder")
+                        allCorrect = false
+                        runtimeDifference = runtimeDifference xor JVM_DEVIATION
+                    }
+                }
+
+                if (nativeRuntime.exists()) {
+                    nativeReader = Scanner(nativeRuntime)
+                    if (nativeReader.nextInt() != 0) {
+                        println("$gen: <Kotlin/Native> program running error in ${names[i]} folder")
+                        allCorrect = false
+                        runtimeDifference = runtimeDifference xor NATIVE_DEVIATION
+                    }
+                }
+
+                if (ProductionParams.joinTest?.value() == true){
+                    if (compileDifference != 0) {
+                        allCorrect = false
+                        println("$gen: different compilers behaviour while compiling ${names[i]}")
+                    }
+                    if (runtimeDifference != 0) {
+                        allCorrect = false
+                        println("$gen: different compilers behaviour while running ${names[i]}")
+                    }
+                    jvmReader = Scanner(gen.generatorDir.resolve(names[i]).resolve("runtime").resolve("jvm").resolve("${names[i]}.out").toFile())
+                    nativeReader = Scanner(gen.generatorDir.resolve(names[i]).resolve("runtime").resolve("native").resolve("${names[i]}.out").toFile())
+
+                    var different = false
+                    while (jvmReader.hasNextLine() && nativeReader.hasNextLine()) {
+                        if (jvmReader.nextLine() != nativeReader.nextLine()) {
+                            different = true
+                            break
+                        }
+                    }
+                    if (different || jvmReader.hasNextLine() xor nativeReader.hasNextLine()) {
+                        allCorrect = false
+                        println("$gen: different program outputs depending on the compiler while running ${names[i]}")
                     }
                 }
             } finally {
-                comReader?.close()
-                runReader?.close()
+                jvmReader?.close()
+                nativeReader?.close()
             }
         }
     }

@@ -13,7 +13,7 @@ import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 import java.util.function.BiConsumer
 
-abstract class TestsGenerator protected constructor(
+abstract class TestGenerator protected constructor(
         suffix: String,
         protected val preRunActions: (String) -> Array<String>,
         protected val jtDriverOptions: String
@@ -106,11 +106,26 @@ abstract class TestsGenerator protected constructor(
         }
     }
 
+    fun compilePrinterNative() {
+        val root = getRoot()
+        val pb = ProcessBuilder(KOTLINC_NATIVE, "src/main/kotlin/utils/Printer.kt", "-p", "library", "-o", generatorDir.resolve("Printer").toString())
+        try {
+            val exitCode = runProcess(pb, root.resolve("Printer").toString())
+            if (exitCode != 0) {
+                throw Error("Printer compilation returned exit code $exitCode")
+            }
+        } catch (e: IOException) {
+            throw Error("Can't compile printer", e)
+        } catch (e: InterruptedException) {
+            throw Error("Can't compile printer", e)
+        }
+    }
+
     fun runProgramJVM(mainName: String) {
         val pb = ProcessBuilder(KOTLIN, "-cp", "$classPath/$mainName:$generatorDir", "${mainName}Kt")
         try {
-            ensureExisting(generatorDir.resolve(mainName).resolve("runtime"))
-            runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve(mainName).toString())
+            ensureExisting(generatorDir.resolve(mainName).resolve("runtime").resolve("jvm"))
+            runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve("jvm").resolve(mainName).toString())
         } catch (ex: InterruptedException) {
             throw Error("Can't run generated program ", ex)
         } catch (ex: IOException) {
@@ -121,8 +136,8 @@ abstract class TestsGenerator protected constructor(
     fun runProgramNative(mainName: String) {
         val pb = ProcessBuilder(generatorDir.resolve(mainName).resolve("$mainName.kexe").toString())
         try {
-            ensureExisting(generatorDir.resolve(mainName).resolve("runtime"))
-            runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve(mainName).toString())
+            ensureExisting(generatorDir.resolve(mainName).resolve("runtime").resolve("native"))
+            runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve("native").resolve(mainName).toString())
         } catch (ex: InterruptedException) {
             throw Error("Can't run generated program ", ex)
         } catch (ex: IOException) {

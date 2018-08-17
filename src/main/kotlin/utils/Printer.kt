@@ -1,6 +1,8 @@
 package utils
 
-import java.util.Stack
+fun <T> MutableList<T>.push(elem: T) = add(elem)
+
+fun <T> MutableList<T>.pop() = removeAt(size - 1)
 
 object Printer {
 
@@ -37,16 +39,16 @@ object Printer {
     }
 
     fun print(arg: Any): String {
-        return print_r(Stack(), arg)
+        return print_r(mutableListOf(), arg)
     }
 
-    private fun print_r(visitedObjects: Stack<Any>, arg: Any?): String {
+    private fun print_r(visitedObjects: MutableList<Any>, arg: Any?): String {
         var result = ""
-        when {
-            arg == null -> result += "null"
-            arg.javaClass.isArray -> {
+        when (arg) {
+            null -> result += "null"
+            is Array<*> -> {
                 for (i in visitedObjects.indices) {
-                    if (visitedObjects.elementAt(i) === arg) {
+                    if (visitedObjects.elementAt(i) == arg) {
                         return "<recursive>"
                     }
                 }
@@ -56,78 +58,10 @@ object Printer {
                 val delimiter = ", "
                 result += "["
 
-                when (arg) {
-                    is Array<*> -> {
-                        for (i in arg.indices) {
-                            result += print_r(visitedObjects, arg[i])
-                            if (i < arg.size - 1) {
-                                result += delimiter
-                            }
-                        }
-                    }
-                    is BooleanArray -> {
-                        for (i in arg.indices) {
-                            result += print(arg[i])
-                            if (i < arg.size - 1) {
-                                result += delimiter
-                            }
-                        }
-                    }
-                    is ByteArray -> {
-                        for (i in arg.indices) {
-                            result += print(arg[i])
-                            if (i < arg.size - 1) {
-                                result += delimiter
-                            }
-                        }
-                    }
-                    is ShortArray -> {
-                        for (i in arg.indices) {
-                            result += print(arg[i])
-                            if (i < arg.size - 1) {
-                                result += delimiter
-                            }
-                        }
-                    }
-                    is CharArray -> {
-                        for (i in arg.indices) {
-                            result += print(arg[i])
-                            if (i < arg.size - 1) {
-                                result += delimiter
-                            }
-                        }
-                    }
-                    is IntArray -> {
-                        for (i in arg.indices) {
-                            result += print(arg[i])
-                            if (i < arg.size - 1) {
-                                result += delimiter
-                            }
-                        }
-                    }
-                    is LongArray -> {
-                        for (i in arg.indices) {
-                            result += print(arg[i])
-                            if (i < arg.size - 1) {
-                                result += delimiter
-                            }
-                        }
-                    }
-                    is FloatArray -> {
-                        for (i in arg.indices) {
-                            result += print(arg[i])
-                            if (i < arg.size - 1) {
-                                result += delimiter
-                            }
-                        }
-                    }
-                    is DoubleArray -> {
-                        for (i in arg.indices) {
-                            result += print(arg[i])
-                            if (i < arg.size - 1) {
-                                result += delimiter
-                            }
-                        }
+                for (i in arg.indices) {
+                    result += print_r(visitedObjects, arg[i])
+                    if (i < arg.size - 1) {
+                        result += delimiter
                     }
                 }
 
