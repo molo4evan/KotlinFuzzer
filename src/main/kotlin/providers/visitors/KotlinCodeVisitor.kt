@@ -4,19 +4,16 @@ import exceptions.NotInitializedOptionException
 import information.FunctionInfo
 import information.Symbol
 import information.TypeList
-import information.VariableInfo
 import ir.*
 import ir.control_flow.Break
 import ir.control_flow.Continue
 import ir.control_flow.If
 import ir.control_flow.When
+import ir.control_flow.loops.*
 import ir.functions.*
-import ir.loops.*
 import ir.operators.*
 import ir.operators.OperatorKind.*
 import ir.types.Type
-import ir.types.TypeNothing
-import ir.types.TypeUnit
 import ir.variables.LocalVariable
 import ir.variables.VariableBase
 import ir.variables.VariableDeclaration
@@ -150,12 +147,11 @@ class KotlinCodeVisitor: Visitor<String> {
     override fun visit(node: Continue) = "continue"
 
     override fun visit(node: CounterInitializer): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val vi = node.variableInfo
+        return "var " + vi.name + ": " + vi.type.accept(this) + " = " + node.getChild(0).accept(this)
     }
 
-    override fun visit(node: CounterManipulator): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun visit(node: CounterManipulator) = node.getChild(0).accept(this)
 
     override fun visit(node: Declaration) = node.getChild(0).accept(this)
 
@@ -305,9 +301,7 @@ class KotlinCodeVisitor: Visitor<String> {
 
     override fun visit(node: LocalVariable) = node.variableInfo.name
 
-    override fun visit(node: LoopingCondition): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun visit(node: LoopingCondition) = node.condition.accept(this)
 
     override fun visit(node: MainFunction): String {
         val body = node.getChild(0)
@@ -376,6 +370,26 @@ class KotlinCodeVisitor: Visitor<String> {
     }
 
     override fun visit(node: While): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val header = node.getChild(While.WhilePart.HEADER.ordinal)
+        val body1 = node.getChild(While.WhilePart.BODY1.ordinal)
+        val body2 = node.getChild(While.WhilePart.BODY2.ordinal)
+        val body3 = node.getChild(While.WhilePart.BODY3.ordinal)
+
+        return StringBuilder().
+                append(node.loop.initializer.accept(this)).
+                append("\n").
+                append(header.accept(this)).
+                append(PrintingUtils.align(node.level - 1)).
+                append("while (").
+                append(node.loop.condition.accept(this)).
+                append(") {\n").
+                append(body1.accept(this)).
+                append(PrintingUtils.align(node.level)).
+                append(node.loop.manipulator.accept(this)).
+                append("\n").
+                append(body2.accept(this)).
+                append(body3.accept(this)).
+                append(PrintingUtils.align(node.level - 1)).
+                append("}\n").toString()
     }
 }
