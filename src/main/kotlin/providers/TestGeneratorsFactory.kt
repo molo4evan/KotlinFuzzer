@@ -1,11 +1,11 @@
 package providers
 
 import providers.tests_generators.KotlinCodeGenerator
-import providers.tests_generators.TestsGenerator
+import providers.tests_generators.TestGenerator
 
-class TestGeneratorsFactory: (List<String>) -> List<TestsGenerator> {
-    override fun invoke(names: List<String>): List<TestsGenerator> {
-        val result = mutableListOf<TestsGenerator>()
+class TestGeneratorsFactory: (List<String>) -> List<TestGenerator> {
+    override fun invoke(names: List<String>): List<TestGenerator> {
+        val result = mutableListOf<TestGenerator>()
         for (name in names) {
             when (name) {
                 "KotlinCode" -> result.add(KotlinCodeGenerator())
