@@ -1,4 +1,4 @@
-package ir.loops
+package ir.control_flow.loops
 
 import ir.IRNode
 import providers.visitors.Visitor

@@ -7,7 +7,7 @@ import java.util.stream.Collectors
 import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 
-object SymbolTable {                                                            //TODO: can't see all local vars, fix
+object SymbolTable {
     private val SYMBOL_STACK = Stack<MutableMap<Type, MutableList<Symbol>>>()
     private var VARIABLE_AMOUNT = 0
     private var FUNCTION_AMOUNT = 0
@@ -248,7 +248,7 @@ object SymbolTable {                                                            
 
     fun getNextVariableNumber() =  ++VARIABLE_AMOUNT
 
-    fun getNextFunctionNumber() = ++ FUNCTION_AMOUNT
+    fun getNextFunctionNumber() = ++FUNCTION_AMOUNT
 
     override fun toString() = SYMBOL_STACK.toString()
 }

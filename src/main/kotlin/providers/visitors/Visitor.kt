@@ -1,12 +1,11 @@
 package providers.visitors
 
-import information.Symbol
 import ir.*
 import ir.control_flow.Break
 import ir.control_flow.*
 import ir.functions.*
 import ir.functions.FunctionCall
-import ir.loops.*
+import ir.control_flow.loops.*
 import ir.operators.BinaryOperator
 import ir.operators.CastOperator
 import ir.operators.UnaryOperator

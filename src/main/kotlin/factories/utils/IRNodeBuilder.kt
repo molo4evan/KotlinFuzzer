@@ -5,6 +5,10 @@ import exceptions.ProductionFailedException
 import factories.*
 import factories.control_flow.IfFactory
 import factories.control_flow.WhenFactory
+import factories.control_flow.loops.CounterInitializerFactory
+import factories.control_flow.loops.CounterManipulatorFactory
+import factories.control_flow.loops.LoopingConditionFactory
+import factories.control_flow.loops.WhileFactory
 import factories.functoins.*
 import factories.operators.*
 import factories.rules.*
@@ -15,18 +19,21 @@ import factories.variables.LocalVariableFactory
 import factories.variables.VariableDeclarationBlockFactory
 import factories.variables.VariableDeclarationFactory
 import factories.variables.VariableInitializationFactory
-import ir.*
-import ir.control_flow.If
-import ir.operators.OperatorKind.*
-import ir.types.Type
-import ir.variables.*
 import information.FunctionInfo
 import information.TypeList
+import ir.*
+import ir.control_flow.If
 import ir.control_flow.When
+import ir.control_flow.loops.CounterInitializer
+import ir.control_flow.loops.CounterManipulator
+import ir.control_flow.loops.LoopingCondition
+import ir.control_flow.loops.While
 import ir.functions.*
-import ir.functions.FunctionCall
 import ir.operators.*
+import ir.operators.OperatorKind.*
+import ir.types.Type
 import ir.types.TypeNothing
+import ir.variables.*
 import utils.ProductionParams
 import java.util.*
 
@@ -194,14 +201,14 @@ class IRNodeBuilder() {                                                  //TODO:
 //    fun getContinueFactory(): Factory<Continue> {
 //        return ContinueFactory()
 //    }
-//
-//    fun getCounterInitializerFactory(counterValue: Int): Factory<CounterInitializer> {
-//        return CounterInitializerFactory(getOwnerClass(), counterValue)
-//    }
-//
-//    fun getCounterManipulatorFactory(): Factory<CounterManipulator> {
-//        return CounterManipulatorFactory(getLocalVariable())
-//    }
+
+    fun getCounterInitializerFactory(counterValue: Int): Factory<CounterInitializer> {
+        return CounterInitializerFactory(getOwnerClass(), counterValue)
+    }
+
+    fun getCounterManipulatorFactory(): Factory<CounterManipulator> {
+        return CounterManipulatorFactory(getLocalVariable())
+    }
 
     fun getDeclarationFactory(): Factory<Declaration> {     //BlockFactory, VariableDeclarationBlockFactory
         return DeclarationFactory(getOwnerClass(), getComplexityLimit(), getOperatorLimit(),
@@ -212,11 +219,11 @@ class IRNodeBuilder() {                                                  //TODO:
 //        return DoWhileFactory(getOwnerClass(), getResultType(), getComplexityLimit(),
 //                getStatementLimit(), getOperatorLimit(), getLevel(), getCanHaveReturn())
 //    }
-//
-//    fun getWhileFactory(): Factory<While> {
-//        return WhileFactory(getOwnerClass(), getResultType(), getComplexityLimit(),
-//                getStatementLimit(), getOperatorLimit(), getLevel(), getCanHaveReturn())
-//    }
+
+    fun getWhileFactory(): Factory<While> {
+        return WhileFactory(getOwnerClass(), getResultType(), getComplexityLimit(),
+                getStatementLimit(), getOperatorLimit(), getLevel(), getCanHaveReturn())
+    }
 
     fun getIfFactory(): Factory<If> {
         return IfFactory(getOwnerClass(), getResultType(), getComplexityLimit(),
@@ -307,10 +314,10 @@ class IRNodeBuilder() {                                                  //TODO:
         return LogicOperatorFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(), getExceptionSafe(), getNoConsts())
     }
 
-//    fun getLoopingConditionFactory(_limiter: Literal): Factory<LoopingCondition> {
-//        return LoopingConditionFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
-//                getLocalVariable(), _limiter)
-//    }
+    fun getLoopingConditionFactory(limiter: Literal): Factory<LoopingCondition> {
+        return LoopingConditionFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
+                getLocalVariable(), limiter)
+    }
 
 //    fun getNonStaticMemberVariableFactory(): Factory<NonStaticMemberVariable> {
 //        return NonStaticMemberVariableFactory(getComplexityLimit(), getOperatorLimit(),

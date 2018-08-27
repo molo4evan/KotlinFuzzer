@@ -1,22 +1,21 @@
 package factories
 
 import exceptions.ProductionFailedException
-import factories.utils.IRNodeBuilder
 import factories.rules.Rule
+import factories.utils.IRNodeBuilder
 import information.SymbolTable
 import information.TypeList
 import ir.Block
 import ir.IRNode
 import ir.control_flow.If
 import ir.control_flow.When
-import ir.loops.DoWhile
-import ir.loops.For
-import ir.loops.While
+import ir.control_flow.loops.DoWhile
+import ir.control_flow.loops.For
+import ir.control_flow.loops.While
 import ir.types.Type
 import utils.ProductionParams
 import utils.PseudoRandom
-import utils.TypeUtil
-import java.util.ArrayList
+import java.util.*
 
 class BlockFactory(
         private val owner: Type?,
@@ -129,9 +128,9 @@ class BlockFactory(
         if (ProductionParams.disableIf?.value()?.not() ?: throw Exception("Option disableIf not initialized")) {
             rule.add("if", builder.getIfFactory())
         }
-//        if (ProductionParams.disableWhile?.value()?.not() ?: throw Exception("Option disableWhile not initialized")) {
-//            rule.add("while", builder.getWhileFactory())
-//        }
+        if (ProductionParams.disableWhile?.value()?.not() ?: throw Exception("Option disableWhile not initialized")) {
+            rule.add("while", builder.getWhileFactory())
+        }
 //        if (ProductionParams.disableDoWhile?.value()?.not() ?: throw Exception("Option disableDoWhile not initialized")) {
 //            rule.add("do_while", builder.getDoWhileFactory())
 //        }

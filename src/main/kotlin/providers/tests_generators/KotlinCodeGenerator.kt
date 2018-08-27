@@ -31,10 +31,8 @@ class KotlinCodeGenerator(
                 compileKotlinFileNative(mainName)
                 runProgramNative(mainName)
             } else {
-                try {
-                    compileKotlinFileJVM(mainName)
-                    runProgramJVM(mainName)
-                } catch (ex: UnsuccessfullRunningException) {}
+                compileKotlinFileJVM(mainName)
+                runProgramJVM(mainName)
             }
         }
     }
@@ -64,9 +62,9 @@ class KotlinCodeGenerator(
             ensureExisting(generatorDir.resolve(mainName).resolve("compile").resolve("jvm"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve("jvm").resolve(mainName).toString())
         } catch (e: IOException) {
-            throw Error("Can't compile sources ", e)
+            throw UnsuccessfullRunningException("Can't compile sources ", e)
         } catch (e: InterruptedException) {
-            throw Error("Can't compile sources ", e)
+            throw UnsuccessfullRunningException("Can't compile sources ", e)
         }
     }
 
@@ -85,9 +83,9 @@ class KotlinCodeGenerator(
             /*val exit = */runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve("native").resolve(mainName).toString())
            /* if (exit != 0) throw UnsuccessfullRunningException()*/
         } catch (e: IOException) {
-            throw Error("Can't compile sources ", e)
+            throw UnsuccessfullRunningException("Can't compile sources ", e)
         } catch (e: InterruptedException) {
-            throw Error("Can't compile sources ", e)
+            throw UnsuccessfullRunningException("Can't compile sources ", e)
         }
     }
 }

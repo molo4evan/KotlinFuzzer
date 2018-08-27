@@ -54,6 +54,8 @@ object ProductionParams {
     var generators: Option<String>? = null
     var generatorsFactories: Option<String>? = null
     var functionCallsPercent: Option<Double>? = null
+    var ignoreArithmeticExceptions: Option<Boolean>? = null
+    var propertyFileOpt: Option<String>? = null
 
     var useNative: Option<Boolean>? = null
     var nativePath: Option<String>? = null
@@ -71,6 +73,7 @@ object ProductionParams {
         memberFunctionsLimit = OptionResolver.addIntOption('m', "member-functions-limit", 15, "Upper limit on member functions")
         useNative = addBooleanOption('n', "use-native", false, "Switch compilation from Kotlin JVM to Kotlin/Native, doesn\'t matters, if \'join-test\' option is set")
         operatorLimit = OptionResolver.addIntOption('o', "operator-limit", 50, "Upper limit on operators in a statement")
+        propertyFileOpt = OptionResolver.addStringOption('p', "property-file", "conf/default.properties", "File to read properties from")
         excludeMethodsFile = OptionResolver.addStringOption('r', "exclude-methods-file", "conf/exclude.methods.lst", "File to read excluded methods from")
         statementLimit = OptionResolver.addIntOption('s', "statement-limit", 30, "Upper limit on statements in function")
         numberOfTests = OptionResolver.addIntOption('t', "number-of-tests", 0, "Number of test classes to generate")
@@ -104,6 +107,7 @@ object ProductionParams {
         functionCallsPercent = OptionResolver.addDoubleOption("function-calls-percent", 0.1, "Percentage of function calls in generating expressions")
         generators = OptionResolver.addStringOption("generators", "", "Comma-separated list of generator names")
         generatorsFactories = OptionResolver.addStringOption("generators-factories", "", "Comma-separated list of generators factories fully qualified class names")
+        ignoreArithmeticExceptions = addBooleanOption("ignore-arithmetic", "Don\'t show an information about \'ArithmeticException\' throws in generated tests")
         maxCfgDepth = OptionResolver.addIntOption("max-cfg-depth", 3, "A non-negative decimal integer used to restrict the upper bound of depth of control flow graph")
         minCfgDepth = OptionResolver.addIntOption("min-cfg-depth", 2, "A non-negative decimal integer used to restrict the lower bound of depth of control flow graph")
         nativePath = OptionResolver.addStringOption("native-path", "", "Kotlin/Native home directory (used if \'use-native\' option is \'true\')")

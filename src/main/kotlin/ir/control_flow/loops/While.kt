@@ -1,4 +1,4 @@
-package ir.loops
+package ir.control_flow.loops
 
 import ir.Block
 import ir.IRNode
@@ -14,7 +14,7 @@ import kotlin.math.max
 //      body3;                                 //    [subblock with breaks]
 // }
 
-class While(level: Long, private val loop: Loop, private val thisLoopIterLimit: Long, 
+class While(level: Long, val loop: Loop, private val thisLoopIterLimit: Long,
             header: Block, body1: Block, body2: Block, body3: Block): IRNode(body1.getResultType()) {
     
     enum class WhilePart{
