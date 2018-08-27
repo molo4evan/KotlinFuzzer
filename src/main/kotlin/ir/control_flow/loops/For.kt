@@ -7,9 +7,9 @@ import providers.visitors.Visitor
 import kotlin.math.max
 
 // header;                       // [subblock]
-// statement1, statement2;       // for (statement; condition; statement) {     //TODO: loop.condition == to,
+// from, step;                   // for (statement; condition; statement) {     // loop.condition == to
 // body1;                        //    [subblock with breaks]
-//    mutate(x);
+// mutate(x);
 // body2;                        //    [subblock with breaks and continues]
 // body3;                        //    [subblock with breaks]
 // }
@@ -59,7 +59,7 @@ class For(level: Long, private val loop: Loop, private val thisLoopIterLimit: Lo
 
     override fun removeSelf(): Boolean {
         val header = children[ForPart.HEADER.ordinal]
-        val siblings = parent!!.children
+        val siblings = parent?.children ?: return false
         var index = siblings.indexOf(this)
         siblings[index++] = loop.initializer
         if (header is Block){

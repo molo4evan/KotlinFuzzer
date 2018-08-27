@@ -1,3 +1,3 @@
 package exceptions
 
-class UnsuccessfullRunningException: Exception()
+class UnsuccessfullRunningException(msg: String, cause: Exception): Error(msg, cause)
