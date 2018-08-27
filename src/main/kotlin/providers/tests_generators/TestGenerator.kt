@@ -2,6 +2,7 @@ package providers.tests_generators
 
 import MINUTES_TO_WAIT
 import exceptions.NotInitializedOptionException
+import exceptions.UnsuccessfullRunningException
 import ir.IRNode
 import utils.ProductionParams
 import java.io.File
@@ -13,7 +14,7 @@ import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
 import java.util.function.BiConsumer
 
-abstract class TestGenerator protected constructor(
+abstract class TestGenerator protected constructor(         //TODO: add compiling and running in separate threads for native and jvm
         suffix: String,
         protected val preRunActions: (String) -> Array<String>,
         protected val jtDriverOptions: String
@@ -24,6 +25,10 @@ abstract class TestGenerator protected constructor(
     init {
         generatorDir = getRoot().resolve(suffix)
         classPath = getRoot().toString() + File.pathSeparator + generatorDir
+    }
+
+    override fun toString(): String {
+        return this::class.simpleName ?: this::class.qualifiedName ?: this::class.toString()
     }
 
     protected constructor(suffix: String): this(suffix, { emptyArray<String>()}, "")
@@ -64,7 +69,8 @@ abstract class TestGenerator protected constructor(
             pb.redirectError(File("$name.err"))
             pb.redirectOutput(File("$name.out"))
             val process = pb.start()
-            return if (process.waitFor(MINUTES_TO_WAIT, TimeUnit.MINUTES)) {
+            val inTime = process.waitFor(MINUTES_TO_WAIT, TimeUnit.MINUTES)
+            return if (inTime) {
                 var file: FileWriter? = null
                 try {
                     file = FileWriter("$name.exit")
@@ -74,6 +80,13 @@ abstract class TestGenerator protected constructor(
                 }
                 process.exitValue()
             } else {
+                var file: FileWriter? = null
+                try {
+                    file = FileWriter("$name.exit")
+                    file.write("interrupted")
+                } finally {
+                    file?.close()
+                }
                 process.destroyForcibly()
                 -1
             }
@@ -100,9 +113,9 @@ abstract class TestGenerator protected constructor(
                 throw Error("Printer compilation returned exit code $exitCode")
             }
         } catch (e: IOException) {
-            throw Error("Can't compile printer", e)
+            throw UnsuccessfullRunningException("Can't compile printer", e)
         } catch (e: InterruptedException) {
-            throw Error("Can't compile printer", e)
+            throw UnsuccessfullRunningException("Can't compile printer", e)
         }
     }
 
@@ -115,9 +128,9 @@ abstract class TestGenerator protected constructor(
                 throw Error("Printer compilation returned exit code $exitCode")
             }
         } catch (e: IOException) {
-            throw Error("Can't compile printer", e)
+            throw UnsuccessfullRunningException("Can't compile printer", e)
         } catch (e: InterruptedException) {
-            throw Error("Can't compile printer", e)
+            throw UnsuccessfullRunningException("Can't compile printer", e)
         }
     }
 
@@ -127,9 +140,9 @@ abstract class TestGenerator protected constructor(
             ensureExisting(generatorDir.resolve(mainName).resolve("runtime").resolve("jvm"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve("jvm").resolve(mainName).toString())
         } catch (ex: InterruptedException) {
-            throw Error("Can't run generated program ", ex)
+            throw UnsuccessfullRunningException("Can't run generated program ", ex)
         } catch (ex: IOException) {
-            throw Error("Can't run generated program ", ex)
+            throw UnsuccessfullRunningException("Can't run generated program ", ex)
         }
     }
 
@@ -139,9 +152,9 @@ abstract class TestGenerator protected constructor(
             ensureExisting(generatorDir.resolve(mainName).resolve("runtime").resolve("native"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve("native").resolve(mainName).toString())
         } catch (ex: InterruptedException) {
-            throw Error("Can't run generated program ", ex)
+            throw UnsuccessfullRunningException("Can't run generated program ", ex)
         } catch (ex: IOException) {
-            throw Error("Can't run generated program ", ex)
+            throw UnsuccessfullRunningException("Can't run generated program ", ex)
         }
     }
 }

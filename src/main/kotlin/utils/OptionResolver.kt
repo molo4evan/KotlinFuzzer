@@ -1,5 +1,6 @@
 package utils
 
+import exceptions.NotInitializedOptionException
 import java.io.FileReader
 import java.util.*
 
@@ -8,9 +9,7 @@ object OptionResolver {
     private val values = mutableMapOf<Option<*>, Any>()
     private val options = mutableMapOf<String, Option<*>>()
 
-    fun parse(args: Array<String>) = parse(args, null)
-
-    fun parse(args: Array<String>, propertyFileOption: Option<String>?){
+    fun parse(args: Array<String>){
         var pos = 0
         while (pos < args.size){
             var curArg = args[pos]
@@ -57,9 +56,7 @@ object OptionResolver {
             pos++
         }
 
-        if (propertyFileOption != null && !values.containsKey(propertyFileOption)){
-            parseProperties(propertyFileOption.value())
-        }
+        parseProperties(ProductionParams.propertyFileOpt?.value() ?: throw NotInitializedOptionException("propertyFileOpt"))
     }
 
     private fun parseProperties(fileName: String) {
