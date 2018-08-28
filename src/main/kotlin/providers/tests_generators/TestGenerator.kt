@@ -5,12 +5,14 @@ import exceptions.NotInitializedOptionException
 import exceptions.UnsuccessfullRunningException
 import ir.IRNode
 import utils.ProductionParams
+import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.function.BiConsumer
 
@@ -21,6 +23,7 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
 ): BiConsumer<IRNode, IRNode?> {
     val generatorDir: Path
     protected val classPath: String
+    private var printerTmp: File? = null
 
     init {
         generatorDir = getRoot().resolve(suffix)
@@ -104,9 +107,29 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
         }
     }
 
+    fun extractPrinter(){
+        val printerScanner = Scanner(this.javaClass.classLoader.getResourceAsStream("utils/Printer.kt"))
+        printerTmp = File("utils/Printer.kt")
+        if (printerTmp!!.exists()) deletePrinter()
+        ensureExisting(printerTmp!!.toPath().parent)
+        printerTmp!!.createNewFile()
+        val writer = BufferedWriter(FileWriter(printerTmp!!))
+        while (printerScanner.hasNextLine()) {
+            val str = printerScanner.nextLine() + "\n"
+            writer.write(str)
+        }
+        writer.close()
+    }
+
+    fun deletePrinter() {
+        printerTmp?.delete()
+        printerTmp?.parentFile?.delete()
+    }
+
     fun compilePrinterJVM() {
         val root = getRoot()
-        val pb = ProcessBuilder(KOTLINC_JVM, "src/main/kotlin/utils/Printer.kt", "-d", generatorDir.toString())
+        if (printerTmp == null) throw Error("Printer is not extracted")
+        val pb = ProcessBuilder(KOTLINC_JVM, printerTmp!!.absolutePath, "-verbose", "-d", generatorDir.toString())
         try {
             val exitCode = runProcess(pb, root.resolve("Printer").toString())
             if (exitCode != 0) {
@@ -119,9 +142,10 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
         }
     }
 
-    fun compilePrinterNative() {
+    fun compilePrinterNative() {    //TODO: refactor
         val root = getRoot()
-        val pb = ProcessBuilder(KOTLINC_NATIVE, "src/main/kotlin/utils/Printer.kt", "-p", "library", "-o", generatorDir.resolve("Printer").toString())
+        if (printerTmp == null) throw Error("Printer is not extracted")
+        val pb = ProcessBuilder(KOTLINC_NATIVE, printerTmp!!.absolutePath, "-p", "library", "-o", generatorDir.resolve("Printer").toString())
         try {
             val exitCode = runProcess(pb, root.resolve("Printer").toString())
             if (exitCode != 0) {

@@ -1,16 +1,17 @@
 package utils
-
 import information.FunctionInfo
 import information.Symbol
 import information.TypeList
 import information.VariableInfo
 import ir.*
 import ir.functions.FunctionCall
-import ir.functions.FunctionDefinition
 import ir.operators.BinaryOperator
 import ir.operators.OperatorKind
 import ir.types.Type
-import ir.variables.*
+import ir.variables.LocalVariable
+import ir.variables.NonStaticMemberVariable
+import ir.variables.StaticMemberVariable
+import ir.variables.VariableInitialization
 
 object PrintingUtils {
     val EOL = Literal("\n", TypeList.STRING)
@@ -33,7 +34,7 @@ object PrintingUtils {
 
         val vars = node.vars
 
-        val printerClass = Type(Printer.javaClass.name)
+        val printerClass = Type("utils.Printer")
 
         val thisInfo: VariableInfo
         var thisVar: LocalVariable? = null

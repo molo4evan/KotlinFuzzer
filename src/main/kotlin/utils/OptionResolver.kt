@@ -1,7 +1,8 @@
 package utils
 
 import exceptions.NotInitializedOptionException
-import java.io.FileReader
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.util.*
 
 
@@ -56,12 +57,14 @@ object OptionResolver {
             pos++
         }
 
-        parseProperties(ProductionParams.propertyFileOpt?.value() ?: throw NotInitializedOptionException("propertyFileOpt"))
+        val propFileName = ProductionParams.propertyFileOpt?.value() ?: throw NotInitializedOptionException("propertyFileOpt")
+        val file = this.javaClass.classLoader.getResourceAsStream(propFileName)
+        parseProperties(file)
     }
 
-    private fun parseProperties(fileName: String) {
+    private fun parseProperties(file: InputStream) {
         val properties = Properties()
-        properties.load(FileReader(fileName))
+        properties.load(InputStreamReader(file))
 
         for (optionName in properties.stringPropertyNames()){
             val curOpt = options["--$optionName"] ?: throw IllegalArgumentException("Unknown option in property file $optionName")
