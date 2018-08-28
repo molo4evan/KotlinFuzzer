@@ -14,7 +14,7 @@ To build project from sources you should have Gradle (version 4.9 or higher): [M
 
 Also you should define _**KOTLIN_HOME**_ variable in your environment as a path to your Kotlin JVM home directory.
 
-In addition, if you want to use Kotlin/Native testing features, you must define **'native-path'** option in the config file or by arguement (a path to your Kotlin/Native home directory)
+In addition, if you want to use Kotlin/Native testing features, you must define **'native-path'** option in the config file or by argument (a path to your Kotlin/Native home directory)
 
 
 After setting up the environment, just follow these steps:
