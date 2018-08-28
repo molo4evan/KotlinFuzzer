@@ -40,15 +40,20 @@ fun main(args: Array<String>) {
         throw Error("No generators loaded")
     }
     else {
-        if (ProductionParams.joinTest?.value() == true) {
-            generators[0].compilePrinterNative()
-            generators[0].compilePrinterJVM()
-        } else {
-            if (ProductionParams.useNative?.value() == true) {
+        generators[0].extractPrinter()
+        try {
+            if (ProductionParams.joinTest?.value() == true) {
                 generators[0].compilePrinterNative()
-            } else {
                 generators[0].compilePrinterJVM()
+            } else {
+                if (ProductionParams.useNative?.value() == true) {
+                    generators[0].compilePrinterNative()
+                } else {
+                    generators[0].compilePrinterJVM()
+                }
             }
+        } finally {
+            generators[0].deletePrinter()
         }
     }
 
@@ -96,7 +101,7 @@ fun main(args: Array<String>) {
 
 fun initializeTestGenerators(args: Array<String>) {
     ProductionParams.register()
-    OptionResolver.parse(args)
+    OptionResolver.parse(args)                          //TODO: cover IllegalArgumentException
     PseudoRandom.reset(ProductionParams.seed?.value())
 //    TypesParser.parseTypesAndMethods(ProductionParams.classesFile?.value() ?: throw NotInitializedOptionException("classesFile"),
 //            ProductionParams.excludeMethodsFile?.value() ?: throw NotInitializedOptionException("excludedMethodsFile"))

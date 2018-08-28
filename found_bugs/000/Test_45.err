@@ -1,0 +1,27 @@
+production/kotlin_tests/Test_45/Test_45.kt:121:21: error: type expected
+			return false < ((49).toByte() > (13).toByte() || true)
+                    ^
+production/kotlin_tests/Test_45/Test_45.kt:121:25: error: expecting function type
+			return false < ((49).toByte() > (13).toByte() || true)
+                        ^
+production/kotlin_tests/Test_45/Test_45.kt:121:25: error: unresolved reference: toByte
+			return false < ((49).toByte() > (13).toByte() || true)
+                        ^
+production/kotlin_tests/Test_45/Test_45.kt:121:31: error: expecting comma or ')'
+			return false < ((49).toByte() > (13).toByte() || true)
+                              ^
+production/kotlin_tests/Test_45/Test_45.kt:121:31: error: expecting ')'
+			return false < ((49).toByte() > (13).toByte() || true)
+                              ^
+production/kotlin_tests/Test_45/Test_45.kt:121:32: error: expecting '->' to specify return type of a function type
+			return false < ((49).toByte() > (13).toByte() || true)
+                               ^
+production/kotlin_tests/Test_45/Test_45.kt:121:34: error: type expected
+			return false < ((49).toByte() > (13).toByte() || true)
+                                 ^
+production/kotlin_tests/Test_45/Test_45.kt:121:57: error: unexpected tokens (use ';' to separate expressions on the same line)
+			return false < ((49).toByte() > (13).toByte() || true)
+                                                        ^
+production/kotlin_tests/Test_45/Test_45.kt:121:11: error: expression 'false' of type 'Boolean' cannot be invoked as a function. The function 'invoke()' is not found
+			return false < ((49).toByte() > (13).toByte() || true)
+          ^
