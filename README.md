@@ -35,6 +35,7 @@ After setting up the environment, just follow these steps:
  [Gradle User Manual](https://docs.gradle.org/current/userguide/userguide.html)
 ## Usage
 *KotlinFuzzer* can be configured with command line options or through the settings file, defined by **'property-file'** option.
+Command line options have a higher priority than the configuration file.
 
 To display all avaliable options and usage tips, run *KotlinFuzzer* with **'-h'** or **'--help'** option.
 
