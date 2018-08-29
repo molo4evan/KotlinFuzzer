@@ -201,7 +201,7 @@ object OptionResolver {
 
         override fun parseFromString(arg: String?): Boolean {
             //null and empty value is considered true, as option is flag and value could be absent
-            return "" == arg || "true".equals(arg, ignoreCase = true)
+            return null == arg || "" == arg || "true".equals(arg, ignoreCase = true)
         }
     }
 

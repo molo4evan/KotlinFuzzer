@@ -11,6 +11,8 @@ import providers.tests_generators.TestGenerator
 import utils.OptionResolver
 import utils.ProductionParams
 import utils.PseudoRandom
+import java.io.BufferedWriter
+import java.io.FileWriter
 import java.time.LocalTime
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -29,10 +31,15 @@ fun main(args: Array<String>) {
         return
     }
     initializeTestGenerators(args)
+    when {
+        ProductionParams.joinTest?.value() == true -> println("\nJOIN MODE\n")
+        ProductionParams.useNative?.value() == true -> println("\nNATIVE MODE\n")
+        else -> println("\nJVM MODE\n")
+    }
     var counter = 0
-    System.out.printf(" %13s | %8s | %11s | %8s | %7s |%n", "start time", "count", "generating",
+    System.out.printf(" %13s | %8s | %11s | %8s | %11s |%n", "start time", "count", "generating",
             "running", "status")
-    System.out.printf(" %13s | %8s | %11s | %8s | %7s |%n", "---", "---", "---", "---", "---")
+    System.out.printf(" %13s | %8s | %11s | %8s | %11s |%n", "---", "---", "---", "---", "---")
 
     val generators = getTestGenerators()
     TestGenerator.ensureExisting(TestGenerator.getRoot())
@@ -40,6 +47,7 @@ fun main(args: Array<String>) {
         throw Error("No generators loaded")
     }
     else {
+        TestGenerator.deleteRecursively(generators[0].generatorDir.toFile())
         generators[0].extractPrinter()
         try {
             if (ProductionParams.joinTest?.value() == true) {
@@ -85,11 +93,14 @@ fun main(args: Array<String>) {
         if (generatorThread.isAlive) {
             // maxTime reached, so, proceed to next test generation
             generatorThread.interrupt()
+            val runTime = System.currentTimeMillis() - start
+            System.out.printf(" %8d |", runTime)
+            System.out.printf(" interrupted |%n")
         } else {
             val runTime = System.currentTimeMillis() - start
             System.out.printf(" %8d |", runTime)
             val status = if (allCorrect) "success" else "ERROR"
-            System.out.printf(" %7s |%n", status)
+            System.out.printf(" %11s |%n", status)
             if (runTime < MAX_WAIT_TIME) {
                 counter++
             }
@@ -103,6 +114,7 @@ fun initializeTestGenerators(args: Array<String>) {
     ProductionParams.register()
     OptionResolver.parse(args)                          //TODO: cover IllegalArgumentException
     PseudoRandom.reset(ProductionParams.seed?.value())
+    println("Current seed: ${PseudoRandom.currentSeed}")
 //    TypesParser.parseTypesAndMethods(ProductionParams.classesFile?.value() ?: throw NotInitializedOptionException("classesFile"),
 //            ProductionParams.excludeMethodsFile?.value() ?: throw NotInitializedOptionException("excludedMethodsFile"))
     if (ProductionParams.specificSeed?.isSet() ?: throw NotInitializedOptionException("specificSeed")) {
@@ -168,7 +180,22 @@ fun generateIRTreeWithoutOOP(name: String): Pair<IRNode, IRNode> {
 fun printBadCompilsAndRuns(gens: List<TestGenerator>, names: List<String>) {
     var allCorrect = true
     var divByZero = false
-    for (i in 0 until (ProductionParams.numberOfTests?.value() ?: throw NotInitializedOptionException("numberOfTests"))) {
+    var runtimeErrors = 0
+    var compileErrors = 0
+    var hangs = 0
+    var diffCases = 0
+
+    val report = TestGenerator.getRoot().resolve("report_${PseudoRandom.currentSeed}.txt").toFile()
+    if (report.exists()) {
+        report.delete()
+    }
+    report.createNewFile()
+    val writer = BufferedWriter(FileWriter(report))
+
+    val numTests = (ProductionParams.numberOfTests?.value() ?: throw NotInitializedOptionException("numberOfTests"))
+    writer.write("$numTests tests generated\n")
+
+    for (i in 0 until numTests) {
         next_gen@ for (gen in gens) {
             val compliation = gen.generatorDir.resolve(names[i]).resolve("compile")
             val jvmCompile = compliation.resolve("jvm").resolve("${names[i]}.exit").toFile()
@@ -186,7 +213,9 @@ fun printBadCompilsAndRuns(gens: List<TestGenerator>, names: List<String>) {
                     jvmReader = Scanner(jvmCompile)
                     if (jvmReader.nextInt() != 0) {
                         println("$gen: <Kotlin JVM> compilation error in ${names[i]} folder")
+                        writer.write("$gen: <Kotlin JVM> compilation error in ${names[i]} folder\n")
                         allCorrect = false
+                        compileErrors++
                         compileDifference = compileDifference xor JVM_DEVIATION
                     }
                 }
@@ -195,7 +224,9 @@ fun printBadCompilsAndRuns(gens: List<TestGenerator>, names: List<String>) {
                     nativeReader = Scanner(nativeCompile)
                     if (nativeReader.nextInt() != 0) {
                         println("$gen: <Kotlin/Native> compilation error in ${names[i]} folder")
+                        writer.write("$gen: <Kotlin/Native> compilation error in ${names[i]} folder\n")
                         allCorrect = false
+                        compileErrors++
                         compileDifference = compileDifference xor NATIVE_DEVIATION
                     }
                 }
@@ -219,8 +250,17 @@ fun printBadCompilsAndRuns(gens: List<TestGenerator>, names: List<String>) {
                             }
                         }
 
-                        if (exit == "interrupted") println("$gen: <Kotlin JVM> program hanged in ${names[i]} folder")
-                        else println("$gen: <Kotlin JVM> program running error in ${names[i]} folder")
+                        if (exit == "interrupted" && ProductionParams.ignoreHanging?.value()?.not() == true) {
+                            println("$gen: <Kotlin JVM> program hanged in ${names[i]} folder")
+                            writer.write("$gen: <Kotlin JVM> program hanged in ${names[i]} folder\n")
+                            hangs++
+
+                        }
+                        else {
+                            println("$gen: <Kotlin JVM> program running error in ${names[i]} folder")
+                            writer.write("$gen: <Kotlin JVM> program running error in ${names[i]} folder\n")
+                            runtimeErrors++
+                        }
                         allCorrect = false
                         runtimeDifference = runtimeDifference xor JVM_DEVIATION
                     }
@@ -238,8 +278,16 @@ fun printBadCompilsAndRuns(gens: List<TestGenerator>, names: List<String>) {
                                 continue@next_gen
                             }
                         }
-                        if (exit == "interrupted") println("$gen: <Kotlin/Native> program hanged in ${names[i]} folder")
-                        else println("$gen: <Kotlin/Native> program running error in ${names[i]} folder")
+                        if (exit == "interrupted" && ProductionParams.ignoreHanging?.value()?.not() == true) {
+                            println("$gen: <Kotlin/Native> program hanged in ${names[i]} folder")
+                            writer.write("$gen: <Kotlin/Native> program hanged in ${names[i]} folder\n")
+                            hangs++
+                        }
+                        else {
+                            println("$gen: <Kotlin/Native> program running error in ${names[i]} folder: exit code ${exit.toInt()}")
+                            writer.write("$gen: <Kotlin/Native> program running error in ${names[i]} folder: exit code ${exit.toInt()}\n")
+                            runtimeErrors++
+                        }
                         allCorrect = false
                         runtimeDifference = runtimeDifference xor NATIVE_DEVIATION
                     }
@@ -249,10 +297,14 @@ fun printBadCompilsAndRuns(gens: List<TestGenerator>, names: List<String>) {
                     if (compileDifference != 0) {
                         allCorrect = false
                         println("$gen: different behaviour of compilers while compiling ${names[i]}")
+                        writer.write("$gen: different behaviour of compilers while compiling ${names[i]}\n")
+                        diffCases++
                     }
                     if (runtimeDifference != 0) {
                         allCorrect = false
                         println("$gen: different behaviour of compilers while running ${names[i]}")
+                        writer.write("$gen: different behaviour of compilers while running ${names[i]}\n")
+                        diffCases++
                     }
                     jvmReader = Scanner(gen.generatorDir.resolve(names[i]).resolve("runtime").resolve("jvm").resolve("${names[i]}.out").toFile())
                     nativeReader = Scanner(gen.generatorDir.resolve(names[i]).resolve("runtime").resolve("native").resolve("${names[i]}.out").toFile())
@@ -267,6 +319,8 @@ fun printBadCompilsAndRuns(gens: List<TestGenerator>, names: List<String>) {
                     if (different || jvmReader.hasNextLine() xor nativeReader.hasNextLine()) {
                         allCorrect = false
                         println("$gen: different program outputs depending on the compiler while running ${names[i]}")
+                        writer.write("$gen: different program outputs depending on the compiler while running ${names[i]}")
+                        diffCases++
                     }
                 }
             } finally {
@@ -276,7 +330,17 @@ fun printBadCompilsAndRuns(gens: List<TestGenerator>, names: List<String>) {
         }
     }
 
-    if (allCorrect) println("No compilation or running errors${if (divByZero) " (except for division by zero)" else ""} on all tests${if (ProductionParams.joinTest?.value() == true) ", no difference in behaviour" else ""}")
+    if (allCorrect) {
+        val str = "No compilation or running errors${if (divByZero) " (except for division by zero)" else ""} on all tests${if (ProductionParams.joinTest?.value() == true) ", no difference in behaviour" else ""}"
+        println(str)
+        writer.write("$str\n")
+    } else {
+        val hangInfo = if (ProductionParams.ignoreHanging?.value()?.not() == true) " hangs: $hangs" else ""
+        val diffInfo = if (ProductionParams.joinTest?.value() == true) ", cases of different behaviour: $diffCases" else ""
+        println("Compile errors: $compileErrors, runtime errors: $runtimeErrors,$hangInfo$diffInfo")
+        writer.write("Compile errors: $compileErrors, runtime errors: $runtimeErrors,$hangInfo$diffInfo\n")
+    }
+    writer.close()
 }
 
 fun showHelp(){
@@ -284,7 +348,7 @@ fun showHelp(){
     println("-<short name> <expected value>")
     println("--<long name> <expected value>")
     println("Example: --dimensions-limit 4\n")
-    println("Also you can add options by its long names to file \"conf/default.properties\" according to pattern <option name>=<option value>\n")
+    println("Also you can add options by its long names to file defined by \'property-file\' option according to pattern <option name>=<option value>\n")
     println(" <short name> |         <long name>        |     <expected value>    |      <default value>     | <description>")
     ProductionParams.register()
     val options = OptionResolver.getRegisteredOptions()
