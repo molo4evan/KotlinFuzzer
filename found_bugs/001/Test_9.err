@@ -1,0 +1,15 @@
+production/kotlin_tests/Test_9/Test_9.kt:294:27: error: expecting ')'
+    fun_4(arg_1 < arg_1 > !true)
+                          ^
+production/kotlin_tests/Test_9/Test_9.kt:294:28: error: unexpected tokens (use ';' to separate expressions on the same line)
+    fun_4(arg_1 < arg_1 > !true)
+                           ^
+production/kotlin_tests/Test_9/Test_9.kt:294:32: error: unexpected tokens (use ';' to separate expressions on the same line)
+    fun_4(arg_1 < arg_1 > !true)
+                               ^
+production/kotlin_tests/Test_9/Test_9.kt:294:11: error: unresolved reference: arg_1
+    fun_4(arg_1 < arg_1 > !true)
+          ^
+production/kotlin_tests/Test_9/Test_9.kt:294:19: error: unresolved reference: arg_1
+    fun_4(arg_1 < arg_1 > !true)
+                  ^
