@@ -50,6 +50,7 @@ The settings file is **'conf/default.properties'** by default, it is stored in *
 
 ## Upcoming features
 - **For** loop
+- Ranges
 - Typechecks
 - Using **if** and **when** as a statements
 - Arrays
