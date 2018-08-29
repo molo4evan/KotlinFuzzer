@@ -21,7 +21,7 @@ import kotlin.reflect.full.createInstance
 
 const val MINUTES_TO_WAIT = 1L  //Process running time limit
 const val OVERHEAD = 100L       //The overhead for running thread to avoid unexpected interruption of thread (and leaving hanged test process in memory)
-val MAX_WAIT_TIME = (if (ProductionParams.joinTest?.value() == true) TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT * 4) else TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT * 2)) + OVERHEAD
+var MAX_WAIT_TIME = 0L
 const val JVM_DEVIATION = 1
 const val NATIVE_DEVIATION = 1
 
@@ -31,6 +31,7 @@ fun main(args: Array<String>) {
         return
     }
     initializeTestGenerators(args)
+    MAX_WAIT_TIME = (if (ProductionParams.joinTest?.value() == true) TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT * 4) else TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT * 2)) + OVERHEAD
     when {
         ProductionParams.joinTest?.value() == true -> println("\nJOIN MODE\n")
         ProductionParams.useNative?.value() == true -> println("\nNATIVE MODE\n")

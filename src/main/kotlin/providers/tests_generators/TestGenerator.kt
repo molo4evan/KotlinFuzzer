@@ -84,27 +84,31 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
         fun runProcess(pb: ProcessBuilder, name: String): Int {
             pb.redirectError(File("$name.err"))
             pb.redirectOutput(File("$name.out"))
-            val process = pb.start()
-            val inTime = process.waitFor(MINUTES_TO_WAIT, TimeUnit.MINUTES)
-            return if (inTime) {
-                var file: FileWriter? = null
-                try {
-                    file = FileWriter("$name.exit")
-                    file.write(process.exitValue().toString())
-                } finally {
-                    file?.close()
+            var process: Process? = null
+            try {
+                process = pb.start()
+                val inTime = process.waitFor(MINUTES_TO_WAIT, TimeUnit.MINUTES)
+                return if (inTime) {
+                    var file: FileWriter? = null
+                    try {
+                        file = FileWriter("$name.exit")
+                        file.write(process.exitValue().toString())
+                    } finally {
+                        file?.close()
+                    }
+                    process.exitValue()
+                } else {
+                    var file: FileWriter? = null
+                    try {
+                        file = FileWriter("$name.exit")
+                        file.write("interrupted")
+                    } finally {
+                        file?.close()
+                    }
+                    -1
                 }
-                process.exitValue()
-            } else {
-                var file: FileWriter? = null
-                try {
-                    file = FileWriter("$name.exit")
-                    file.write("interrupted")
-                } finally {
-                    file?.close()
-                }
-                process.destroyForcibly()
-                -1
+            } finally {
+                process?.destroyForcibly()
             }
         }
 
