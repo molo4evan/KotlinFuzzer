@@ -2,10 +2,12 @@
 ## Overview
 This fuzzer generates simple Kotlin programs (syntactically correct, but not always correctly executed due to division by zero, stucking in loops, ArrayOutOfBoundsExceptions, etc.).
 
-Then *KotlinFuzzer* compiles obtained sources with Kotlin compiler (there is **Kotlin JVM**, **Kotlin/Native** or **'split'** mode avaliable) and runs compiled programs.
+Then *KotlinFuzzer* compiles obtained sources with Kotlin compiler (there is **Kotlin JVM**, **Kotlin/Native** or **'join'** mode avaliable) and runs compiled programs.
 
 All compiling or running errors are displayed. 
-Also *KotlinFuzzer* dispalys an information about difference in behaviour (successfull/unsuccessfull compilation or runs, program output) between Kotlin JVM and Kotlin/Native programs in 'split' mode.
+Also *KotlinFuzzer* dispalys an information about difference in behaviour (successfull/unsuccessfull compilation or runs, program output) between Kotlin JVM and Kotlin/Native programs in 'join' mode.
+
+Additionally, launch information saves to report file (you can find a seed of specific launch in the file name), and files with compile or run errors are copied to **'crashes'** folder.
 
 So far, 1 unique compiler bug has been found: [see the comment](https://youtrack.jetbrains.com/issue/KT-25204).
 
@@ -29,8 +31,10 @@ After setting up the environment, just follow these steps:
   ./gradlew makeAll
   ```
  - Go to **'build/libs'** folder.
- There you can find generated JAR file and **'run.sh'** script for launch.
+   There you can find generated JAR file and **'run.sh'** script for launch.
+ - Now you can start **'run.sh'** with the required parameters, and it will launch JAR file. 
  
+ Launch script is needed because of conflicts with archived kotlin std library when trying to start the program using **'kotlin'**.
  
  [Gradle User Manual](https://docs.gradle.org/current/userguide/userguide.html)
 ## Usage
