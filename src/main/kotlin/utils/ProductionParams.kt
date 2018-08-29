@@ -55,6 +55,7 @@ object ProductionParams {
     var generatorsFactories: Option<String>? = null
     var functionCallsPercent: Option<Double>? = null
     var ignoreArithmeticExceptions: Option<Boolean>? = null
+    var ignoreHanging: Option<Boolean>? = null
     var propertyFileOpt: Option<String>? = null
 
     var useNative: Option<Boolean>? = null
@@ -67,6 +68,7 @@ object ProductionParams {
         dimensionsLimit = OptionResolver.addIntOption('d', "dimensions-limit", 3, "Upper limit on array dimensions")
         testStatementLimit = OptionResolver.addIntOption('e', "test-statement-limit", 300, "Upper limit on statements in test() function")
         classesFile = OptionResolver.addStringOption('f', "classes-file", "conf/classes.lst", "File to read classes from")
+        ignoreHanging = addBooleanOption('h', "ignore-hanging", false, "Don\'t add an information about hanged programs to report")
         implementationLimit = OptionResolver.addIntOption('i', "implementation-limit", 3, "Upper limit on a number of interfaces a class can implement")
         joinTest = addBooleanOption('j', "join-test", false, "Test and compare both of Kotlin JVM and Kotlin/Native compilation")
         productionLimit = OptionResolver.addIntOption('l', "production-limit", 100, "Limit on steps in the production of an expression")
@@ -107,7 +109,7 @@ object ProductionParams {
         functionCallsPercent = OptionResolver.addDoubleOption("function-calls-percent", 0.1, "Percentage of function calls in generating expressions")
         generators = OptionResolver.addStringOption("generators", "", "Comma-separated list of generator names")
         generatorsFactories = OptionResolver.addStringOption("generators-factories", "", "Comma-separated list of generators factories fully qualified class names")
-        ignoreArithmeticExceptions = addBooleanOption("ignore-arithmetic", "Don\'t show an information about \'ArithmeticException\' throws in generated tests")
+        ignoreArithmeticExceptions = addBooleanOption("ignore-arithmetic", "Don\'t add an information about \'ArithmeticException\' throws in generated tests to report")
         maxCfgDepth = OptionResolver.addIntOption("max-cfg-depth", 3, "A non-negative decimal integer used to restrict the upper bound of depth of control flow graph")
         minCfgDepth = OptionResolver.addIntOption("min-cfg-depth", 2, "A non-negative decimal integer used to restrict the lower bound of depth of control flow graph")
         nativePath = OptionResolver.addStringOption("native-path", "", "Kotlin/Native home directory (used if \'use-native\' option is \'true\')")

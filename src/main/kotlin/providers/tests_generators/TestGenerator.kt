@@ -40,7 +40,11 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
         private val KOTLIN_BIN = getKotlinHome()
         val KOTLINC_JVM = Paths.get(KOTLIN_BIN, "kotlinc-jvm").toString()
         val KOTLIN = Paths.get(KOTLIN_BIN, "kotlin").toString()
-        private val KOTLIN_NATIVE_BIN = (ProductionParams.nativePath?.value() ?: throw NotInitializedOptionException("nativePath")) + "/bin/"
+        private val KOTLIN_NATIVE_BIN = if (ProductionParams.useNative?.value() == true || ProductionParams.joinTest?.value() == true) {
+            ((ProductionParams.nativePath?.value() ?: throw NotInitializedOptionException("nativePath")) + "/bin/")
+        } else {
+            ""
+        }
         val KOTLINC_NATIVE = Paths.get(KOTLIN_NATIVE_BIN, "kotlinc-native").toString()
 
 
@@ -66,6 +70,15 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
                     ex.printStackTrace()
                 }
             }
+        }
+
+        fun deleteRecursively(candidate: File) {
+            if (candidate.exists() && candidate.isDirectory) {
+                for (file in candidate.listFiles()) {
+                    deleteRecursively(file)
+                }
+            }
+            candidate.delete()
         }
 
         fun runProcess(pb: ProcessBuilder, name: String): Int {

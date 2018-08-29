@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong
 object PseudoRandom {
     private lateinit var random: Random
     private var SEED_FIELD: Field
+    var currentSeed: String = ""
 
     init {
         try {
@@ -21,7 +22,7 @@ object PseudoRandom {
     fun reset(seed: String?){
         val newSeed = if (seed == null || seed.isEmpty()) System.currentTimeMillis().toString()
         else seed
-        println("Current seed: $newSeed")
+        currentSeed = newSeed
         random = Random(newSeed.hashCode().toLong())
     }
 
