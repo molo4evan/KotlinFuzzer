@@ -1,4 +1,4 @@
-package factories.operators
+package factories.operators.binary
 
 import exceptions.ProductionFailedException
 import factories.utils.IRNodeBuilder
@@ -39,7 +39,7 @@ class BinaryLogicOperatorFactory(
         val leftOperand = builder.setComplexityLimit(leftComplLimit)
                 .setOperatorLimit(leftOpLimit)
                 .setResultType(TypeList.BOOLEAN)
-                .setNoConsts(swap && noconsts)
+                .setNoConsts(swap && noConsts)
                 .getExpressionFactory()
                 .produce()
         // Right branch won't necessarily execute. Ignore initalization performed in it.
@@ -49,7 +49,7 @@ class BinaryLogicOperatorFactory(
             rightOperand = builder.setComplexityLimit(rightComplLimit)
                     .setOperatorLimit(rightOpLimit)
                     .setResultType(TypeList.BOOLEAN)
-                    .setNoConsts(!swap && noconsts)
+                    .setNoConsts(!swap && noConsts)
                     .getExpressionFactory()
                     .produce()
         } finally {

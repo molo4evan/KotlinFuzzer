@@ -1,4 +1,4 @@
-package factories.operators
+package factories.operators.unary
 
 import information.TypeList
 import ir.operators.OperatorKind

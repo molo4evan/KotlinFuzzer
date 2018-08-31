@@ -8,5 +8,5 @@ abstract class OperatorFactory<T : Operator> protected constructor(     //TODO: 
         protected val complexityLimit: Long,
         protected var operatorLimit: Int,
         protected val exceptionSafe: Boolean,
-        protected val noconsts: Boolean
+        protected val noConsts: Boolean
 ) : Factory<T>()

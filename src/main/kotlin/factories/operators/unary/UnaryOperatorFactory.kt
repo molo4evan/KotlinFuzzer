@@ -1,6 +1,7 @@
-package factories.operators
+package factories.operators.unary
 
 import exceptions.ProductionFailedException
+import factories.operators.OperatorFactory
 import information.SymbolTable
 import ir.operators.OperatorKind
 import ir.operators.UnaryOperator

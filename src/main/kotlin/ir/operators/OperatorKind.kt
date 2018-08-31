@@ -70,7 +70,9 @@ enum class OperatorKind(val priority: Int, val isPrefix: Boolean) {
     /** a++  */
     POST_INC(16, false),
     /** a is Type */
-    TYPE_CHECK(17);
+    TYPE_CHECK(17),
+    /** a (!)in b.. (until, downTo) c (step d)*/
+    RANGE(17);
 
     constructor(priority: Int): this(priority, true)
 

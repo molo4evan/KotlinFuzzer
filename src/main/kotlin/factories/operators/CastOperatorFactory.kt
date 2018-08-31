@@ -28,7 +28,7 @@ class CastOperatorFactory(
                         setOwnerClass(owner).
                         setResultType(type).
                         setExceptionSafe(exceptionSafe).
-                        setNoConsts(noconsts).
+                        setNoConsts(noConsts).
                         getExpressionFactory()
                 SymbolTable.push()
                 if (type == result || (exceptionSafe && type.isBuiltIn() || type.canExplicitlyCastTo(result) && !exceptionSafe)) {
