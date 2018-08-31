@@ -25,6 +25,7 @@ import kotlin.reflect.full.createInstance
 const val MINUTES_TO_WAIT = 1L  //Process running time limit
 const val OVERHEAD = 100L       //The overhead for running thread to avoid unexpected interruption of thread (and leaving hanged test process in memory)
 var MAX_WAIT_TIME = 0L
+const val SECONDS_TO_CLOSE = 5L //Time to destroy the process before the "destroyForcibly" invocation
 const val JVM_DEVIATION = 1
 const val NATIVE_DEVIATION = 1
 
@@ -265,10 +266,12 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                                 }
                             }
 
-                            if (exit == "interrupted" && ProductionParams.ignoreHanging?.value()?.not() == true) {
-                                println("$gen: <Kotlin JVM> program hanged in ${names[i]} folder")
-                                writer.write("$gen: <Kotlin JVM> program hanged in ${names[i]} folder\n")
-                                hangs++
+                            if (exit == "interrupted") {
+                                if (ProductionParams.ignoreHanging?.value()?.not() == true) {
+                                    println("$gen: <Kotlin JVM> program hanged in ${names[i]} folder")
+                                    writer.write("$gen: <Kotlin JVM> program hanged in ${names[i]} folder\n")
+                                    hangs++
+                                }
 
                             } else {
                                 println("$gen: <Kotlin JVM> program running error in ${names[i]} folder")
@@ -381,10 +384,10 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
         writer.write("$str\n")
         TestGenerator.deleteRecursively(crashes.toFile())
     } else {
-        val hangInfo = if (ProductionParams.ignoreHanging?.value()?.not() == true) " hangs: $hangs" else ""
+        val hangInfo = if (ProductionParams.ignoreHanging?.value()?.not() == true) ", hangs: $hangs" else ""
         val diffInfo = if (ProductionParams.joinTest?.value() == true) ", cases of different behaviour: $diffCases" else ""
-        println("Compile errors: $compileErrors, runtime errors: $runtimeErrors,$hangInfo$diffInfo")
-        writer.write("Compile errors: $compileErrors, runtime errors: $runtimeErrors,$hangInfo$diffInfo\n")
+        println("\nCompile errors: $compileErrors, runtime errors: $runtimeErrors$hangInfo$diffInfo")
+        writer.write("\nCompile errors: $compileErrors, runtime errors: $runtimeErrors$hangInfo$diffInfo\n")
 
         val input = FileInputStream(report)
         val destRep = crashes.resolve("report.txt").toFile()

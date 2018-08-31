@@ -1,6 +1,7 @@
 package providers.tests_generators
 
 import MINUTES_TO_WAIT
+import SECONDS_TO_CLOSE
 import exceptions.NotInitializedOptionException
 import exceptions.UnsuccessfullRunningException
 import ir.IRNode
@@ -38,8 +39,10 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
 
     companion object {
         private val KOTLIN_BIN = getKotlinHome()
+        private val JAVA_BIN = getJavaHome()
         val KOTLINC_JVM = Paths.get(KOTLIN_BIN, "kotlinc-jvm").toString()
         val KOTLIN = Paths.get(KOTLIN_BIN, "kotlin").toString()
+        val JAVA = Paths.get(JAVA_BIN, "java").toString()
         private val KOTLIN_NATIVE_BIN = if (ProductionParams.useNative?.value() == true || ProductionParams.joinTest?.value() == true) {
             ((ProductionParams.nativePath?.value() ?: throw NotInitializedOptionException("nativePath")) + "/bin/")
         } else {
@@ -87,8 +90,10 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
             var process: Process? = null
             try {
                 process = pb.start()
+                //println("\nProcess ${pb.command()[0]} start work")
                 val inTime = process.waitFor(MINUTES_TO_WAIT, TimeUnit.MINUTES)
                 return if (inTime) {
+                    //println("Process ${pb.command()[0]} end work")
                     var file: FileWriter? = null
                     try {
                         file = FileWriter("$name.exit")
@@ -98,6 +103,13 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
                     }
                     process.exitValue()
                 } else {
+                    process.destroy()
+                    val died = process.waitFor(SECONDS_TO_CLOSE, TimeUnit.SECONDS)
+                    //println("Process ${pb.command()[0]} stopped")
+                    if (!died) {
+                        process.destroyForcibly()
+                        //println("Process ${pb.command()[0]} stopped forcibly")
+                    }
                     var file: FileWriter? = null
                     try {
                         file = FileWriter("$name.exit")
@@ -108,12 +120,26 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
                     -1
                 }
             } finally {
-                process?.destroyForcibly()
+                if (process?.isAlive == true) {
+                    process.destroyForcibly()
+                    println("Process ${pb.command()[0]} stopped from finally")
+                }
             }
         }
 
         private fun getKotlinHome(): String {
             val env = arrayOf("KOTLIN_HOME", "JDK_HOME", "BOOTDIR")
+            for (name in env){
+                val path = System.getenv(name)
+                if (path != null && !path.isEmpty()) {
+                    return "$path/bin/"
+                }
+            }
+            return ""
+        }
+
+        private fun getJavaHome(): String {
+            val env = arrayOf("JAVA_HOME", "JDK_HOME", "BOOTDIR")
             for (name in env){
                 val path = System.getenv(name)
                 if (path != null && !path.isEmpty()) {
@@ -159,7 +185,7 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
         }
     }
 
-    fun compilePrinterNative() {    //TODO: refactor
+    fun compilePrinterNative() {
         val root = getRoot()
         if (printerTmp == null) throw Error("Printer is not extracted")
         val pb = ProcessBuilder(KOTLINC_NATIVE, printerTmp!!.absolutePath, "-p", "library", "-o", generatorDir.resolve("Printer").toString())
@@ -176,7 +202,7 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
     }
 
     fun runProgramJVM(mainName: String) {
-        val pb = ProcessBuilder(KOTLIN, "-cp", "$classPath/$mainName:$generatorDir", "${mainName}Kt")
+        val pb = ProcessBuilder(JAVA, "-cp", "$classPath/$mainName/$mainName.jar:$generatorDir", "${mainName}Kt")
         try {
             ensureExisting(generatorDir.resolve(mainName).resolve("runtime").resolve("jvm"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve("jvm").resolve(mainName).toString())

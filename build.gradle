@@ -36,5 +36,5 @@ task copyRunScript(type: Copy, group: "Build", description: "Copies run script f
 }
 
 task makeAll(group: "Build", description: "Makes a full JAR (with std libs) and a launch script") {
-    dependsOn ":shadowJar", ":copyRunScript"
+    dependsOn  ":clean", ":shadowJar", ":copyRunScript"     //is clean needed?
 }
