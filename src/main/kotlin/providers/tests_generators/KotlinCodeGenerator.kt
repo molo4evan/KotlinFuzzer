@@ -55,7 +55,8 @@ class KotlinCodeGenerator(
                 KOTLINC_JVM,
                 generatorDir.resolve(mainName).resolve("$mainName.kt").toString(),
                 "-nowarn",
-                "-d", generatorDir.resolve(mainName).toString(),
+                "-include-runtime",
+                "-d", generatorDir.resolve(mainName).resolve("$mainName.jar").toString(),
                 "-cp", generatorDir.toString()
         )
         try {

@@ -308,15 +308,10 @@ class KotlinCodeVisitor: Visitor<String> {
         val pv = node.getChild(1)
         return StringBuilder().
                 append("fun main(args: Array<String>) {\n").
-                append("try {\n").
                 append(body.accept(this)).
                 append(addComplexityInfo(body)).
                 append("\n").
                 append(pv.accept(this)).
-                append("} catch (ex: Exception) {\n").   //TODO: implement in a normal way
-                append("    ex.printStackTrace()\n").   // printing stacktrace for kotlin/native programs
-                append("throw ex\n").
-                append("}\n").
                 append("}").
                 append(addComplexityInfo(pv)).
                 append("\n").toString()
