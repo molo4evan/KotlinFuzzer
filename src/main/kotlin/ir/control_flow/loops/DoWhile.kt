@@ -12,7 +12,7 @@ import kotlin.math.max
 //      body2;              [subblock with breaks]
 // } while(condition);
 
-class DoWhile(level: Long, private val loop: Loop, private val thisLoopIterLimit: Long,
+class DoWhile(level: Long, val loop: Loop, private val thisLoopIterLimit: Long,
               header: Block, body1: Block, body2: Block): IRNode(body1.getResultType()) {
 
     enum class DoWhilePart{

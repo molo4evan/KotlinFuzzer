@@ -1,4 +1,4 @@
-package factories.operators
+package factories.operators.binary
 
 import factories.utils.IRNodeBuilder
 import information.TypeList
@@ -6,7 +6,6 @@ import ir.operators.BinaryOperator
 import ir.operators.OperatorKind
 import ir.types.Type
 import utils.PseudoRandom
-import utils.TypeUtil
 
 class CompoundArithmeticAssignmentOperatorFactory(
         opKind: OperatorKind,
@@ -28,7 +27,7 @@ class CompoundArithmeticAssignmentOperatorFactory(
         val leftOpLimit = (PseudoRandom.random() * operatorLimit).toInt()
         val rightOpLimit = operatorLimit - 1 - leftOpLimit
 
-        val builder = IRNodeBuilder().setOwnerClass(owner).setExceptionSafe(exceptionSafe).setNoConsts(noconsts)
+        val builder = IRNodeBuilder().setOwnerClass(owner).setExceptionSafe(exceptionSafe).setNoConsts(noConsts)
 
         val rightExpr = builder.
                 setComplexityLimit(rightCompLimit).

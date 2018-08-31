@@ -1,5 +1,6 @@
 package factories
 
+import exceptions.NotInitializedOptionException
 import exceptions.ProductionFailedException
 import factories.rules.Rule
 import factories.utils.IRNodeBuilder
@@ -56,12 +57,12 @@ class BlockFactory(
                 builder.setComplexityLimit((PseudoRandom.random() * climit).toLong())
                 rule = Rule("block")
                 rule.add("statement", builder.getStatementFactory(), 3.0)
-                if (ProductionParams.disableVarsInBlock?.value()?.not()  ?: throw Exception("Option disableVarsInBlock not initialized")) {
+                if (ProductionParams.disableVarsInBlock?.value()?.not()  ?: throw NotInitializedOptionException("disableVarsInBlock")) {
                     rule.add("decl", builder.setIsLocal(true).getDeclarationFactory())
                 }
                 if (subLimit > 0) {
                     builder.setStatementLimit(subLimit).setLevel(level + 1)
-                    if (ProductionParams.disableNestedBlocks?.value()?.not() ?: throw Exception("Option disableNestedBlocks not initialized")) {
+                    if (ProductionParams.disableNestedBlocks?.value()?.not() ?: throw NotInitializedOptionException("disableNestedBlocks")) {
                         rule.add("block", builder.setCanHaveReturn(false)
                                 .setCanHaveThrow(false)
                                 .setCanHaveBreaks(false)
@@ -92,12 +93,12 @@ class BlockFactory(
             }
             // Ok, if the block can end with break and continue. Generate the appropriate productions.
             rule = Rule("block_ending")
-//            if (canHaveBreaks && !subBlock) {
-//                rule.add("break", builder.getBreakFactory())
-//            }
-//            if (canHaveContinues && !subBlock) {
-//                rule.add("continue", builder.getContinueFactory())
-//            }
+            if (canHaveBreaks && !subBlock) {
+                rule.add("break", builder.getBreakFactory())
+            }
+            if (canHaveContinues && !subBlock) {
+                rule.add("continue", builder.getContinueFactory())
+            }
             if (canHaveReturn && !subBlock && returnType != TypeList.UNIT) {
                 rule.add("return", builder.setComplexityLimit(climit).getReturnFactory())
             }
@@ -125,19 +126,19 @@ class BlockFactory(
     }
 
     private fun addControlFlowDeviation(rule: Rule<IRNode>, builder: IRNodeBuilder) {
-        if (ProductionParams.disableIf?.value()?.not() ?: throw Exception("Option disableIf not initialized")) {
+        if (ProductionParams.disableIf?.value()?.not() ?: throw NotInitializedOptionException("disableIf")) {
             rule.add("if", builder.getIfFactory())
         }
-        if (ProductionParams.disableWhile?.value()?.not() ?: throw Exception("Option disableWhile not initialized")) {
+        if (ProductionParams.disableWhile?.value()?.not() ?: throw NotInitializedOptionException("disableWhile")) {
             rule.add("while", builder.getWhileFactory())
         }
-//        if (ProductionParams.disableDoWhile?.value()?.not() ?: throw Exception("Option disableDoWhile not initialized")) {
-//            rule.add("do_while", builder.getDoWhileFactory())
-//        }
-//        if (ProductionParams.disableFor?.value()?.not() ?: throw Exception("Option disableFor not initialized")) {
+        if (ProductionParams.disableDoWhile?.value()?.not() ?: throw NotInitializedOptionException("disableDoWhile")) {
+            rule.add("do_while", builder.getDoWhileFactory())
+        }
+//        if (ProductionParams.disableFor?.value()?.not() ?: throw NotInitializedOptionException("disableFor")) {
 //            rule.add("for", builder.getForFactory())
 //        }
-        if (ProductionParams.disableWhen?.value()?.not() ?: throw Exception("Option disableWhen not initialized")) {
+        if (ProductionParams.disableWhen?.value()?.not() ?: throw NotInitializedOptionException("disableWhen")) {
             rule.add("when", builder.getWhenFactory())
         }
     }

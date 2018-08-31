@@ -1,10 +1,8 @@
-package factories.operators
+package factories.operators.binary
 
 import information.TypeList
 import ir.operators.OperatorKind
 import ir.types.Type
-import utils.PseudoRandom
-import utils.TypeUtil
 
 class BinaryBitwiseOperatorFactory(
         opKind: OperatorKind,

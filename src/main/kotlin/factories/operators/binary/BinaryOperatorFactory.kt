@@ -1,11 +1,12 @@
-package factories.operators
+package factories.operators.binary
 
 import exceptions.ProductionFailedException
+import factories.operators.OperatorFactory
 import factories.utils.IRNodeBuilder
+import information.SymbolTable
 import ir.operators.BinaryOperator
 import ir.operators.OperatorKind
 import ir.types.Type
-import information.SymbolTable
 import utils.PseudoRandom
 
 abstract class BinaryOperatorFactory protected constructor(
@@ -33,7 +34,7 @@ abstract class BinaryOperatorFactory protected constructor(
 
         val swap = PseudoRandom.randomBoolean()
 
-        val builder = IRNodeBuilder().setExceptionSafe(exceptionSafe).setOwnerClass(owner).setNoConsts(!swap && noconsts)
+        val builder = IRNodeBuilder().setExceptionSafe(exceptionSafe).setOwnerClass(owner).setNoConsts(!swap && noConsts)
 
         val leftExpr = builder.setComplexityLimit(leftComplLimit).setOperatorLimit(leftOpLimit).setResultType(leftType).getExpressionFactory().produce()
 
@@ -45,12 +46,11 @@ abstract class BinaryOperatorFactory protected constructor(
     override fun produce(): BinaryOperator{
         if (!isApplicable(resultType)){
             //avoid implicit use of resultType.toString()
-            throw ProductionFailedException("Type " + resultType.getName() + " is not applicable by " + this.javaClass.name)
+            throw ProductionFailedException("Type " + resultType.getName() + " is not applicable by " + this::class.simpleName)
         }
 
-        lateinit var types: Pair<Type, Type>
-        try {
-            types = generateTypes()
+        val types: Pair<Type, Type> = try {
+            generateTypes()
         } catch (ex: Exception) {
             throw ProductionFailedException(ex.message)
         }

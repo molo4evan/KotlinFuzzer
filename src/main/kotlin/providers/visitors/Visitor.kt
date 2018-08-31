@@ -2,12 +2,14 @@ package providers.visitors
 
 import ir.*
 import ir.control_flow.Break
-import ir.control_flow.*
-import ir.functions.*
-import ir.functions.FunctionCall
+import ir.control_flow.Continue
+import ir.control_flow.If
+import ir.control_flow.When
 import ir.control_flow.loops.*
+import ir.functions.*
 import ir.operators.BinaryOperator
 import ir.operators.CastOperator
+import ir.operators.RangeOperator
 import ir.operators.UnaryOperator
 import ir.types.Type
 import ir.variables.LocalVariable
@@ -52,6 +54,7 @@ interface Visitor<T> {
 ////    fun visit(node: NonStaticMemberVariable): T
     fun visit(node: NothingNode): T
     fun visit(node: PrintVariables): T
+    fun visit(node: RangeOperator): T
     fun visit(node: Return): T
 //    fun visit(node: Throw): T
     fun visit(node: Statement): T

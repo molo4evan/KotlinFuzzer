@@ -80,7 +80,7 @@ class KotlinCodeVisitor: Visitor<String> {
             NOT -> "!"
             PRE_DEC, POST_DEC -> "--"
             PRE_INC, POST_INC -> "++"
-            CAST, TYPE_CHECK -> throw IllegalArgumentException("Can't convert cast or check operator to code this way")
+            else -> throw IllegalArgumentException("Can't convert that kind of operator to code this way")
     }
 
     private fun expressionToKotlinCode(operator: Operator, part: IRNode, order: Operator.Order) = try {
@@ -156,7 +156,26 @@ class KotlinCodeVisitor: Visitor<String> {
     override fun visit(node: Declaration) = node.getChild(0).accept(this)
 
     override fun visit(node: DoWhile): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val header = node.getChild(DoWhile.DoWhilePart.HEADER.ordinal)
+        val body1 = node.getChild(DoWhile.DoWhilePart.BODY1.ordinal)
+        val body2 = node.getChild(DoWhile.DoWhilePart.BODY2.ordinal)
+
+        return StringBuilder().
+                append(node.loop.initializer.accept(this)).
+                append("\n").
+                append(header.accept(this)).
+                append(PrintingUtils.align(node.level - 1)).
+                append("do {\n").
+                append(body1.accept(this)).
+                append(PrintingUtils.align(node.level)).
+                append(node.loop.manipulator.accept(this)).
+                append("\n").
+                append(body2.accept(this)).
+                append(PrintingUtils.align(node.level - 1)).
+                append("} while (").
+                append(node.loop.condition.accept(this)).
+                append(")").toString()
+
     }
 
     override fun visit(node: For): String {
@@ -320,6 +339,29 @@ class KotlinCodeVisitor: Visitor<String> {
     override fun visit(node: NothingNode) = ""
 
     override fun visit(node: PrintVariables) = PrintingUtils.printVariablesAsBlock(node).accept(this)
+
+    override fun visit(node: RangeOperator): String {
+        val target = node.getChild(RangeOperator.RangeParts.TARGET.ordinal)
+        val from = node.getChild(RangeOperator.RangeParts.FROM.ordinal)
+        val to = node.getChild(RangeOperator.RangeParts.TO.ordinal)
+        val step = node.getChild(RangeOperator.RangeParts.STEP.ordinal)
+
+        val stepStr = if (step is NothingNode) "" else " step ${step.accept(this)}"
+
+        val direction = if (node.forward) {
+            if (node.inclusive) {
+                ".."
+            } else {
+                "until"
+            }
+        } else {
+            "downTo"
+        }
+
+        val opStr = if (node.opposite) "!" else ""
+
+        return "((${target.accept(this)}) ${opStr}in (${from.accept(this)}) $direction (${to.accept(this)}$stepStr))"
+    }
 
     override fun visit(node: Return) = "return ${node.retExpr.accept(this)}"
 

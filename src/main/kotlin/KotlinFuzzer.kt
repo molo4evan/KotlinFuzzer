@@ -242,51 +242,51 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                     }
                 }
 
-                if (jvmRuntime.exists()) {
-                    jvmReader = Scanner(jvmRuntime)
-                    val exit = jvmReader.nextLine()
-                    if (exit == "interrupted" || exit.toInt() != 0) {
-                        if (runtime.resolve("jvm").resolve("${names[i]}.err").toFile().exists()) {
-                            jvmReader.close()
-                            jvmReader = Scanner(runtime.resolve("jvm").resolve("${names[i]}.err").toFile())
-                            while (jvmReader.hasNextLine()) {
-                                val str = jvmReader.nextLine()
-                                if (str.contains("ArithmeticException") && ProductionParams.ignoreArithmeticExceptions?.value() == true) {
-                                    jvmReader.close()
-                                    continue@next_gen
-                                }
-                                if (str.contains("/ by zero")) {
-                                    jvmReader.close()
-                                    divByZero = true
-                                    continue@next_gen
-                                }
-                            }
-
-                            if (exit == "interrupted") {
-                                if (ProductionParams.ignoreHanging?.value()?.not() == true) {
-                                    println("$gen: <Kotlin JVM> program hanged in ${names[i]} folder")
-                                    writer.write("$gen: <Kotlin JVM> program hanged in ${names[i]} folder\n")
-                                    hangs++
+                try {
+                    if (jvmRuntime.exists()) {
+                        jvmReader = Scanner(jvmRuntime)
+                        val exit = jvmReader.nextLine()
+                        if (exit == "interrupted" || exit.toInt() != 0) {
+                            if (runtime.resolve("jvm").resolve("${names[i]}.err").toFile().exists()) {
+                                jvmReader.close()
+                                jvmReader = Scanner(runtime.resolve("jvm").resolve("${names[i]}.err").toFile())
+                                while (jvmReader.hasNextLine()) {
+                                    val str = jvmReader.nextLine()
+                                    if (str.contains("ArithmeticException")) {
+                                        if (str.contains("/ by zero")) {
+                                            jvmReader.close()
+                                            divByZero = true
+                                            throw ProductionFailedException()
+                                        }
+                                    }
                                 }
 
+                                if (exit == "interrupted") {
+                                    if (ProductionParams.ignoreHanging?.value()?.not() == true) {
+                                        println("$gen: <Kotlin JVM> program hanged in ${names[i]} folder")
+                                        writer.write("$gen: <Kotlin JVM> program hanged in ${names[i]} folder\n")
+                                        hangs++
+                                    }
+
+                                } else {
+                                    println("$gen: <Kotlin JVM> program running error in ${names[i]} folder")
+                                    writer.write("$gen: <Kotlin JVM> program running error in ${names[i]} folder\n")
+                                    runtimeErrors++
+
+                                    copyBuggyFile(crashes, gen, names[i])
+                                }
+                                allCorrect = false
+                                runtimeDifference = runtimeDifference xor JVM_DEVIATION
                             } else {
-                                println("$gen: <Kotlin JVM> program running error in ${names[i]} folder")
-                                writer.write("$gen: <Kotlin JVM> program running error in ${names[i]} folder\n")
+                                println("$gen: <Kotlin JVM> program running error in ${names[i]} folder, cannot find output file")
+                                writer.write("$gen: <Kotlin JVM> program running error in ${names[i]} folder, cannot find output file\n")
                                 runtimeErrors++
 
                                 copyBuggyFile(crashes, gen, names[i])
                             }
-                            allCorrect = false
-                            runtimeDifference = runtimeDifference xor JVM_DEVIATION
-                        } else {
-                            println("$gen: <Kotlin JVM> program running error in ${names[i]} folder, cannot find output file")
-                            writer.write("$gen: <Kotlin JVM> program running error in ${names[i]} folder, cannot find output file\n")
-                            runtimeErrors++
-
-                            copyBuggyFile(crashes, gen, names[i])
                         }
                     }
-                }
+                } catch (ex: ProductionFailedException) {}  //TODO: hardcode
 
                 if (nativeRuntime.exists()) {
                     nativeReader = Scanner(nativeRuntime)
@@ -296,10 +296,10 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                             nativeReader.close()
                             nativeReader = Scanner(runtime.resolve("native").resolve("${names[i]}.out").toFile())
                             while (nativeReader.hasNextLine()) {
-                                if (nativeReader.nextLine().contains("ArithmeticException") && ProductionParams.ignoreArithmeticExceptions?.value() == true) {
-                                    nativeReader.close()
-                                    continue@next_gen
-                                }
+                                if (nativeReader.nextLine().contains("ArithmeticException") && divByZero) {       // it may theoretically work incorrect if the
+                                    nativeReader.close()                                                                // KotlinJVM produces "division by zero" and
+                                    continue@next_gen                                                                   // Kotlin/Native produces ArithmeticException
+                                }                                                                                       // in the other part of code in the same time...
                             }
                             if (exit == "interrupted") {
                                 if (ProductionParams.ignoreHanging?.value()?.not() == true) {

@@ -33,7 +33,7 @@ class WhenFactory(
                     setOwnerClass(owner).
                     setOperatorLimit(operatorLimit).
                     setSubBlock(false).
-                    setCanHaveBreaks(true).
+                    setCanHaveBreaks(false).
                     setCanHaveContinues(false).
                     setCanHaveReturn(canHareReturn)
             for (type in whenTypes) {

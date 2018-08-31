@@ -12,11 +12,12 @@ import ir.variables.LocalVariable
 import utils.ProductionParams
 import utils.PseudoRandom
 
-class CounterManipulatorFactory(private val counter: LocalVariable): Factory<CounterManipulator>() {
+class CounterManipulatorFactory(private val counter: LocalVariable, val forward: Boolean): Factory<CounterManipulator>() {
     override fun produce(): CounterManipulator {
         val step = PseudoRandom.randomNotZero(ProductionParams.stepLimit?.value() ?: throw NotInitializedOptionException("stepLimit"))
         val lit = Literal(step, TypeList.INT)
-        val manipulator = BinaryOperator(OperatorKind.COMPOUND_ADD, counter.getResultType(), counter, lit)
+        val op = if (forward) OperatorKind.COMPOUND_ADD else OperatorKind.COMPOUND_SUB
+        val manipulator = BinaryOperator(op, counter.getResultType(), counter, lit)
         return CounterManipulator(Statement(manipulator))
     }
 }

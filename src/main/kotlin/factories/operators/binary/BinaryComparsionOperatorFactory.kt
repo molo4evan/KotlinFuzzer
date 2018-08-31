@@ -1,11 +1,11 @@
-package factories.operators
+package factories.operators.binary
 
 import information.TypeList
 import ir.operators.OperatorKind
 import ir.types.Type
 import utils.PseudoRandom
 
-class BinaryEqualityOperatorFactory(
+class BinaryComparsionOperatorFactory(
         opKind: OperatorKind,
         complexityLimit: Long,
         operatorLimit: Int,
@@ -16,6 +16,8 @@ class BinaryEqualityOperatorFactory(
 
     override fun isApplicable(resultType: Type) = resultType == TypeList.BOOLEAN
 
-    override fun generateTypes() = Pair(TypeList.BOOLEAN, TypeList.BOOLEAN)
+    override fun generateTypes(): Pair<Type, Type> {
+        val type = PseudoRandom.randomElement(TypeList.getBuiltIn())
+        return Pair(type, type)
+    }
 }
-

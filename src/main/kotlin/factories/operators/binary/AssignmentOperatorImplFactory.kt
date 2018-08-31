@@ -1,4 +1,4 @@
-package factories.operators
+package factories.operators.binary
 
 import exceptions.ProductionFailedException
 import factories.utils.IRNodeBuilder
@@ -32,7 +32,7 @@ class AssignmentOperatorImplFactory(
         val builder = IRNodeBuilder().
                 setOwnerClass(owner).
                 setExceptionSafe(exceptionSafe).
-                setNoConsts(noconsts).
+                setNoConsts(noConsts).
                 setComplexityLimit(leftComplLimit).
                 setOperatorLimit(leftOpLimit).
                 setResultType(leftType).

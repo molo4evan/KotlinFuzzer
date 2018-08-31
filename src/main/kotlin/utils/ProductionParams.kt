@@ -2,6 +2,7 @@ package utils
 
 import utils.OptionResolver.Option
 import utils.OptionResolver.addBooleanOption
+import utils.OptionResolver.addDoubleOption
 import utils.OptionResolver.addIntOption
 
 object ProductionParams {
@@ -55,7 +56,6 @@ object ProductionParams {
     var generators: Option<String>? = null
     var generatorsFactories: Option<String>? = null
     var functionCallsPercent: Option<Double>? = null
-    var ignoreArithmeticExceptions: Option<Boolean>? = null
     var ignoreHanging: Option<Boolean>? = null
     var propertyFileOpt: Option<String>? = null
 
@@ -63,6 +63,8 @@ object ProductionParams {
     var nativePath: Option<String>? = null
     var joinTest: Option<Boolean>? = null
     var stepLimit: Option<Int>? = null
+    var headerLimit: Option<Double>? = null
+    var allowCounterMutation: Option<Boolean>? = null
 
     fun register() {
         functionsArgLimit = OptionResolver.addIntOption('a', "member-functions-arg-limit", 5, "Upper limit on the number of function args")
@@ -85,6 +87,7 @@ object ProductionParams {
         complexityLimit = OptionResolver.addLongOption('x', "complexity-limit", 10000000, "Upper limit on complexity")
         specificSeed = OptionResolver.addLongOption('z', "specificSeed", 0L, "A seed to be set for specific test generation(regular seed still needed for initialization)")
         addExternalSymbols = OptionResolver.addStringOption("add-external-symbols", "all", "Add symbols for listed classes (comma-separated list)")
+        allowCounterMutation = addBooleanOption("allow-counter-mutation", "Allows counter mutations in the body of loops (may cause hang of program)")
         //chanceExpressionIndex = OptionResolver.addDoubleOption("chance-expression-index", 0.0, "A floating point number used to restrict chance of generating expression in array index while creating or accessing by index")
         //disableArrays = OptionResolver.addBooleanOption("disable-arrays", "Disable generation of arrays")
         //disableClasses = OptionResolver.addBooleanOption("disable-classes", "Disable generation of classes")
@@ -111,7 +114,7 @@ object ProductionParams {
         functionCallsPercent = OptionResolver.addDoubleOption("function-calls-percent", 0.1, "Percentage of function calls in generating expressions")
         generators = OptionResolver.addStringOption("generators", "", "Comma-separated list of generator names")
         generatorsFactories = OptionResolver.addStringOption("generators-factories", "", "Comma-separated list of generators factories fully qualified class names")
-        ignoreArithmeticExceptions = addBooleanOption("ignore-arithmetic", "Don\'t add an information about \'ArithmeticException\' throws in generated tests to report")
+        headerLimit = addDoubleOption("header-limit", 0.005, "Relative size of header in cycles (in percents)")
         //maxCfgDepth = OptionResolver.addIntOption("max-cfg-depth", 3, "A non-negative decimal integer used to restrict the upper bound of depth of control flow graph")
         //minCfgDepth = OptionResolver.addIntOption("min-cfg-depth", 2, "A non-negative decimal integer used to restrict the lower bound of depth of control flow graph")
         nativePath = OptionResolver.addStringOption("native-path", "", "Kotlin/Native home directory (used if \'use-native\' option is \'true\')")

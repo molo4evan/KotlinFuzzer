@@ -1,4 +1,4 @@
-package factories.operators
+package factories.operators.unary
 
 import factories.rules.ExpressionFactory
 import information.TypeList
@@ -22,5 +22,5 @@ internal class LogicalInversionOperatorFactory(
             ownerClass,
             TypeList.BOOLEAN,
             exceptionSafe,
-            noconsts).produce())
+            noConsts).produce())
 }

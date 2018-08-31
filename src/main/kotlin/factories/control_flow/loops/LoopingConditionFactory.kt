@@ -17,7 +17,8 @@ class LoopingConditionFactory(
         private val operatorLimit: Int,
         private val owner: Type?,
         private val counter: LocalVariable,
-        private val limiter: Literal
+        private val limiter: Literal,
+        private val forward: Boolean
 ): Factory<LoopingCondition>() {
     override fun produce(): LoopingCondition {
         var leftExpr: IRNode? = null
@@ -40,7 +41,12 @@ class LoopingConditionFactory(
         // Just as a temporary solution we'll assume that the counter is monotonically increasing.
         // And use counter < n condition to limit the loop.
         // In future we may introduce other equivalent relations as well.
-        var condition = BinaryOperator(OperatorKind.LT, TypeList.BOOLEAN, counter, limiter)
+        val op = if (forward) {
+            if (PseudoRandom.randomBoolean()) OperatorKind.LT else OperatorKind.LE
+        } else {
+            if (PseudoRandom.randomBoolean()) OperatorKind.GT else OperatorKind.GE
+        }
+        var condition = BinaryOperator(op, TypeList.BOOLEAN, counter, limiter)
         condition = if (rightExpr != null) BinaryOperator(OperatorKind.AND, TypeList.BOOLEAN, condition, rightExpr) else condition  //may get infinite cycle?
         condition = if (leftExpr != null) BinaryOperator(OperatorKind.AND, TypeList.BOOLEAN, condition, leftExpr) else condition
         return LoopingCondition(condition)

@@ -1,4 +1,4 @@
-package factories.operators
+package factories.operators.unary
 
 import factories.utils.IRNodeBuilder
 import information.TypeList
@@ -28,7 +28,7 @@ internal class IncDecOperatorFactory(
                 .setIsConstant(false)
                 .setIsInitialized(true)
                 .setExceptionSafe(exceptionSafe)
-                .setNoConsts(noconsts)
+                .setNoConsts(noConsts)
                 .getVariableFactory()
                 .produce())
     }

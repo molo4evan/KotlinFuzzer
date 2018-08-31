@@ -5,7 +5,7 @@ import ir.Statement
 import providers.visitors.Visitor
 
 /*
- * Note: Can be theoretically subclassed from Operator and have an          //???
+ * Note: Can be theoretically subclassed from Operator and have an
  * operatorPriority field. Therefore, it can used later as a part
  * of some expression.
  */

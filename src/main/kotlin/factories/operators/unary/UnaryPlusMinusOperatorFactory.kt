@@ -1,6 +1,5 @@
-package factories.operators
+package factories.operators.unary
 
-import exceptions.ProductionFailedException
 import factories.utils.IRNodeBuilder
 import information.TypeList
 import ir.operators.OperatorKind
@@ -41,7 +40,7 @@ internal class UnaryPlusMinusOperatorFactory(
                 .setOwnerClass(ownerClass)
                 .setResultType(type)
                 .setExceptionSafe(exceptionSafe)
-                .setNoConsts(noconsts)
+                .setNoConsts(noConsts)
                 .getExpressionFactory()
                 .produce())
     }

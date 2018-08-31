@@ -3,14 +3,18 @@ package factories.utils
 import exceptions.NotInitializedOptionException
 import exceptions.ProductionFailedException
 import factories.*
+import factories.control_flow.BreakFactory
+import factories.control_flow.ContinueFactory
 import factories.control_flow.IfFactory
 import factories.control_flow.WhenFactory
-import factories.control_flow.loops.CounterInitializerFactory
-import factories.control_flow.loops.CounterManipulatorFactory
-import factories.control_flow.loops.LoopingConditionFactory
-import factories.control_flow.loops.WhileFactory
+import factories.control_flow.loops.*
 import factories.functoins.*
-import factories.operators.*
+import factories.operators.CastOperatorFactory
+import factories.operators.RangeOperatorFactory
+import factories.operators.binary.*
+import factories.operators.unary.IncDecOperatorFactory
+import factories.operators.unary.LogicalInversionOperatorFactory
+import factories.operators.unary.UnaryPlusMinusOperatorFactory
 import factories.rules.*
 import factories.rules.operators.ArithmeticOperatorFactory
 import factories.rules.operators.AssignmentOperatorFactory
@@ -22,12 +26,11 @@ import factories.variables.VariableInitializationFactory
 import information.FunctionInfo
 import information.TypeList
 import ir.*
+import ir.control_flow.Break
+import ir.control_flow.Continue
 import ir.control_flow.If
 import ir.control_flow.When
-import ir.control_flow.loops.CounterInitializer
-import ir.control_flow.loops.CounterManipulator
-import ir.control_flow.loops.LoopingCondition
-import ir.control_flow.loops.While
+import ir.control_flow.loops.*
 import ir.functions.*
 import ir.operators.*
 import ir.operators.OperatorKind.*
@@ -37,8 +40,7 @@ import ir.variables.*
 import utils.ProductionParams
 import java.util.*
 
-class IRNodeBuilder() {                                                  //TODO: mb replace optional with custom class (see getOwnerClass())
-    //private Optional<Type> variableType = Optional.empty();
+class IRNodeBuilder {
     private var argumentType = Optional.empty<Type?>()
     private var variableNumber = Optional.empty<Int>()
     private var complexityLimit = Optional.empty<Long>()
@@ -68,6 +70,8 @@ class IRNodeBuilder() {                                                  //TODO:
     private var flags = Optional.empty<Int>()
     private var functionInfo = Optional.empty<FunctionInfo>()
 
+
+    /** factories */
 
     fun getArgumentDeclarationFactory(): Factory<ArgumentDeclaration> {
         return ArgumentDeclarationFactory(getArgumentType(), getVariableNumber())
@@ -148,12 +152,12 @@ class IRNodeBuilder() {                                                  //TODO:
                 getStatementLimit(), getOperatorLimit(), getLevel(), subBlock.orElse(false),
                 canHaveBreaks.orElse(false), canHaveContinues.orElse(false),
                 canHaveReturn.orElse(false), canHaveReturn.orElse(false))
-        //now 'throw' can be placed only in the same positions as 'return'
+        //now 'throw' can be placed only in the same positions as 'return' TODO: mb should change
     }
 
-//    fun getBreakFactory(): Factory<Break> {
-//        return BreakFactory()
-//    }
+    fun getBreakFactory(): Factory<Break> {
+        return BreakFactory()
+    }
 
     fun getCastOperatorFactory(): Factory<CastOperator> {
         return CastOperatorFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
@@ -198,16 +202,16 @@ class IRNodeBuilder() {                                                  //TODO:
 //                getFunctionsArgLimit(), getLevel())
 //    }
 
-//    fun getContinueFactory(): Factory<Continue> {
-//        return ContinueFactory()
-//    }
+    fun getContinueFactory(): Factory<Continue> {
+        return ContinueFactory()
+    }
 
     fun getCounterInitializerFactory(counterValue: Int): Factory<CounterInitializer> {
         return CounterInitializerFactory(getOwnerClass(), counterValue)
     }
 
-    fun getCounterManipulatorFactory(): Factory<CounterManipulator> {
-        return CounterManipulatorFactory(getLocalVariable())
+    fun getCounterManipulatorFactory(forward: Boolean): Factory<CounterManipulator> {
+        return CounterManipulatorFactory(getLocalVariable(), forward)
     }
 
     fun getDeclarationFactory(): Factory<Declaration> {     //BlockFactory, VariableDeclarationBlockFactory
@@ -215,10 +219,10 @@ class IRNodeBuilder() {                                                  //TODO:
                 getIsLocal(), getExceptionSafe())
     }
 
-//    fun getDoWhileFactory(): Factory<DoWhile> {
-//        return DoWhileFactory(getOwnerClass(), getResultType(), getComplexityLimit(),
-//                getStatementLimit(), getOperatorLimit(), getLevel(), getCanHaveReturn())
-//    }
+    fun getDoWhileFactory(): Factory<DoWhile> {
+        return DoWhileFactory(getOwnerClass(), getResultType(), getComplexityLimit(),
+                getStatementLimit(), getOperatorLimit(), getLevel(), getCanHaveReturn())
+    }
 
     fun getWhileFactory(): Factory<While> {
         return WhileFactory(getOwnerClass(), getResultType(), getComplexityLimit(),
@@ -270,7 +274,7 @@ class IRNodeBuilder() {                                                  //TODO:
                 getMemberFunctionsArgLimit(), getLevel(), getFlags())
     }
 
-    fun getFunctionCallFactory(): Factory<FunctionCall> {   //used in rules
+    fun getFunctionCallFactory(): Factory<FunctionCall> {
         return FunctionCallFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
                 resultType.orElse(null), getExceptionSafe())
     }
@@ -307,16 +311,16 @@ class IRNodeBuilder() {                                                  //TODO:
     }
 
     fun getLocalVariableFactory(): Factory<LocalVariable> {
-        return LocalVariableFactory(/*getVariableType()*/getResultType(), getFlags())
+        return LocalVariableFactory(getResultType(), getFlags())
     }
 
     fun getLogicOperatorFactory(): Factory<Operator> {
         return LogicOperatorFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(), getExceptionSafe(), getNoConsts())
     }
 
-    fun getLoopingConditionFactory(limiter: Literal): Factory<LoopingCondition> {
+    fun getLoopingConditionFactory(limiter: Literal, forward: Boolean): Factory<LoopingCondition> {
         return LoopingConditionFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
-                getLocalVariable(), limiter)
+                getLocalVariable(), limiter, forward)
     }
 
 //    fun getNonStaticMemberVariableFactory(): Factory<NonStaticMemberVariable> {
@@ -330,6 +334,10 @@ class IRNodeBuilder() {                                                  //TODO:
 
     fun getPrintVariablesFactory(): Factory<PrintVariables> {
         return PrintVariablesFactory(getOwnerClass(), getLevel())
+    }
+
+    fun getRangeOperatorFactory(): Factory<RangeOperator> {
+        return RangeOperatorFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(), getExceptionSafe(), getNoConsts())
     }
 
     fun getReturnFactory(): Factory<Return> {
@@ -366,7 +374,7 @@ class IRNodeBuilder() {                                                  //TODO:
 
     fun getVariableFactory(): Factory<VariableBase> {
         return VariableFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
-                /*getVariableType()*/getResultType(), getIsConstant(), getIsInitialized(), getExceptionSafe(), getNoConsts())
+                getResultType(), getIsConstant(), getIsInitialized(), getExceptionSafe(), getNoConsts())
     }
 
     fun getVariableInitializationFactory(): Factory<VariableInitialization> {
@@ -380,6 +388,8 @@ class IRNodeBuilder() {                                                  //TODO:
 //                getLevel(), subBlock.orElse(false), getCanHaveBreaks(),
 //                getCanHaveContinues(), getCanHaveReturn())
 //    }
+
+    /** setters */
 
     fun setArgumentType(value: Type?): IRNodeBuilder {
         if (value != null) argumentType = Optional.of(value)
@@ -424,7 +434,7 @@ class IRNodeBuilder() {                                                  //TODO:
         return this
     }
 
-    // TODO: check is noconsts is always false in current implementation
+    // TODO: check is noConsts is always false in current implementation
     fun setNoConsts(value: Boolean): IRNodeBuilder {
         noConsts = Optional.of(value)
         return this
@@ -520,11 +530,7 @@ class IRNodeBuilder() {                                                  //TODO:
         return this
     }
 
-    // getters
-/*    private Type getVariableType() {
-        return variableType.orElseThrow(() -> new IllegalArgumentException(
-                "Variable type wasn't set"));
-    }*/
+    /** getters */
 
     private fun getArgumentType(): Type? {
         return argumentType.orElse(null)
@@ -558,7 +564,7 @@ class IRNodeBuilder() {                                                  //TODO:
         }
     }
 
-    private fun getOwnerClass(): Type? {                                                         //TODO: incorrect
+    private fun getOwnerClass(): Type? {
         return ownerClass.orElse(null)
     }
 
