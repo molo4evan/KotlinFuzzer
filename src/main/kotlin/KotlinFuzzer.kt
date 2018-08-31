@@ -122,9 +122,6 @@ fun initializeTestGenerators(args: Array<String>) {
     println("Current seed: ${PseudoRandom.currentSeed}")
 //    TypesParser.parseTypesAndMethods(ProductionParams.classesFile?.value() ?: throw NotInitializedOptionException("classesFile"),
 //            ProductionParams.excludeMethodsFile?.value() ?: throw NotInitializedOptionException("excludedMethodsFile"))
-    if (ProductionParams.specificSeed?.isSet() ?: throw NotInitializedOptionException("specificSeed")) {
-        PseudoRandom.setCurrentSeed(ProductionParams.specificSeed!!.value())
-    }
 }
 
 fun getTestGenerators(): List<TestGenerator> {
@@ -158,7 +155,7 @@ fun generateIRTreeWithoutOOP(name: String): Pair<IRNode, IRNode> {
     try {
         topLevelFunctions = builder.setOwnerClass(null).
                 setMemberFunctionsLimit(ProductionParams.memberFunctionsLimit?.value() ?: throw NotInitializedOptionException("memberFunctionsLimit")).
-                setMemberFunctionsArgLimit(ProductionParams.memberFunctionsArgLimit?.value() ?: throw NotInitializedOptionException("memberFunctionsArgLimit")).
+                setMemberFunctionsArgLimit(ProductionParams.functionsArgLimit?.value() ?: throw NotInitializedOptionException("functionsArgLimit")).
                 setComplexityLimit(topFunComplexity).
                 setStatementLimit(ProductionParams.statementLimit?.value() ?: throw NotInitializedOptionException("statementLimit")).
                 setOperatorLimit(ProductionParams.operatorLimit?.value() ?: throw NotInitializedOptionException("operatorLimit")).
@@ -195,7 +192,6 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
     TestGenerator.ensureExisting(crashes)
 
     val reportDir = TestGenerator.getRoot().resolve("reports")
-    TestGenerator.deleteRecursively(reportDir.toFile())
     TestGenerator.ensureExisting(reportDir)
     val report = reportDir.resolve("report_${PseudoRandom.currentSeed}.txt").toFile()
     if (report.exists()) report.delete()

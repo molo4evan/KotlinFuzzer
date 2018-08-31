@@ -164,7 +164,7 @@ class IRNodeBuilder() {                                                  //TODO:
 //        return ClassDefinitionBlockFactory(getPrefix(),
 //                ProductionParams.classesLimit.value(),
 //                ProductionParams.memberFunctionsLimit.value(),
-//                ProductionParams.memberFunctionsArgLimit.value(),
+//                ProductionParams.functionsArgLimit.value(),
 //                getComplexityLimit(),
 //                ProductionParams.statementLimit.value(),
 //                ProductionParams.operatorLimit.value(),
@@ -174,7 +174,7 @@ class IRNodeBuilder() {                                                  //TODO:
 //    fun getMainKlassFactory(): Factory<MainKlass> {
 //        return MainKlassFactory(getName(), getComplexityLimit(),
 //                ProductionParams.memberFunctionsLimit.value(),
-//                ProductionParams.memberFunctionsArgLimit.value(),
+//                ProductionParams.functionsArgLimit.value(),
 //                ProductionParams.statementLimit.value(),
 //                ProductionParams.testStatementLimit.value(),
 //                ProductionParams.operatorLimit.value())
@@ -188,14 +188,14 @@ class IRNodeBuilder() {                                                  //TODO:
 
 //    fun getConstructorDefinitionBlockFactory(): Factory<ConstructorDefinitionBlock> {
 //        return ConstructorDefinitionBlockFactory(getOwnerClass(), getMemberFunctionsLimit(),
-//                ProductionParams.memberFunctionsArgLimit.value(), getComplexityLimit(),
+//                ProductionParams.functionsArgLimit.value(), getComplexityLimit(),
 //                getStatementLimit(), getOperatorLimit(), getLevel())
 //    }
 //
 //    fun getConstructorDefinitionFactory(): Factory<ConstructorDefinition> {
 //        return ConstructorDefinitionFactory(getOwnerClass(), getComplexityLimit(),
 //                getStatementLimit(), getOperatorLimit(),
-//                getMemberFunctionsArgLimit(), getLevel())
+//                getFunctionsArgLimit(), getLevel())
 //    }
 
 //    fun getContinueFactory(): Factory<Continue> {
@@ -288,12 +288,12 @@ class IRNodeBuilder() {                                                  //TODO:
 
 //    fun getInterfaceFactory(): Factory<Interface> {
 //        return InterfaceFactory(getName(), getMemberFunctionsLimit(),
-//                getMemberFunctionsArgLimit(), getLevel())
+//                getFunctionsArgLimit(), getLevel())
 //    }
 
 //    fun getKlassFactory(): Factory<Klass> {
 //        return KlassFactory(getName(), getComplexityLimit(),
-//                getMemberFunctionsLimit(), getMemberFunctionsArgLimit(), getStatementLimit(),
+//                getMemberFunctionsLimit(), getFunctionsArgLimit(), getStatementLimit(),
 //                getOperatorLimit(), getLevel())
 //    }
 

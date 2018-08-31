@@ -1,5 +1,6 @@
 package factories.control_flow.loops
 
+import exceptions.NotInitializedOptionException
 import exceptions.ProductionFailedException
 import factories.SafeFactory
 import factories.utils.IRNodeBuilder
@@ -11,6 +12,7 @@ import ir.control_flow.loops.Loop
 import ir.control_flow.loops.While
 import ir.types.Type
 import ir.variables.LocalVariable
+import utils.ProductionParams
 import utils.PseudoRandom
 
 class WhileFactory(
@@ -21,7 +23,7 @@ class WhileFactory(
         private val operatorLimit: Int,
         private val level: Long,
         private val canHaveReturn: Boolean
-): SafeFactory<While>() {
+): SafeFactory<While>() {                   //TODO: add downto loop?
     override fun sproduce(): While {
         if (statementLimit <= 0 || complexityLimit <= 0) {
             throw ProductionFailedException()
@@ -34,7 +36,7 @@ class WhileFactory(
         currentCompl -= headerCompLimit
         val headerStatLimit = PseudoRandom.randomNotZero(statementLimit / 3)
 
-        val iterationLimit = (0.0001 * currentCompl * PseudoRandom.random()).toLong()
+        val iterationLimit = (0.0001 * currentCompl * PseudoRandom.random()).toLong() * PseudoRandom.randomNotZero(ProductionParams.stepLimit?.value() ?: throw NotInitializedOptionException("stepLimit"))
         if (iterationLimit > Int.MAX_VALUE.toLong() || iterationLimit == 0L) {
             throw ProductionFailedException()
         }

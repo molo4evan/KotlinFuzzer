@@ -2,7 +2,6 @@ package utils
 
 import java.lang.reflect.Field
 import java.util.*
-import java.util.concurrent.atomic.AtomicLong
 
 object PseudoRandom {
     private lateinit var random: Random
@@ -79,24 +78,5 @@ object PseudoRandom {
         if (array.isEmpty())
             throw NoSuchElementException("Empty, no element can be randomly selected")
         return array[random.nextInt(array.size)]
-    }
-
-    fun getCurrentSeed(): Long {
-        try {
-            return (SEED_FIELD.get(random) as AtomicLong).get()
-        } catch (roe: ReflectiveOperationException) {
-            throw Error("Can't get seed: $roe", roe)
-        }
-
-    }
-
-    fun setCurrentSeed(seed: Long) {
-        try {
-            val seedObject = SEED_FIELD.get(random) as AtomicLong
-            seedObject.set(seed)
-        } catch (roe: ReflectiveOperationException) {
-            throw Error("Can't set seed: $roe", roe)
-        }
-
     }
 }
