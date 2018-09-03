@@ -51,12 +51,10 @@ class RangeOperatorFactory(
                 setComplexityLimit(toCompLimit).
                 setOperatorLimit(toOpLimit).
                 getExpressionFactory().produce()
-
-        val forward = if (paramType == TypeList.DOUBLE) true else PseudoRandom.randomBoolean()
         val inclusive = if (paramType == TypeList.DOUBLE) true else PseudoRandom.randomBoolean()
         val opposite = PseudoRandom.randomBoolean()
 
-        return RangeOperator(targetExpr, fromExpr, toExpr, NothingNode(), forward, inclusive, opposite)
+        return RangeOperator(targetExpr, fromExpr, toExpr, NothingNode(), true, inclusive, opposite)
     }
 
     override fun produce(): RangeOperator {

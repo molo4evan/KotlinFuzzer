@@ -29,6 +29,8 @@ const val SECONDS_TO_CLOSE = 5L //Time to destroy the process before the "destro
 const val JVM_DEVIATION = 1
 const val NATIVE_DEVIATION = 1
 
+const val ARITHMETIC_EXIT = 136 // Native runtime ArithmeticException exit code (not an authentic information)
+
 fun main(args: Array<String>) {
     if (!args.isEmpty() && (args[0] == "-h" || args[0] == "--help")){
         showHelp()
@@ -190,6 +192,8 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
     val crashes = TestGenerator.getRoot().resolve("crashes").resolve(PseudoRandom.currentSeed)
     TestGenerator.deleteRecursively(crashes.toFile())
     TestGenerator.ensureExisting(crashes)
+    val crashReport = crashes.resolve("report.txt").toFile()
+    if (!crashReport.exists()) crashReport.createNewFile()
 
     val reportDir = TestGenerator.getRoot().resolve("reports")
     TestGenerator.ensureExisting(reportDir)
@@ -197,10 +201,16 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
     if (report.exists()) report.delete()
     report.createNewFile()
 
-    val writer = BufferedWriter(FileWriter(report))
+    val regularWriter = BufferedWriter(FileWriter(report))
+    val crashWriter = BufferedWriter(FileWriter(crashReport))
+
+    val writers = mutableListOf<BufferedWriter>()
+    writers.add(regularWriter)
+    writers.add(crashWriter)
 
     val numTests = (ProductionParams.numberOfTests?.value() ?: throw NotInitializedOptionException("numberOfTests"))
-    writer.write("$numTests tests generated\n")
+    regularWriter.write("$numTests tests generated\n")
+    crashWriter.write("$numTests tests generated\n")
 
     for (i in 0 until numTests) {
         next_gen@ for (gen in gens) {
@@ -219,8 +229,7 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                 if (jvmCompile.exists()) {
                     jvmReader = Scanner(jvmCompile)
                     if (jvmReader.nextInt() != 0) {
-                        println("$gen: <Kotlin JVM> compilation error in ${names[i]} folder")
-                        writer.write("$gen: <Kotlin JVM> compilation error in ${names[i]} folder\n")
+                        writeInfo("$gen: <Kotlin JVM> compilation error in ${names[i]} folder", writers)
                         allCorrect = false
                         compileErrors++
                         compileDifference = compileDifference xor JVM_DEVIATION
@@ -232,8 +241,7 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                 if (nativeCompile.exists()) {
                     nativeReader = Scanner(nativeCompile)
                     if (nativeReader.nextInt() != 0) {
-                        println("$gen: <Kotlin/Native> compilation error in ${names[i]} folder")
-                        writer.write("$gen: <Kotlin/Native> compilation error in ${names[i]} folder\n")
+                        writeInfo("$gen: <Kotlin/Native> compilation error in ${names[i]} folder", writers)
                         allCorrect = false
                         compileErrors++
                         compileDifference = compileDifference xor NATIVE_DEVIATION
@@ -263,14 +271,12 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
 
                                 if (exit == "interrupted") {
                                     if (ProductionParams.ignoreHanging?.value()?.not() == true) {
-                                        println("$gen: <Kotlin JVM> program hanged in ${names[i]} folder")
-                                        writer.write("$gen: <Kotlin JVM> program hanged in ${names[i]} folder\n")
+                                        writeInfo("$gen: <Kotlin JVM> program hanged in ${names[i]} folder", writers)
                                         hangs++
                                     }
 
                                 } else {
-                                    println("$gen: <Kotlin JVM> program running error in ${names[i]} folder")
-                                    writer.write("$gen: <Kotlin JVM> program running error in ${names[i]} folder\n")
+                                    writeInfo("$gen: <Kotlin JVM> program running error in ${names[i]} folder", writers)
                                     runtimeErrors++
 
                                     copyBuggyFile(crashes, gen, names[i])
@@ -278,8 +284,7 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                                 allCorrect = false
                                 runtimeDifference = runtimeDifference xor JVM_DEVIATION
                             } else {
-                                println("$gen: <Kotlin JVM> program running error in ${names[i]} folder, cannot find output file")
-                                writer.write("$gen: <Kotlin JVM> program running error in ${names[i]} folder, cannot find output file\n")
+                                writeInfo("$gen: <Kotlin JVM> program running error in ${names[i]} folder, cannot find output file", writers)
                                 runtimeErrors++
 
                                 copyBuggyFile(crashes, gen, names[i])
@@ -292,6 +297,7 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                     nativeReader = Scanner(nativeRuntime)
                     val exit = nativeReader.nextLine()
                     if (exit == "interrupted" || exit.toInt() != 0) {
+                        if (exit.toInt() == ARITHMETIC_EXIT && divByZero) continue@next_gen
                         if (runtime.resolve("native").resolve("${names[i]}.out").toFile().exists()) {
                             nativeReader.close()
                             nativeReader = Scanner(runtime.resolve("native").resolve("${names[i]}.out").toFile())
@@ -303,13 +309,11 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                             }
                             if (exit == "interrupted") {
                                 if (ProductionParams.ignoreHanging?.value()?.not() == true) {
-                                    println("$gen: <Kotlin/Native> program hanged in ${names[i]} folder")
-                                    writer.write("$gen: <Kotlin/Native> program hanged in ${names[i]} folder\n")
+                                    writeInfo("$gen: <Kotlin/Native> program hanged in ${names[i]} folder", writers)
                                     hangs++
                                 }
                             } else {
-                                println("$gen: <Kotlin/Native> program running error in ${names[i]} folder: exit code ${exit.toInt()}")
-                                writer.write("$gen: <Kotlin/Native> program running error in ${names[i]} folder: exit code ${exit.toInt()}\n")
+                                writeInfo("$gen: <Kotlin/Native> program running error in ${names[i]} folder: exit code ${exit.toInt()}", writers)
                                 runtimeErrors++
 
                                 copyBuggyFile(crashes, gen, names[i])
@@ -318,8 +322,7 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                             runtimeDifference = runtimeDifference xor NATIVE_DEVIATION
                         }
                         else {
-                            println("$gen: <Kotlin/Native> program running error in ${names[i]} folder, cannot find output file")
-                            writer.write("$gen: <Kotlin/Native> program running error in ${names[i]} folder, cannot find output file\n")
+                            writeInfo("$gen: <Kotlin/Native> program running error in ${names[i]} folder, cannot find output file", writers)
                             runtimeErrors++
 
                             copyBuggyFile(crashes, gen, names[i])
@@ -330,16 +333,14 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                 if (ProductionParams.joinTest?.value() == true){
                     if (compileDifference != 0) {
                         allCorrect = false
-                        println("$gen: different behaviour of compilers while compiling ${names[i]}")
-                        writer.write("$gen: different behaviour of compilers while compiling ${names[i]}\n")
+                        writeInfo("$gen: different behaviour of compilers while compiling ${names[i]}", writers)
                         diffCases++
 
                         copyBuggyFile(crashes, gen, names[i])
                     }
                     if (runtimeDifference != 0) {
                         allCorrect = false
-                        println("$gen: different behaviour of compilers while running ${names[i]}")
-                        writer.write("$gen: different behaviour of compilers while running ${names[i]}\n")
+                        writeInfo("$gen: different behaviour of compilers while running ${names[i]}", writers)
                         diffCases++
 
                         copyBuggyFile(crashes, gen, names[i])
@@ -359,8 +360,7 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                         }
                         if (different || jvmReader.hasNextLine() xor nativeReader.hasNextLine()) {
                             allCorrect = false
-                            println("$gen: different program outputs depending on the compiler while running ${names[i]}")
-                            writer.write("$gen: different program outputs depending on the compiler while running ${names[i]}")
+                            writeInfo("$gen: different program outputs depending on the compiler while running ${names[i]}", writers)
                             diffCases++
 
                             copyBuggyFile(crashes, gen, names[i])
@@ -376,19 +376,16 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
 
     if (allCorrect) {
         val str = "No compilation or running errors${if (divByZero) " (except for division by zero)" else ""} on all tests${if (ProductionParams.joinTest?.value() == true) ", no difference in behaviour" else ""}"
-        println(str)
-        writer.write("$str\n")
+        writeInfo(str, writers)
         TestGenerator.deleteRecursively(crashes.toFile())
     } else {
         val hangInfo = if (ProductionParams.ignoreHanging?.value()?.not() == true) ", hangs: $hangs" else ""
         val diffInfo = if (ProductionParams.joinTest?.value() == true) ", cases of different behaviour: $diffCases" else ""
-        println("\nCompile errors: $compileErrors, runtime errors: $runtimeErrors$hangInfo$diffInfo")
-        writer.write("\nCompile errors: $compileErrors, runtime errors: $runtimeErrors$hangInfo$diffInfo\n")
+        writeInfo("\nCompile errors: $compileErrors, runtime errors: $runtimeErrors$hangInfo$diffInfo", writers)
 
         val input = FileInputStream(report)
-        val destRep = crashes.resolve("report.txt").toFile()
-        if (!destRep.exists()) destRep.createNewFile()
-        val output = FileOutputStream(destRep)
+
+        val output = FileOutputStream(crashReport)
         var len: Int
         val buf = ByteArray(1024) {0}
         len = input.read(buf)
@@ -400,15 +397,25 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
         output.close()
     }
 
-    writer.close()
+    regularWriter.close()
+    crashWriter.close()
+}
+
+fun writeInfo(msg: String, writers: List<BufferedWriter>) {
+    println(msg)
+    for (writer in writers) {
+        writer.write("$msg\n")
+    }
 }
 
 fun copyBuggyFile(to: Path, gen: TestGenerator, name: String) {
-    val dest = to.resolve("$name.kt").toFile()
-    if (!dest.exists()) {
-        dest.createNewFile()
-        val input = FileInputStream(gen.generatorDir.resolve(name).resolve("$name.kt").toFile())
-        val output = FileOutputStream(dest)
+    val srcRoot = gen.generatorDir.resolve(name)
+    val mainDest = to.resolve("$name")
+
+    if (!mainDest.toFile().exists()) {
+        TestGenerator.ensureExisting(mainDest)
+        val input = FileInputStream(srcRoot.resolve("$name.kt").toFile())
+        val output = FileOutputStream(mainDest.resolve("$name.kt").toFile())
         var len: Int
         val buf = ByteArray(1024) {0}
         len = input.read(buf)
@@ -418,6 +425,36 @@ fun copyBuggyFile(to: Path, gen: TestGenerator, name: String) {
         }
         input.close()
         output.close()
+    }
+    if (!mainDest.resolve("compile").toFile().exists()) {
+        TestGenerator.ensureExisting(mainDest.resolve("compile"))
+        copyFolder(srcRoot.resolve("compile"), mainDest)
+    }
+    if (!mainDest.resolve("runtime").toFile().exists()) {
+        TestGenerator.ensureExisting(mainDest.resolve("runtime"))
+        copyFolder(srcRoot.resolve("runtime"), mainDest)
+    }
+}
+
+fun copyFolder(from: Path, to: Path) {
+    if (from.toFile().isDirectory) {
+        for (file in from.toFile().listFiles()) {
+            copyFolder(file.toPath(), to.resolve(from.fileName))
+        }
+    } else {
+        val inputStream = FileInputStream(from.toString())
+        val dest = to.resolve(from.fileName)
+        TestGenerator.ensureExisting(dest.parent)
+        if (!dest.toFile().exists()) dest.toFile().createNewFile()
+        val outputStream = FileOutputStream(dest.toString())
+        val buf = ByteArray(1024) {0}
+        var len = inputStream.read(buf)
+        while (len > 0) {
+            outputStream.write(buf, 0, len)
+            len = inputStream.read(buf)
+        }
+        inputStream.close()
+        outputStream.close()
     }
 }
 
