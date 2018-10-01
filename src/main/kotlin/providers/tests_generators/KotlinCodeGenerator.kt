@@ -21,19 +21,17 @@ class KotlinCodeGenerator(
     override fun accept(main: IRNode, other: IRNode?) {
         val mainName = main.getName()
         generateSources(main, other)
-        if (ProductionParams.joinTest?.value() == true) {
-            compileKotlinFileNative(mainName)
-            runProgramNative(mainName)
+        if (ProductionParams.joinMode?.value() == true || ProductionParams.jvmMode?.value() == true) {
             compileKotlinFileJVM(mainName)
             runProgramJVM(mainName)
-        } else {
-            if (ProductionParams.useNative?.value() == true) {
-                compileKotlinFileNative(mainName)
-                runProgramNative(mainName)
-            } else {
-                compileKotlinFileJVM(mainName)
-                runProgramJVM(mainName)
-            }
+        }
+        if (ProductionParams.joinMode?.value() == true || ProductionParams.nativeMode?.value() == true) {
+            compileKotlinFileNative(mainName)
+            runProgramNative(mainName)
+        }
+        if (ProductionParams.joinMode?.value() == true || ProductionParams.jsMode?.value() == true) {
+            compileKotlinFileJS(mainName)
+            runProgramJS(mainName)
         }
     }
 
@@ -74,15 +72,32 @@ class KotlinCodeGenerator(
                 KOTLINC_NATIVE,
                 generatorDir.resolve(mainName).resolve("$mainName.kt").toString(),
                 "-nowarn",
-                "-o",
-                generatorDir.resolve(mainName).resolve("$mainName.kexe").toString(),
-                "-l",
-                generatorDir.resolve("Printer.klib").toString()
+                "-o", generatorDir.resolve(mainName).resolve("$mainName.kexe").toString(),
+                "-l", generatorDir.resolve("Printer.klib").toString()
         )
         try {
             ensureExisting(generatorDir.resolve(mainName).resolve("compile").resolve("native"))
             /*val exit = */runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve("native").resolve(mainName).toString())
            /* if (exit != 0) throw UnsuccessfullRunningException()*/
+        } catch (e: IOException) {
+            throw UnsuccessfullRunningException("Can't compile sources ", e)
+        } catch (e: InterruptedException) {
+            throw UnsuccessfullRunningException("Can't compile sources ", e)
+        }
+    }
+
+    private fun compileKotlinFileJS(mainName: String) {
+        val pb = ProcessBuilder(
+                KOTLINC_JS,
+                generatorDir.resolve(mainName).resolve("$mainName.kt").toString(),
+                "-mowarn",
+                "-output", generatorDir.resolve(mainName).resolve("$mainName.js").toString(),
+                "-libraries", generatorDir.toString()
+        )
+        try {
+            ensureExisting(generatorDir.resolve(mainName).resolve("compile").resolve("js"))
+            /*val exit = */runProcess(pb, generatorDir.resolve(mainName).resolve("compile").resolve("js").resolve(mainName).toString())
+            /* if (exit != 0) throw UnsuccessfullRunningException()*/
         } catch (e: IOException) {
             throw UnsuccessfullRunningException("Can't compile sources ", e)
         } catch (e: InterruptedException) {

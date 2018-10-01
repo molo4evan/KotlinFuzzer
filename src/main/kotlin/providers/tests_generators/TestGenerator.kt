@@ -40,15 +40,23 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
     companion object {
         private val KOTLIN_BIN = getKotlinHome()
         private val JAVA_BIN = getJavaHome()
+
         val KOTLINC_JVM = Paths.get(KOTLIN_BIN, "kotlinc-jvm").toString()
-        val KOTLIN = Paths.get(KOTLIN_BIN, "kotlin").toString()
         val JAVA = Paths.get(JAVA_BIN, "java").toString()
-        private val KOTLIN_NATIVE_BIN = if (ProductionParams.useNative?.value() == true || ProductionParams.joinTest?.value() == true) {
+
+        private val KOTLIN_NATIVE_BIN = if (ProductionParams.nativeMode?.value() == true || ProductionParams.joinMode?.value() == true) {
             ((ProductionParams.nativePath?.value() ?: throw NotInitializedOptionException("nativePath")) + "/bin/")
         } else {
             ""
         }
         val KOTLINC_NATIVE = Paths.get(KOTLIN_NATIVE_BIN, "kotlinc-native").toString()
+
+        val KOTLINC_JS = Paths.get(KOTLIN_BIN, "kotlinc-js").toString()
+        val KOTLIN_JS = if (ProductionParams.jsMode?.value() == true || ProductionParams.joinMode?.value() == true) {
+            ProductionParams.jsPath?.value() ?: throw NotInitializedOptionException("jsPath")
+        } else {
+            ""
+        }
 
 
         fun getRoot() = Paths.get(ProductionParams.testbaseDir?.value() ?: throw NotInitializedOptionException("testbaseDir"))
@@ -172,7 +180,12 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
     fun compilePrinterJVM() {
         val root = getRoot()
         if (printerTmp == null) throw Error("Printer is not extracted")
-        val pb = ProcessBuilder(KOTLINC_JVM, printerTmp!!.absolutePath, "-verbose", "-d", generatorDir.toString())
+        val pb = ProcessBuilder(
+                KOTLINC_JVM,
+                printerTmp!!.absolutePath,
+                "-d",
+                generatorDir.toString()
+        )
         try {
             val exitCode = runProcess(pb, root.resolve("Printer").toString())
             if (exitCode != 0) {
@@ -188,7 +201,36 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
     fun compilePrinterNative() {
         val root = getRoot()
         if (printerTmp == null) throw Error("Printer is not extracted")
-        val pb = ProcessBuilder(KOTLINC_NATIVE, printerTmp!!.absolutePath, "-p", "library", "-o", generatorDir.resolve("Printer").toString())
+        val pb = ProcessBuilder(
+                KOTLINC_NATIVE,
+                printerTmp!!.absolutePath,
+                "-p",
+                "library",
+                "-o",
+                generatorDir.resolve("Printer").toString()
+        )
+        try {
+            val exitCode = runProcess(pb, root.resolve("Printer").toString())
+            if (exitCode != 0) {
+                throw Error("Printer compilation returned exit code $exitCode")
+            }
+        } catch (e: IOException) {
+            throw UnsuccessfullRunningException("Can't compile printer", e)
+        } catch (e: InterruptedException) {
+            throw UnsuccessfullRunningException("Can't compile printer", e)
+        }
+    }
+
+    fun compilePrinterJS() {
+        val root = getRoot()
+        if (printerTmp == null) throw Error("Printer is not extracted")
+        val pb = ProcessBuilder(
+                KOTLINC_JS,
+                printerTmp!!.absolutePath,
+                "-meta-info",
+                "-output",
+                generatorDir.resolve("Printer").toString()
+        )
         try {
             val exitCode = runProcess(pb, root.resolve("Printer").toString())
             if (exitCode != 0) {
@@ -202,7 +244,12 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
     }
 
     fun runProgramJVM(mainName: String) {
-        val pb = ProcessBuilder(JAVA, "-cp", "$classPath/$mainName/$mainName.jar:$generatorDir", "${mainName}Kt")
+        val pb = ProcessBuilder(
+                JAVA,
+                "-cp",
+                "$classPath/$mainName/$mainName.jar:$generatorDir",
+                "${mainName}Kt"
+        )
         try {
             ensureExisting(generatorDir.resolve(mainName).resolve("runtime").resolve("jvm"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve("jvm").resolve(mainName).toString())
@@ -218,6 +265,21 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
         try {
             ensureExisting(generatorDir.resolve(mainName).resolve("runtime").resolve("native"))
             runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve("native").resolve(mainName).toString())
+        } catch (ex: InterruptedException) {
+            throw UnsuccessfullRunningException("Can't run generated program ", ex)
+        } catch (ex: IOException) {
+            throw UnsuccessfullRunningException("Can't run generated program ", ex)
+        }
+    }
+
+    fun runProgramJS(mainName: String) {
+        val pb = ProcessBuilder(
+                KOTLIN_JS,
+                generatorDir.resolve(mainName).resolve("$mainName.js").toString()
+        )
+        try {
+            ensureExisting(generatorDir.resolve(mainName).resolve("runtime").resolve("js"))
+            runProcess(pb, generatorDir.resolve(mainName).resolve("runtime").resolve("js").resolve(mainName).toString())
         } catch (ex: InterruptedException) {
             throw UnsuccessfullRunningException("Can't run generated program ", ex)
         } catch (ex: IOException) {

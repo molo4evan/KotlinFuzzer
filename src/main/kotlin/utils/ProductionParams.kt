@@ -4,6 +4,7 @@ import utils.OptionResolver.Option
 import utils.OptionResolver.addBooleanOption
 import utils.OptionResolver.addDoubleOption
 import utils.OptionResolver.addIntOption
+import utils.OptionResolver.addStringOption
 
 object ProductionParams {
     var productionLimit: Option<Int>? = null
@@ -59,9 +60,12 @@ object ProductionParams {
     var ignoreHanging: Option<Boolean>? = null
     var propertyFileOpt: Option<String>? = null
 
-    var useNative: Option<Boolean>? = null
+    var nativeMode: Option<Boolean>? = null
     var nativePath: Option<String>? = null
-    var joinTest: Option<Boolean>? = null
+    var jvmMode: Option<Boolean>? = null
+    var jsMode: Option<Boolean>? = null
+    var jsPath: Option<String>? = null
+    var joinMode: Option<Boolean>? = null
     var stepLimit: Option<Int>? = null
     var headerLimit: Option<Double>? = null
     var allowCounterMutation: Option<Boolean>? = null
@@ -72,12 +76,12 @@ object ProductionParams {
         //dimensionsLimit = OptionResolver.addIntOption('d', "dimensions-limit", 3, "Upper limit on array dimensions")
         //testStatementLimit = OptionResolver.addIntOption('e', "test-statement-limit", 300, "Upper limit on statements in test() function")
         //classesFile = OptionResolver.addStringOption('f', "classes-file", "conf/classes.lst", "File to read classes from")
-        ignoreHanging = addBooleanOption('h', "ignore-hanging", false, "Don\'t add an information about hanged programs to report")
+        ignoreHanging = addBooleanOption('h', "ignore-hanging", false, "Don't add an information about hanged programs to report")
         //implementationLimit = OptionResolver.addIntOption('i', "implementation-limit", 3, "Upper limit on a number of interfaces a class can implement")
-        joinTest = addBooleanOption('j', "join-test", false, "Test and compare both of Kotlin JVM and Kotlin/Native compilation")
+        joinMode = addBooleanOption('j', "join-test", false, "Test and compare all the supported compilers")
         productionLimit = OptionResolver.addIntOption('l', "production-limit", 100, "Limit on steps in the production of an expression")
         memberFunctionsLimit = OptionResolver.addIntOption('m', "member-functions-limit", 15, "Upper limit on functions amount (member functions or top-level functions)")
-        useNative = addBooleanOption('n', "use-native", false, "Switch compilation from Kotlin JVM to Kotlin/Native (doesn\'t matters, if \'join-test\' option is set)")
+        nativeMode = addBooleanOption('n', "use-native", false, "Enable Kotlin/Native compiler (doesn't matters, if 'join-test' option is set)")
         operatorLimit = OptionResolver.addIntOption('o', "operator-limit", 50, "Upper limit on operators in a statement")
         propertyFileOpt = OptionResolver.addStringOption('p', "property-file", "conf/default.properties", "File to read properties from")
         //excludeMethodsFile = OptionResolver.addStringOption('r', "exclude-methods-file", "conf/exclude.methods.lst", "File to read excluded methods from")
@@ -91,23 +95,23 @@ object ProductionParams {
         //chanceExpressionIndex = OptionResolver.addDoubleOption("chance-expression-index", 0.0, "A floating point number used to restrict chance of generating expression in array index while creating or accessing by index")
         //disableArrays = OptionResolver.addBooleanOption("disable-arrays", "Disable generation of arrays")
         //disableClasses = OptionResolver.addBooleanOption("disable-classes", "Disable generation of classes")
-        disableDoWhile = OptionResolver.addBooleanOption("disable-do-while", "Don\'t use do-while")
+        disableDoWhile = OptionResolver.addBooleanOption("disable-do-while", "Don't use do-while")
         disableDowncasts = OptionResolver.addBooleanOption("disable-downcasts", "Disable downcasting of objects")
-        disableExternalSymbols = OptionResolver.addBooleanOption("disable-external-symbols", "Don\'t use external symbols")
-        disableExprInInit = OptionResolver.addBooleanOption("disable-expr-in-init", "Don\'t use complex expressions in variable initialization")
+        disableExternalSymbols = OptionResolver.addBooleanOption("disable-external-symbols", "Don't use external symbols")
+        disableExprInInit = OptionResolver.addBooleanOption("disable-expr-in-init", "Don't use complex expressions in variable initialization")
         //disableFinalClasses = OptionResolver.addBooleanOption("disable-final-classes", "Don\'t use final classes")
-        disableFinalMethods = OptionResolver.addBooleanOption("disable-final-methods", "Don\'t use final methods")
-        disableFinalVariables = OptionResolver.addBooleanOption("disable-final-variabless", "Don\'t use final variables")
-        disableFor = OptionResolver.addBooleanOption("disable-for", "Don\'t use for")
+        disableFinalMethods = OptionResolver.addBooleanOption("disable-final-methods", "Don't use final methods")
+        disableFinalVariables = OptionResolver.addBooleanOption("disable-final-variabless", "Don't use final variables")
+        disableFor = OptionResolver.addBooleanOption("disable-for", "Don't use for")
         //disableFunctions = OptionResolver.addBooleanOption("disable-functions", "Don\'t use functions")
-        disableIf = addBooleanOption("disable-if", "Don\'t use if")
+        disableIf = addBooleanOption("disable-if", "Don't use if")
         //disableInheritance = OptionResolver.addBooleanOption("disable-inheritance", "Disable inheritance")
         //disableInterfaces = OptionResolver.addBooleanOption("disable-interfaces", "Disable generation of interfaces")
         disableNestedBlocks = OptionResolver.addBooleanOption("disable-nested-blocks", "Disable generation of nested blocks")
         disableStatic = OptionResolver.addBooleanOption("disable-static", "Disable generation of static objects and functions")
-        disableVarsInBlock = OptionResolver.addBooleanOption("disable-vars-in-block", "Don\'t generate variables in blocks")
-        disableWhen = OptionResolver.addBooleanOption("disable-when", "Don\'t use when")
-        disableWhile = OptionResolver.addBooleanOption("disable-while", "Don\'t use while")
+        disableVarsInBlock = OptionResolver.addBooleanOption("disable-vars-in-block", "Don't generate variables in blocks")
+        disableWhen = OptionResolver.addBooleanOption("disable-when", "Don't use when")
+        disableWhile = OptionResolver.addBooleanOption("disable-while", "Don't use while")
         //enableFinalizers = OptionResolver.addBooleanOption("enable-finalizers", "Enable finalizers (for stress testing)")
         //enableStrictFP = OptionResolver.addBooleanOption("enable-strict-fp", "Add strictfp attribute to test class")
         floatingPointPrecision = OptionResolver.addIntOption("fp-precision", 8, "A non-negative decimal integer used to restrict the number of digits after the decimal separator")
@@ -115,9 +119,12 @@ object ProductionParams {
         generators = OptionResolver.addStringOption("generators", "", "Comma-separated list of generator names")
         generatorsFactories = OptionResolver.addStringOption("generators-factories", "", "Comma-separated list of generators factories fully qualified class names")
         headerLimit = addDoubleOption("header-limit", 0.005, "Relative size of header in cycles (in percents)")
+        jvmMode = addBooleanOption("jvm-mode", "Enable Kotlin JVM compiler (doesn't matters, if 'join-test' option is set)")
+        jsMode = addBooleanOption("js-mode", "Enable Kotlin JS compiler (doesn't matters, if 'join-test' option is set)")
+        jsPath = addStringOption("js-path", "", "Path to JS interpreter execution")
         //maxCfgDepth = OptionResolver.addIntOption("max-cfg-depth", 3, "A non-negative decimal integer used to restrict the upper bound of depth of control flow graph")
         //minCfgDepth = OptionResolver.addIntOption("min-cfg-depth", 2, "A non-negative decimal integer used to restrict the lower bound of depth of control flow graph")
-        nativePath = OptionResolver.addStringOption("native-path", "", "Kotlin/Native home directory (used if \'use-native\' option is \'true\')")
+        nativePath = OptionResolver.addStringOption("native-path", "", "Kotlin/Native home directory (used if 'use-native' option is 'true')")
         printComplexity = OptionResolver.addBooleanOption("print-complexity", "Print complexity of each statement")
         //printHierarchy = OptionResolver.addBooleanOption("print-hierarchy", "Print resulting class hierarchy")
         seed = OptionResolver.addStringOption("seed", "", "User seed (for the same seed, the same sequence of tests are generated)")

@@ -26,8 +26,12 @@ const val MINUTES_TO_WAIT = 1L  //Process running time limit
 const val OVERHEAD = 100L       //The overhead for running thread to avoid unexpected interruption of thread (and leaving hanged test process in memory)
 var MAX_WAIT_TIME = 0L
 const val SECONDS_TO_CLOSE = 5L //Time to destroy the process before the "destroyForcibly" invocation
+
 const val JVM_DEVIATION = 1
 const val NATIVE_DEVIATION = 1
+const val JS_DEVIATION = 1
+
+const val MODES_COUNT = 3
 
 const val ARITHMETIC_EXIT = 136 // Native runtime ArithmeticException exit code (not an authentic information)
 
@@ -37,12 +41,23 @@ fun main(args: Array<String>) {
         return
     }
     initializeTestGenerators(args)
-    MAX_WAIT_TIME = (if (ProductionParams.joinTest?.value() == true) TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT * 4) else TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT * 2)) + OVERHEAD
-    when {
-        ProductionParams.joinTest?.value() == true -> println("\nJOIN MODE\n")
-        ProductionParams.useNative?.value() == true -> println("\nNATIVE MODE\n")
-        else -> println("\nJVM MODE\n")
+
+    val modsNum = if (ProductionParams.joinMode?.value() == true) 3 else {
+        var amount = 0
+        if (ProductionParams.jvmMode?.value() == true) amount++
+        if (ProductionParams.nativeMode?.value() == true) amount++
+        if (ProductionParams.jsMode?.value() == true) amount++
+        amount
     }
+    if (modsNum == 0) throw Error("Compilation mode not specified")
+    MAX_WAIT_TIME = TimeUnit.MINUTES.toMillis(MINUTES_TO_WAIT * modsNum) + OVERHEAD
+
+    if (ProductionParams.joinMode?.value() == true) println("JOIN MODE") else {
+        if (ProductionParams.jvmMode?.value() == true) println("JVM MODE")
+        if (ProductionParams.nativeMode?.value() == true) println("NATIVE MODE")
+        if (ProductionParams.jsMode?.value() == true) println("JS MODE")
+    }
+
     var counter = 0
     System.out.printf(" %14s | %8s | %11s | %8s | %11s |%n", "start time", "count", "generating",
             "running", "status")
@@ -54,21 +69,21 @@ fun main(args: Array<String>) {
         throw Error("No generators loaded")
     }
     else {
-        TestGenerator.deleteRecursively(generators[0].generatorDir.toFile())
-        generators[0].extractPrinter()
+        val gen = generators[0]
+        TestGenerator.deleteRecursively(gen.generatorDir.toFile())
+        gen.extractPrinter()
         try {
-            if (ProductionParams.joinTest?.value() == true) {
-                generators[0].compilePrinterNative()
-                generators[0].compilePrinterJVM()
-            } else {
-                if (ProductionParams.useNative?.value() == true) {
-                    generators[0].compilePrinterNative()
-                } else {
-                    generators[0].compilePrinterJVM()
-                }
+            if (ProductionParams.joinMode?.value() == true || ProductionParams.jvmMode?.value() == true) {
+                gen.compilePrinterJVM()
+            }
+            if (ProductionParams.joinMode?.value() == true || ProductionParams.nativeMode?.value() == true) {
+                gen.compilePrinterNative()
+            }
+            if (ProductionParams.joinMode?.value() == true || ProductionParams.jsMode?.value() == true) {
+                gen.compilePrinterJS()
             }
         } finally {
-            generators[0].deletePrinter()
+            gen.deletePrinter()
         }
     }
 
@@ -189,6 +204,14 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
     var hangs = 0
     var diffCases = 0
 
+    val modsNum = if (ProductionParams.joinMode?.value() == true) 3 else {
+        var amount = 0
+        if (ProductionParams.jvmMode?.value() == true) amount++
+        if (ProductionParams.nativeMode?.value() == true) amount++
+        if (ProductionParams.jsMode?.value() == true) amount++
+        amount
+    }
+
     val crashes = TestGenerator.getRoot().resolve("crashes").resolve(PseudoRandom.currentSeed)
     TestGenerator.deleteRecursively(crashes.toFile())
     TestGenerator.ensureExisting(crashes)
@@ -217,12 +240,17 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
             val compliation = gen.generatorDir.resolve(names[i]).resolve("compile")
             val jvmCompile = compliation.resolve("jvm").resolve("${names[i]}.exit").toFile()
             val nativeCompile = compliation.resolve("native").resolve("${names[i]}.exit").toFile()
+            val jsCompile = compliation.resolve("js").resolve("${names[i]}.exit").toFile()
+
             val runtime = gen.generatorDir.resolve(names[i]).resolve("runtime")
             val jvmRuntime = runtime.resolve("jvm").resolve("${names[i]}.exit").toFile()
             val nativeRuntime = runtime.resolve("native").resolve("${names[i]}.exit").toFile()
+            val jsRuntime = runtime.resolve("js").resolve("${names[i]}.exit").toFile()
 
             var jvmReader: Scanner? = null
             var nativeReader: Scanner? = null
+            var jsReader: Scanner? = null
+
             var compileDifference = 0
             var runtimeDifference = 0
             try {
@@ -245,6 +273,18 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                         allCorrect = false
                         compileErrors++
                         compileDifference = compileDifference xor NATIVE_DEVIATION
+
+                        copyBuggyFile(crashes, gen, names[i])
+                    }
+                }
+
+                if (jsCompile.exists()) {
+                    jsReader = Scanner(jsCompile)
+                    if (jsReader.nextInt() != 0) {
+                        writeInfo("$gen: <Kotlin JS> compilation error in ${names[i]} folder", writers)
+                        allCorrect = false
+                        compileErrors++
+                        compileDifference = compileDifference xor JS_DEVIATION
 
                         copyBuggyFile(crashes, gen, names[i])
                     }
@@ -293,6 +333,49 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                     }
                 } catch (ex: ProductionFailedException) {}  //TODO: hardcode
 
+                try {
+                    if (jsRuntime.exists()) {
+                        jsReader = Scanner(jsRuntime)
+                        val exit = jsReader.nextLine()
+                        if (exit == "interrupted" || exit.toInt() != 0) {
+                            if (runtime.resolve("js").resolve("${names[i]}.err").toFile().exists()) {
+                                jsReader.close()
+                                jsReader = Scanner(runtime.resolve("js").resolve("${names[i]}.err").toFile())
+                                while (jsReader.hasNextLine()) {
+                                    val str = jsReader.nextLine()
+                                    if (str.contains("ArithmeticException")) {
+                                        if (str.contains("/ by zero")) {
+                                            jsReader.close()
+                                            divByZero = true
+                                            throw ProductionFailedException()
+                                        }
+                                    }
+                                }
+
+                                if (exit == "interrupted") {
+                                    if (ProductionParams.ignoreHanging?.value()?.not() == true) {
+                                        writeInfo("$gen: <Kotlin JS> program hanged in ${names[i]} folder", writers)
+                                        hangs++
+                                    }
+
+                                } else {
+                                    writeInfo("$gen: <Kotlin JS> program running error in ${names[i]} folder", writers)
+                                    runtimeErrors++
+
+                                    copyBuggyFile(crashes, gen, names[i])
+                                }
+                                allCorrect = false
+                                runtimeDifference = runtimeDifference xor JS_DEVIATION
+                            } else {
+                                writeInfo("$gen: <Kotlin JS> program running error in ${names[i]} folder, cannot find output file", writers)
+                                runtimeErrors++
+
+                                copyBuggyFile(crashes, gen, names[i])
+                            }
+                        }
+                    }
+                } catch (ex: ProductionFailedException) {}  //TODO: hardcode
+
                 if (nativeRuntime.exists()) {
                     nativeReader = Scanner(nativeRuntime)
                     val exit = nativeReader.nextLine()
@@ -330,7 +413,7 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                     }
                 }
 
-                if (ProductionParams.joinTest?.value() == true){
+                if (modsNum > 1){
                     if (compileDifference != 0) {
                         allCorrect = false
                         writeInfo("$gen: different behaviour of compilers while compiling ${names[i]}", writers)
@@ -347,40 +430,54 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
                     }
                     val jvm_out = gen.generatorDir.resolve(names[i]).resolve("runtime").resolve("jvm").resolve("${names[i]}.out").toFile()
                     val native_out = gen.generatorDir.resolve(names[i]).resolve("runtime").resolve("native").resolve("${names[i]}.out").toFile()
-                    if (jvm_out.exists() && native_out.exists()) {
-                        jvmReader = Scanner(jvm_out)
-                        nativeReader = Scanner(native_out)
+                    val js_out = gen.generatorDir.resolve(names[i]).resolve("runtime").resolve("js").resolve("${names[i]}.out").toFile()
 
-                        var different = false
-                        while (jvmReader.hasNextLine() && nativeReader.hasNextLine()) {
-                            if (jvmReader.nextLine() != nativeReader.nextLine()) {
-                                different = true
-                                break
-                            }
-                        }
-                        if (different || jvmReader.hasNextLine() xor nativeReader.hasNextLine()) {
-                            allCorrect = false
-                            writeInfo("$gen: different program outputs depending on the compiler while running ${names[i]}", writers)
-                            diffCases++
+                    jvmReader = null
+                    nativeReader = null
+                    jsReader = null
 
-                            copyBuggyFile(crashes, gen, names[i])
+                    if (jvm_out.exists()) jvmReader = Scanner(jvm_out)
+                    if (native_out.exists()) nativeReader = Scanner(native_out)
+                    if (js_out.exists()) jsReader = Scanner(js_out)
+
+                    var different = false
+                    while (jvmReader?.hasNextLine() != false && nativeReader?.hasNextLine() != false && jsReader?.hasNextLine() != false){
+                        val jvmLine = jvmReader?.nextLine()
+                        val nativeLine = nativeReader?.nextLine()
+                        val jsLine = jsReader?.nextLine()
+
+                        if (
+                                (jvmLine != null && jsLine != null && jvmLine != jsLine) ||
+                                (jvmLine != null && nativeLine != null && jvmLine != nativeLine) ||
+                                (jsLine != null && nativeLine != null && jsLine != nativeLine)
+                        ) {
+                            different = true
+                            break
                         }
+                    }
+                    if (different || jvmReader?.hasNextLine() != false || nativeReader?.hasNextLine() != false || jsReader?.hasNextLine() != false) {
+                        allCorrect = false
+                        writeInfo("$gen: different program outputs depending on the compiler while running ${names[i]}", writers)
+                        diffCases++
+
+                        copyBuggyFile(crashes, gen, names[i])
                     }
                 }
             } finally {
                 jvmReader?.close()
                 nativeReader?.close()
+                jsReader?.close()
             }
         }
     }
 
     if (allCorrect) {
-        val str = "No compilation or running errors${if (divByZero) " (except for division by zero)" else ""} on all tests${if (ProductionParams.joinTest?.value() == true) ", no difference in behaviour" else ""}"
+        val str = "No compilation or running errors${if (divByZero) " (except for division by zero)" else ""} on all tests${if (modsNum > 1) ", no difference in behaviour" else ""}"
         writeInfo(str, writers)
         TestGenerator.deleteRecursively(crashes.toFile())
     } else {
         val hangInfo = if (ProductionParams.ignoreHanging?.value()?.not() == true) ", hangs: $hangs" else ""
-        val diffInfo = if (ProductionParams.joinTest?.value() == true) ", cases of different behaviour: $diffCases" else ""
+        val diffInfo = if (modsNum > 1) ", cases of different behaviour: $diffCases" else ""
         writeInfo("\nCompile errors: $compileErrors, runtime errors: $runtimeErrors$hangInfo$diffInfo", writers)
 
         val input = FileInputStream(report)
@@ -397,8 +494,9 @@ fun analyzeResults(gens: List<TestGenerator>, names: List<String>) {
         output.close()
     }
 
-    regularWriter.close()
-    crashWriter.close()
+    for (writer in writers) {
+        writer.close()
+    }
 }
 
 fun writeInfo(msg: String, writers: List<BufferedWriter>) {
@@ -410,7 +508,7 @@ fun writeInfo(msg: String, writers: List<BufferedWriter>) {
 
 fun copyBuggyFile(to: Path, gen: TestGenerator, name: String) {
     val srcRoot = gen.generatorDir.resolve(name)
-    val mainDest = to.resolve("$name")
+    val mainDest = to.resolve(name)
 
     if (!mainDest.toFile().exists()) {
         TestGenerator.ensureExisting(mainDest)
