@@ -1,4 +1,4 @@
-package factories.control_flow.loops
+package factories.controlflow.loops
 
 import exceptions.NotInitializedOptionException
 import exceptions.ProductionFailedException
@@ -8,14 +8,14 @@ import information.SymbolTable
 import information.TypeList
 import ir.Block
 import ir.Literal
-import ir.control_flow.loops.DoWhile
-import ir.control_flow.loops.Loop
+import ir.controlflow.loops.Loop
+import ir.controlflow.loops.While
 import ir.types.Type
 import ir.variables.LocalVariable
 import utils.ProductionParams
 import utils.PseudoRandom
 
-class DoWhileFactory(
+class WhileFactory(
         private val owner: Type?,
         private val result: Type,
         private val complexityLimit: Long,
@@ -23,8 +23,8 @@ class DoWhileFactory(
         private val operatorLimit: Int,
         private val level: Long,
         private val canHaveReturn: Boolean
-): SafeFactory<DoWhile>() {
-    override fun sproduce(): DoWhile {                      //almost the same as WhileFactory
+): SafeFactory<While>() {                   //TODO: add downto loop?
+    override fun sproduce(): While {        //TODO: optionally - add counter to scope as a constant
         if (statementLimit <= 0 || complexityLimit <= 0) {
             throw ProductionFailedException()
         }
@@ -34,20 +34,23 @@ class DoWhileFactory(
         var currentCompl = complexityLimit
         val headerCompLimit = (PseudoRandom.random() * currentCompl * (ProductionParams.headerLimit?.value() ?: throw NotInitializedOptionException("headerLimit"))).toLong()
         currentCompl -= headerCompLimit
-        val headerStatLimit = PseudoRandom.randomNotZero(statementLimit / 3)
+        val headerStatLimit = PseudoRandom.randomNotZero(statementLimit / 4)
 
         val iterationLimit = (0.0001 * currentCompl * PseudoRandom.random()).toLong()
         if (iterationLimit > Int.MAX_VALUE.toLong() || iterationLimit == 0L) {
             throw ProductionFailedException()
         }
-        var iterCompl = currentCompl / iterationLimit
+        var iterCompl = if (iterationLimit > 0) currentCompl / iterationLimit else 0L
         val condComplLimit = (iterCompl * PseudoRandom.random()).toLong()
         iterCompl -= condComplLimit
-        val body1StatLimit = PseudoRandom.randomNotZero(statementLimit / 3)
+        val body1StatLimit = PseudoRandom.randomNotZero(statementLimit / 4)
         val body1CompLimit = (iterCompl * PseudoRandom.random()).toLong()
         iterCompl -= body1CompLimit
-        val body2StatLimit = PseudoRandom.randomNotZero(statementLimit / 3)
+        val body2StatLimit = PseudoRandom.randomNotZero(statementLimit / 4)
         val body2CompLimit = (iterCompl * PseudoRandom.random()).toLong()
+        iterCompl -= body2CompLimit
+        val body3StatLimit = PseudoRandom.randomNotZero(statementLimit / 4)
+        val body3CompLimit = (iterCompl * PseudoRandom.random()).toLong()
 
         val builder = IRNodeBuilder().
                 setOwnerClass(owner).
@@ -108,6 +111,19 @@ class DoWhileFactory(
                     setLevel(level).
                     setSubBlock(true).
                     setCanHaveBreaks(true).
+                    setCanHaveContinues(true).
+                    setCanHaveReturn(canHaveReturn).
+                    getBlockFactory().produce()
+        } catch (ex: ProductionFailedException) {
+            emptyBlock
+        }
+
+        val body3 = try {
+            builder.setComplexityLimit(body3CompLimit).
+                    setStatementLimit(body3StatLimit).
+                    setLevel(level).
+                    setSubBlock(true).
+                    setCanHaveBreaks(true).
                     setCanHaveContinues(false).
                     setCanHaveReturn(canHaveReturn).
                     getBlockFactory().produce()
@@ -118,6 +134,6 @@ class DoWhileFactory(
         SymbolTable.pop()
 
         val loop = Loop(initializer, condition, manipulator)
-        return DoWhile(level, loop, iterationLimit, header, body1, body2)
+        return While(level, loop, iterationLimit, header, body1, body2, body3)
     }
 }

@@ -1,11 +1,11 @@
-package factories.control_flow.loops
+package factories.controlflow.loops
 
 import exceptions.NotInitializedOptionException
 import factories.Factory
 import information.TypeList
 import ir.Literal
 import ir.Statement
-import ir.control_flow.loops.CounterManipulator
+import ir.controlflow.loops.CounterManipulator
 import ir.operators.BinaryOperator
 import ir.operators.OperatorKind
 import ir.variables.LocalVariable

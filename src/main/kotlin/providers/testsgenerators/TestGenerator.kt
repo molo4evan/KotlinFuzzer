@@ -1,4 +1,4 @@
-package providers.tests_generators
+package providers.testsgenerators
 
 import MINUTES_TO_WAIT
 import SECONDS_TO_CLOSE
@@ -18,9 +18,7 @@ import java.util.concurrent.TimeUnit
 import java.util.function.BiConsumer
 
 abstract class TestGenerator protected constructor(         //TODO: add compiling and running in separate threads for native and jvm
-        suffix: String,
-        protected val preRunActions: (String) -> Array<String>,
-        protected val jtDriverOptions: String
+        suffix: String
 ): BiConsumer<IRNode, IRNode?> {
     val generatorDir: Path
     protected val classPath: String
@@ -35,7 +33,6 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
         return this::class.simpleName ?: this::class.qualifiedName ?: this::class.toString()
     }
 
-    protected constructor(suffix: String): this(suffix, { emptyArray<String>()}, "")
 
     companion object {
         private val KOTLIN_BIN = getKotlinHome()
@@ -130,7 +127,7 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
             } finally {
                 if (process?.isAlive == true) {
                     process.destroyForcibly()
-                    println("Process ${pb.command()[0]} stopped from finally")
+                    //println("Process ${pb.command()[0]} stopped from finally")
                 }
             }
         }
@@ -229,7 +226,7 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
                 printerTmp!!.absolutePath,
                 "-meta-info",
                 "-output",
-                generatorDir.resolve("Printer").toString()
+                generatorDir.resolve("Printer.js").toString()
         )
         try {
             val exitCode = runProcess(pb, root.resolve("Printer").toString())

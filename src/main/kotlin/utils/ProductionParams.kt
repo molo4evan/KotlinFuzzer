@@ -47,7 +47,7 @@ object ProductionParams {
     var disableArrays: Option<Boolean>? = null
     //var enableFinalizers: Option<Boolean>? = null
     // workaround: to reduce chance throwing ArrayIndexOutOfBoundsException
-    //var chanceExpressionIndex: Option<Double>? = null
+    var chanceExpressionIndex: Option<Double>? = null
     var testbaseDir: Option<String>? = null
     var numberOfTests: Option<Int>? = null
     var seed: Option<String>? = null
@@ -69,6 +69,7 @@ object ProductionParams {
     var stepLimit: Option<Int>? = null
     var headerLimit: Option<Double>? = null
     var allowCounterMutation: Option<Boolean>? = null
+    var expressionsInRangeStep: Option<Boolean>? = null
 
     fun register() {
         functionsArgLimit = OptionResolver.addIntOption('a', "member-functions-arg-limit", 5, "Upper limit on the number of function args")
@@ -78,10 +79,10 @@ object ProductionParams {
         //classesFile = OptionResolver.addStringOption('f', "classes-file", "conf/classes.lst", "File to read classes from")
         ignoreHanging = addBooleanOption('h', "ignore-hanging", false, "Don't add an information about hanged programs to report")
         //implementationLimit = OptionResolver.addIntOption('i', "implementation-limit", 3, "Upper limit on a number of interfaces a class can implement")
-        joinMode = addBooleanOption('j', "join-test", false, "Test and compare all the supported compilers")
+        joinMode = addBooleanOption('j', "join-mode", false, "Test and compare all the supported compilers")
         productionLimit = OptionResolver.addIntOption('l', "production-limit", 100, "Limit on steps in the production of an expression")
         memberFunctionsLimit = OptionResolver.addIntOption('m', "member-functions-limit", 15, "Upper limit on functions amount (member functions or top-level functions)")
-        nativeMode = addBooleanOption('n', "use-native", false, "Enable Kotlin/Native compiler (doesn't matters, if 'join-test' option is set)")
+        nativeMode = addBooleanOption('n', "native-mode", false, "Enable Kotlin/Native compiler (doesn't matters, if 'join-test' option is set)")
         operatorLimit = OptionResolver.addIntOption('o', "operator-limit", 50, "Upper limit on operators in a statement")
         propertyFileOpt = OptionResolver.addStringOption('p', "property-file", "conf/default.properties", "File to read properties from")
         //excludeMethodsFile = OptionResolver.addStringOption('r', "exclude-methods-file", "conf/exclude.methods.lst", "File to read excluded methods from")
@@ -92,8 +93,8 @@ object ProductionParams {
         specificSeed = OptionResolver.addLongOption('z', "specificSeed", 0L, "A seed to be set for specific test generation(regular seed still needed for initialization)")
         addExternalSymbols = OptionResolver.addStringOption("add-external-symbols", "all", "Add symbols for listed classes (comma-separated list)")
         allowCounterMutation = addBooleanOption("allow-counter-mutation", "Allows counter mutations in the body of loops (may cause hang of program)")
-        //chanceExpressionIndex = OptionResolver.addDoubleOption("chance-expression-index", 0.0, "A floating point number used to restrict chance of generating expression in array index while creating or accessing by index")
-        //disableArrays = OptionResolver.addBooleanOption("disable-arrays", "Disable generation of arrays")
+        chanceExpressionIndex = OptionResolver.addDoubleOption("chance-expression-index", 0.0, "A floating point number used to restrict chance of generating expression in array index while creating or accessing by index")
+        disableArrays = OptionResolver.addBooleanOption("disable-arrays", "Disable generation of arrays")
         //disableClasses = OptionResolver.addBooleanOption("disable-classes", "Disable generation of classes")
         disableDoWhile = OptionResolver.addBooleanOption("disable-do-while", "Don't use do-while")
         disableDowncasts = OptionResolver.addBooleanOption("disable-downcasts", "Disable downcasting of objects")
@@ -114,8 +115,9 @@ object ProductionParams {
         disableWhile = OptionResolver.addBooleanOption("disable-while", "Don't use while")
         //enableFinalizers = OptionResolver.addBooleanOption("enable-finalizers", "Enable finalizers (for stress testing)")
         //enableStrictFP = OptionResolver.addBooleanOption("enable-strict-fp", "Add strictfp attribute to test class")
+        expressionsInRangeStep = addBooleanOption("expressions-in-range-step", "Enable expressions in step of ranges (instead of literals). May cause runtime errors")
         floatingPointPrecision = OptionResolver.addIntOption("fp-precision", 8, "A non-negative decimal integer used to restrict the number of digits after the decimal separator")
-        functionCallsPercent = OptionResolver.addDoubleOption("function-calls-percent", 0.1, "Percentage of function calls in generating expressions")
+        functionCallsPercent = OptionResolver.addDoubleOption("function-calls-percent", 0.01, "Percentage of function calls in generating expressions")
         generators = OptionResolver.addStringOption("generators", "", "Comma-separated list of generator names")
         generatorsFactories = OptionResolver.addStringOption("generators-factories", "", "Comma-separated list of generators factories fully qualified class names")
         headerLimit = addDoubleOption("header-limit", 0.005, "Relative size of header in cycles (in percents)")

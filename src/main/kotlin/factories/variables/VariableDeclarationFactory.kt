@@ -24,7 +24,7 @@ internal class VariableDeclarationFactory(private val ownerClass: Type?, private
         val resultName = "var_" + SymbolTable.getNextVariableNumber()
         var flags = Symbol.NONE
         if (isStatic) {
-            flags = flags or Symbol.STATIC            //TODO: incorrect
+            flags = flags or Symbol.STATIC
         }
         if (isLocal) {
             flags = flags or VariableInfo.LOCAL

@@ -8,11 +8,11 @@ import information.SymbolTable
 import information.TypeList
 import ir.Block
 import ir.IRNode
-import ir.control_flow.If
-import ir.control_flow.When
-import ir.control_flow.loops.DoWhile
-import ir.control_flow.loops.For
-import ir.control_flow.loops.While
+import ir.controlflow.If
+import ir.controlflow.When
+import ir.controlflow.loops.DoWhile
+import ir.controlflow.loops.For
+import ir.controlflow.loops.While
 import ir.types.Type
 import utils.ProductionParams
 import utils.PseudoRandom
@@ -135,9 +135,9 @@ class BlockFactory(
         if (ProductionParams.disableDoWhile?.value()?.not() ?: throw NotInitializedOptionException("disableDoWhile")) {
             rule.add("do_while", builder.getDoWhileFactory())
         }
-//        if (ProductionParams.disableFor?.value()?.not() ?: throw NotInitializedOptionException("disableFor")) {
-//            rule.add("for", builder.getForFactory())
-//        }
+        if (ProductionParams.disableFor?.value()?.not() ?: throw NotInitializedOptionException("disableFor")) {
+            rule.add("for", builder.getForFactory())
+        }
         if (ProductionParams.disableWhen?.value()?.not() ?: throw NotInitializedOptionException("disableWhen")) {
             rule.add("when", builder.getWhenFactory())
         }

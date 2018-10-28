@@ -1,10 +1,10 @@
 package ir
 
-import ir.control_flow.If
-import ir.control_flow.When
-import ir.control_flow.loops.DoWhile
-import ir.control_flow.loops.For
-import ir.control_flow.loops.While
+import ir.controlflow.If
+import ir.controlflow.When
+import ir.controlflow.loops.DoWhile
+import ir.controlflow.loops.For
+import ir.controlflow.loops.While
 import ir.types.Type
 import providers.visitors.Visitor
 import kotlin.math.max

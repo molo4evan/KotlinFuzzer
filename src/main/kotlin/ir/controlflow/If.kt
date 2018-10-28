@@ -1,4 +1,4 @@
-package ir.control_flow
+package ir.controlflow
 
 import ir.Block
 import ir.IRNode

@@ -1,4 +1,4 @@
-package ir.control_flow
+package ir.controlflow
 
 import ir.IRNode
 import providers.visitors.Visitor

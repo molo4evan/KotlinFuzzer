@@ -6,9 +6,9 @@ import factories.utils.ProductionLimiter
 import information.TypeList
 import ir.IRNode
 import ir.Statement
-import utils.PseudoRandom
 import ir.types.Type
 import utils.ProductionParams
+import utils.PseudoRandom
 
 class StatementFactory(
         complexityLimit: Long,
@@ -27,9 +27,9 @@ class StatementFactory(
                 .setExceptionSafe(exceptionSafe)
                 .setNoConsts(noconsts)
                 .setResultType(PseudoRandom.randomElement(TypeList.getAll()))
-        //rule.add("array_creation", builder.getArrayCreationFactory())             //TODO: uncomment
+        rule.add("array_creation", builder.getArrayCreationFactory())
         rule.add("assignment", builder.getAssignmentOperatorFactory())
-        builder.setResultType(TypeList.UNIT/*PseudoRandom.randomElement(TypeList.getAllForFunctions())*/)
+        builder.setResultType(/*TypeList.UNIT*/PseudoRandom.randomElement(TypeList.getAllForFunctions()))   //TODO: resturn to UNIT?
         rule.add("function_call", builder.getFunctionCallFactory(), ProductionParams.functionCallsPercent?.value() ?: 0.1)
     }
 

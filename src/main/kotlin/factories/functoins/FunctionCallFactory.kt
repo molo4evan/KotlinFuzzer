@@ -6,8 +6,8 @@ import factories.utils.IRNodeBuilder
 import information.FunctionInfo
 import information.SymbolTable
 import ir.IRNode
-import ir.types.Type
 import ir.functions.FunctionCall
+import ir.types.Type
 import utils.PseudoRandom
 
 class FunctionCallFactory(
@@ -57,7 +57,7 @@ class FunctionCallFactory(
                 // are not overrided. We may also call such functions.
 
                 // If it's a local call.. or it's a call using some variable to some object of some type in our hierarchy   //whaaaaat???
-                var inHierarchy = false
+                var inHierarchy: Boolean
                 if (owner != null) {
                     if (owner == functionInfo.owner || classHierarchy != null && classHierarchy.contains(functionInfo.owner)) {
                         inHierarchy = classHierarchy!!.contains(functionInfo.owner)

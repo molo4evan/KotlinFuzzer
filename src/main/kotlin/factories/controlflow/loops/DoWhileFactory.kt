@@ -1,4 +1,4 @@
-package factories.control_flow.loops
+package factories.controlflow.loops
 
 import exceptions.NotInitializedOptionException
 import exceptions.ProductionFailedException
@@ -8,14 +8,14 @@ import information.SymbolTable
 import information.TypeList
 import ir.Block
 import ir.Literal
-import ir.control_flow.loops.Loop
-import ir.control_flow.loops.While
+import ir.controlflow.loops.DoWhile
+import ir.controlflow.loops.Loop
 import ir.types.Type
 import ir.variables.LocalVariable
 import utils.ProductionParams
 import utils.PseudoRandom
 
-class WhileFactory(
+class DoWhileFactory(
         private val owner: Type?,
         private val result: Type,
         private val complexityLimit: Long,
@@ -23,8 +23,8 @@ class WhileFactory(
         private val operatorLimit: Int,
         private val level: Long,
         private val canHaveReturn: Boolean
-): SafeFactory<While>() {                   //TODO: add downto loop?
-    override fun sproduce(): While {        //TODO: optionally - add counter to scope as a constant
+): SafeFactory<DoWhile>() {
+    override fun sproduce(): DoWhile {                      //almost the same as WhileFactory
         if (statementLimit <= 0 || complexityLimit <= 0) {
             throw ProductionFailedException()
         }
@@ -34,7 +34,7 @@ class WhileFactory(
         var currentCompl = complexityLimit
         val headerCompLimit = (PseudoRandom.random() * currentCompl * (ProductionParams.headerLimit?.value() ?: throw NotInitializedOptionException("headerLimit"))).toLong()
         currentCompl -= headerCompLimit
-        val headerStatLimit = PseudoRandom.randomNotZero(statementLimit / 4)
+        val headerStatLimit = PseudoRandom.randomNotZero(statementLimit / 3)
 
         val iterationLimit = (0.0001 * currentCompl * PseudoRandom.random()).toLong()
         if (iterationLimit > Int.MAX_VALUE.toLong() || iterationLimit == 0L) {
@@ -43,14 +43,11 @@ class WhileFactory(
         var iterCompl = currentCompl / iterationLimit
         val condComplLimit = (iterCompl * PseudoRandom.random()).toLong()
         iterCompl -= condComplLimit
-        val body1StatLimit = PseudoRandom.randomNotZero(statementLimit / 4)
+        val body1StatLimit = PseudoRandom.randomNotZero(statementLimit / 3)
         val body1CompLimit = (iterCompl * PseudoRandom.random()).toLong()
         iterCompl -= body1CompLimit
-        val body2StatLimit = PseudoRandom.randomNotZero(statementLimit / 4)
+        val body2StatLimit = PseudoRandom.randomNotZero(statementLimit / 3)
         val body2CompLimit = (iterCompl * PseudoRandom.random()).toLong()
-        iterCompl -= body2CompLimit
-        val body3StatLimit = PseudoRandom.randomNotZero(statementLimit / 4)
-        val body3CompLimit = (iterCompl * PseudoRandom.random()).toLong()
 
         val builder = IRNodeBuilder().
                 setOwnerClass(owner).
@@ -111,19 +108,6 @@ class WhileFactory(
                     setLevel(level).
                     setSubBlock(true).
                     setCanHaveBreaks(true).
-                    setCanHaveContinues(true).
-                    setCanHaveReturn(canHaveReturn).
-                    getBlockFactory().produce()
-        } catch (ex: ProductionFailedException) {
-            emptyBlock
-        }
-
-        val body3 = try {
-            builder.setComplexityLimit(body3CompLimit).
-                    setStatementLimit(body3StatLimit).
-                    setLevel(level).
-                    setSubBlock(true).
-                    setCanHaveBreaks(true).
                     setCanHaveContinues(false).
                     setCanHaveReturn(canHaveReturn).
                     getBlockFactory().produce()
@@ -134,6 +118,6 @@ class WhileFactory(
         SymbolTable.pop()
 
         val loop = Loop(initializer, condition, manipulator)
-        return While(level, loop, iterationLimit, header, body1, body2, body3)
+        return DoWhile(level, loop, iterationLimit, header, body1, body2)
     }
 }

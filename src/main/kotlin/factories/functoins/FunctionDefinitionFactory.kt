@@ -36,8 +36,10 @@ class FunctionDefinitionFactory (               //TODO: add result types
             argInfo.add(VariableInfo("this", ownerClass, ownerClass, VariableInfo.CONST or VariableInfo.LOCAL or VariableInfo.INITIALIZED))
         }
         val body: IRNode
-        var returnNode: Return? = null
+        val returnNode: Return
         var functionInfo: FunctionInfo
+
+        //println("Function $name constructing")
 
         SymbolTable.push()
         try {
@@ -81,20 +83,21 @@ class FunctionDefinitionFactory (               //TODO: add result types
                     setCanHaveReturn(true).
                     getBlockFactory().produce()
 
-            if (resType != TypeList.UNIT) {
-                returnNode = builder.
-                        setComplexityLimit(complexityLimit - blockCompLimit).
-                        setExceptionSafe(false).
-                        getReturnFactory().produce()
+            returnNode = if (resType != TypeList.UNIT) {
+                builder.setComplexityLimit(complexityLimit - blockCompLimit).setExceptionSafe(false).getReturnFactory().produce()
             } else {
-                returnNode = Return(NothingNode())
+                Return(NothingNode())
             }
         } finally {
             SymbolTable.pop()
         }
+
+        //println("Function $name constructed")
+        //SymbolTable.printAll()
+
         functionInfo = FunctionInfo(name, ownerClass, resType, body.complexity(), flags, argInfo)
         // If it's all ok, add the function to the symbol table.
         SymbolTable.add(functionInfo)
-        return FunctionDefinition(functionInfo, argDecl, body ?: NothingNode(), returnNode)
+        return FunctionDefinition(functionInfo, argDecl, body, returnNode)
     }
 }

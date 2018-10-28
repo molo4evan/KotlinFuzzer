@@ -22,8 +22,7 @@ open class Symbol(val name: String, val owner: Type?, val type: Type, var flags:
         if (other == null || other !is Symbol) return false
 
         return try{
-            val s = other as Symbol
-            owner == s.owner && name == s.name
+            owner == other.owner && name == other.name
         } catch (e: Exception) {
             false
         }

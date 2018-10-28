@@ -1,11 +1,11 @@
-package factories.control_flow.loops
+package factories.controlflow.loops
 
 import factories.Factory
 import factories.utils.IRNodeBuilder
 import information.TypeList
 import ir.IRNode
 import ir.Literal
-import ir.control_flow.loops.LoopingCondition
+import ir.controlflow.loops.LoopingCondition
 import ir.operators.BinaryOperator
 import ir.operators.OperatorKind
 import ir.types.Type

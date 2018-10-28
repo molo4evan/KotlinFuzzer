@@ -16,7 +16,7 @@ internal class LogicalInversionOperatorFactory(
 
     override fun isApplicable(resultType: Type) = resultType == TypeList.BOOLEAN
 
-    override fun generateProduction(resultType: Type) = UnaryOperator(opKind, ExpressionFactory(
+    override fun generateProduction(type: Type) = UnaryOperator(opKind, ExpressionFactory(
             complexityLimit - 1,
             operatorLimit - 1,
             ownerClass,

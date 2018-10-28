@@ -7,7 +7,7 @@ import information.Symbol
 import information.SymbolTable
 import information.TypeList
 import ir.IRNode
-import providers.tests_generators.TestGenerator
+import providers.testsgenerators.TestGenerator
 import utils.OptionResolver
 import utils.ProductionParams
 import utils.PseudoRandom
@@ -30,8 +30,6 @@ const val SECONDS_TO_CLOSE = 5L //Time to destroy the process before the "destro
 const val JVM_DEVIATION = 1
 const val NATIVE_DEVIATION = 1
 const val JS_DEVIATION = 1
-
-const val MODES_COUNT = 3
 
 const val ARITHMETIC_EXIT = 136 // Native runtime ArithmeticException exit code (not an authentic information)
 

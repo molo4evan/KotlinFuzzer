@@ -1,13 +1,12 @@
 package ir.types
 
 import exceptions.NotInitializedOptionException
-import ir.IRNode
-import utils.ProductionParams
 import information.Symbol
 import information.SymbolTable
 import information.TypeList
-import ir.NothingNode
+import ir.IRNode
 import providers.visitors.Visitor
+import utils.ProductionParams
 import java.util.*
 
 open class Type(val typename: String, private var flags: Int = 0x00): IRNode(null), Comparable<Type> {
@@ -18,6 +17,7 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
         val ABSTRACT = 0x04
         val BUILTIN = 0x08
         val ENUM = 0x10
+        val NULLABLE = 0x20
     }
 
     lateinit var parentClass: Type
@@ -30,7 +30,7 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other === null || other !is Type) return false
-        return typename == other.typename
+        return typename == other.typename && isNullable() == other.isNullable()
     }
 
     override fun compareTo(other: Type) = typename.compareTo(other.typename)
@@ -39,7 +39,7 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
 
     fun addSymbol(s: Symbol) = symbols.add(s)
 
-    fun exportSymbols() {
+    open fun exportSymbols() {
         symbols.stream().forEach { SymbolTable.add(it) }
     }
 
@@ -86,9 +86,7 @@ open class Type(val typename: String, private var flags: Int = 0x00): IRNode(nul
 
     fun isAbstract() = flags and ABSTRACT != 0
 
-    fun setAbstract(){
-        flags = flags or ABSTRACT
-    }
+    fun isNullable() = flags and NULLABLE != 0
 
     fun isInterface() = flags and INTERFACE != 0
 

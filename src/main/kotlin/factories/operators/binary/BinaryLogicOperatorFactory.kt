@@ -23,7 +23,7 @@ class BinaryLogicOperatorFactory(
 
     override fun generateTypes() = Pair(TypeList.BOOLEAN, TypeList.BOOLEAN)
 
-    override fun generateProduction(t1: Type, t2: Type): BinaryOperator {
+    override fun generateProduction(leftType: Type, rightType: Type): BinaryOperator {
         val leftOpLimit = (PseudoRandom.random() * (operatorLimit - 1)).toInt()
         val rightOpLimit = operatorLimit - 1 - leftOpLimit
         val leftComplLimit = (PseudoRandom.random() * (complexityLimit - 1)).toLong()

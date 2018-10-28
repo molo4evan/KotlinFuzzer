@@ -32,16 +32,15 @@ object TypeList {
         BUILTIN_FP_TYPES.add(FLOAT)
         BUILTIN_FP_TYPES.add(DOUBLE)
 
-        BUILTIN_TYPES.addAll(BUILTIN_INT_TYPES)     //TODO: change addition?
+        BUILTIN_TYPES.addAll(BUILTIN_INT_TYPES)
         BUILTIN_TYPES.addAll(BUILTIN_FP_TYPES)
 
         BUILTIN_TYPES.add(BOOLEAN)
         BUILTIN_TYPES.add(CHAR)
-        //BUILTIN_TYPES.add(UNIT)
-        //BUILTIN_TYPES.add(NOTHING)
-
 
         TYPES.addAll(BUILTIN_TYPES)
+
+        addArrays()
 
         if (ProductionParams.disableArrays?.value() == false) {
             TYPES.addAll(REFERENCE_TYPES)
@@ -55,6 +54,12 @@ object TypeList {
 
         TYPES_FOR_FUNS.addAll(TYPES)
         TYPES_FOR_FUNS.add(UNIT)
+    }
+
+    private fun addArrays(){
+        for (type in BUILTIN_TYPES){
+            REFERENCE_TYPES.add(TypeArray(type))
+        }
     }
 
     fun getAll() = TYPES
@@ -75,7 +80,7 @@ object TypeList {
 //
 //    fun isBuiltInInt(t: Type) = BUILTIN_INT_TYPES.contains(t)
 //
-//    fun isBuiltIn(t: Type) = isBuiltInInt(t) || isBuiltInFP(t) || t.equals(NOTHING)     //TODO: incorrect
+    fun isBuiltIn(t: Type) = BUILTIN_TYPES.contains(t)
 
     fun isIn(t: Type) = TYPES.contains(t)
 

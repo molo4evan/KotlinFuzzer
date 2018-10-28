@@ -1,16 +1,19 @@
 package providers.visitors
 
 import ir.*
-import ir.control_flow.Break
-import ir.control_flow.Continue
-import ir.control_flow.If
-import ir.control_flow.When
-import ir.control_flow.loops.*
+import ir.arrays.ArrayCreation
+import ir.arrays.ArrayElement
+import ir.controlflow.Break
+import ir.controlflow.Continue
+import ir.controlflow.If
+import ir.controlflow.When
+import ir.controlflow.loops.*
 import ir.functions.*
 import ir.operators.BinaryOperator
 import ir.operators.CastOperator
 import ir.operators.RangeOperator
 import ir.operators.UnaryOperator
+import ir.types.TypeArray
 import ir.types.Type
 import ir.variables.LocalVariable
 import ir.variables.VariableDeclaration
@@ -19,9 +22,8 @@ import ir.variables.VariableDeclarationBlock
 
 interface Visitor<T> {
     fun visit(node: ArgumentDeclaration): T
-//    fun visit(node: ArrayCreation): T
-//    fun visit(node: ArrayElement): T
-//    fun visit(node: ArrayExtraction): T
+    fun visit(node: ArrayCreation): T
+    fun visit(node: ArrayElement): T
     fun visit(node: BinaryOperator): T
     fun visit(node: Block): T
     fun visit(node: Break): T
@@ -50,7 +52,7 @@ interface Visitor<T> {
     fun visit(node: Literal): T
     fun visit(node: LocalVariable): T
     fun visit(node: LoopingCondition): T
-////    fun visit(node: MainKlass): T   //TODO: delete?
+////    fun visit(node: MainKlass): T
 ////    fun visit(node: NonStaticMemberVariable): T
     fun visit(node: NothingNode): T
     fun visit(node: PrintVariables): T
@@ -61,7 +63,7 @@ interface Visitor<T> {
 ////    fun visit(node: StaticConstructorDefinition): T
 ////    fun visit(node: StaticMemberVariable): T
     fun visit(node: Type): T
-//    fun visit(node: TypeArray): T
+    fun visit(node: TypeArray): T
     fun visit(node: UnaryOperator): T
     fun visit(node: VariableDeclaration): T
     fun visit(node: VariableDeclarationBlock): T

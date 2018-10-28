@@ -3,7 +3,8 @@ package factories.functoins
 import exceptions.ProductionFailedException
 import factories.Factory
 import factories.utils.IRNodeBuilder
-import information.*
+import information.SymbolTable
+import information.TypeList
 import ir.IRNode
 import ir.PrintVariables
 import ir.functions.MainFunction
@@ -16,8 +17,8 @@ class MainFunctionFactory (
         private val operatorLimit: Int
 ): Factory<MainFunction>() {
     override fun produce(): MainFunction {
-        var body: IRNode? = null
-        var printVars: PrintVariables? = null
+        val body: IRNode?
+        val printVars: PrintVariables?
 
         SymbolTable.push()
         try {

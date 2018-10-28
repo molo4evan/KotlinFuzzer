@@ -20,6 +20,7 @@ internal class VariableFactory(
     private val rule: Rule<VariableBase>
 
     init {
+
         var flags = Symbol.NONE
         if (constant) {
             flags = flags or VariableInfo.CONST

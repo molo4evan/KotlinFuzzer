@@ -3,11 +3,13 @@ package factories.utils
 import exceptions.NotInitializedOptionException
 import exceptions.ProductionFailedException
 import factories.*
-import factories.control_flow.BreakFactory
-import factories.control_flow.ContinueFactory
-import factories.control_flow.IfFactory
-import factories.control_flow.WhenFactory
-import factories.control_flow.loops.*
+import factories.arrays.ArrayCreationFactory
+import factories.arrays.ArrayElementFactory
+import factories.controlflow.BreakFactory
+import factories.controlflow.ContinueFactory
+import factories.controlflow.IfFactory
+import factories.controlflow.WhenFactory
+import factories.controlflow.loops.*
 import factories.functoins.*
 import factories.operators.CastOperatorFactory
 import factories.operators.RangeOperatorFactory
@@ -26,11 +28,13 @@ import factories.variables.VariableInitializationFactory
 import information.FunctionInfo
 import information.TypeList
 import ir.*
-import ir.control_flow.Break
-import ir.control_flow.Continue
-import ir.control_flow.If
-import ir.control_flow.When
-import ir.control_flow.loops.*
+import ir.arrays.ArrayCreation
+import ir.arrays.ArrayElement
+import ir.controlflow.Break
+import ir.controlflow.Continue
+import ir.controlflow.If
+import ir.controlflow.When
+import ir.controlflow.loops.*
 import ir.functions.*
 import ir.operators.*
 import ir.operators.OperatorKind.*
@@ -69,6 +73,7 @@ class IRNodeBuilder {
     private var name = Optional.empty<String>()
     private var flags = Optional.empty<Int>()
     private var functionInfo = Optional.empty<FunctionInfo>()
+    private var forLoop = Optional.empty<Boolean>()
 
 
     /** factories */
@@ -82,20 +87,15 @@ class IRNodeBuilder {
                 getOwnerClass(), getResultType(), getExceptionSafe(), getNoConsts())
     }
 
-//    fun getArrayCreationFactory(): Factory<ArrayCreation> {
-//        return ArrayCreationFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
-//                getResultType(), getExceptionSafe(), getNoConsts())
-//    }
-//
-//    fun getArrayElementFactory(): Factory<ArrayElement> {
-//        return ArrayElementFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
-//                getResultType(), getExceptionSafe(), getNoConsts())
-//    }
-//
-//    fun getArrayExtractionFactory(): Factory<ArrayExtraction> {
-//        return ArrayExtractionFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
-//                getResultType(), getExceptionSafe(), getNoConsts())
-//    }
+    fun getArrayCreationFactory(): Factory<ArrayCreation> {
+        return ArrayCreationFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
+                getResultType(), getExceptionSafe(), getNoConsts())
+    }
+
+    fun getArrayElementFactory(): Factory<ArrayElement> {
+        return ArrayElementFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(),
+                getResultType(), getExceptionSafe(), getNoConsts())
+    }
 
     fun getAssignmentOperatorFactory(): Factory<Operator> {
         return AssignmentOperatorFactory(getComplexityLimit(), getOperatorLimit(),
@@ -235,10 +235,10 @@ class IRNodeBuilder {
                 getCanHaveContinues(), getCanHaveReturn())
     }
 
-//    fun getForFactory(): Factory<For> {
-//        return ForFactory(getOwnerClass(), getResultType(), getComplexityLimit(),
-//                getStatementLimit(), getOperatorLimit(), getLevel(), getCanHaveReturn())
-//    }
+    fun getForFactory(): Factory<For> {
+        return ForFactory(getOwnerClass(), getResultType(), getComplexityLimit(),
+                getStatementLimit(), getOperatorLimit(), getLevel(), getCanHaveReturn())
+    }
 
     fun getWhenFactory(): Factory<When> {
         return WhenFactory(getComplexityLimit(), getStatementLimit(), getOperatorLimit(),
@@ -337,7 +337,7 @@ class IRNodeBuilder {
     }
 
     fun getRangeOperatorFactory(): Factory<RangeOperator> {
-        return RangeOperatorFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(), getExceptionSafe(), getNoConsts())
+        return RangeOperatorFactory(getComplexityLimit(), getOperatorLimit(), getOwnerClass(), getExceptionSafe(), getNoConsts(), getForLoop())
     }
 
     fun getReturnFactory(): Factory<Return> {
@@ -530,6 +530,11 @@ class IRNodeBuilder {
         return this
     }
 
+    fun setForLoop(value: Boolean): IRNodeBuilder {
+        forLoop = Optional.of(value)
+        return this
+    }
+
     /** getters */
 
     private fun getArgumentType(): Type? {
@@ -658,5 +663,9 @@ class IRNodeBuilder {
         return functionInfo.orElseThrow {
             IllegalArgumentException("FunctionInfo wasn't set")
         }
+    }
+
+    private fun getForLoop(): Boolean {
+        return forLoop.orElseThrow { IllegalArgumentException("forLoop wasn't set") }
     }
 }

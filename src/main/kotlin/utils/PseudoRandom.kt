@@ -47,8 +47,8 @@ object PseudoRandom {
         Collections.shuffle(list, random)
     }
 
-    fun randomNotNegative(limit: Int): Int {
-        val result = (limit * random.nextDouble()).toInt()
+    fun randomNotNegative(limit: Long): Long {
+        val result = (limit * random.nextDouble()).toLong()
         return Math.abs(result)
     }
 

@@ -1,7 +1,7 @@
-package factories.control_flow
+package factories.controlflow
 
 import factories.Factory
-import ir.control_flow.Break
+import ir.controlflow.Break
 
 class BreakFactory: Factory<Break>() {
     override fun produce() = Break()

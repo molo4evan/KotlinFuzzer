@@ -1,7 +1,7 @@
-package factories.control_flow
+package factories.controlflow
 
 import factories.Factory
-import ir.control_flow.Continue
+import ir.controlflow.Continue
 
 class ContinueFactory: Factory<Continue>() {
     override fun produce() = Continue()

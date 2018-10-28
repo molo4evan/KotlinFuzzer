@@ -1,4 +1,4 @@
-package factories.control_flow.loops
+package factories.controlflow.loops
 
 import exceptions.NotInitializedOptionException
 import factories.SafeFactory
@@ -6,7 +6,7 @@ import information.SymbolTable
 import information.TypeList
 import information.VariableInfo
 import ir.LiteralInitializer
-import ir.control_flow.loops.CounterInitializer
+import ir.controlflow.loops.CounterInitializer
 import ir.types.Type
 import utils.ProductionParams
 

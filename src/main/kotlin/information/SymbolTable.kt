@@ -37,6 +37,7 @@ object SymbolTable {
     }
 
     fun add(symbol: Symbol?){
+        //if (symbol != null) println("${symbol.name}:${symbol.type.getName()} added to symbol table")
         val vars = SYMBOL_STACK.peek()
         if (symbol != null){
             if (!vars.containsKey(symbol.type)){
@@ -50,6 +51,7 @@ object SymbolTable {
     fun remove(symbol: Symbol?){
         val vars = SYMBOL_STACK.peek()
         if (symbol != null) {
+            //println("${symbol.name} removed from symbol table")
             if (vars.containsKey(symbol.type)) {
                 val symbolsOfType = vars[symbol.type]
                 symbolsOfType!!.remove(symbol)
@@ -221,6 +223,7 @@ object SymbolTable {
     }
 
     fun push() {
+        //println("Stack pushed")
         // Do deep cloning..
         val prev = SYMBOL_STACK.peek()
         val top = mutableMapOf<Type, MutableList<Symbol>>()
@@ -237,12 +240,14 @@ object SymbolTable {
     fun merge() {
         // Merging means moving element at the top of stack one step down, while removing the
         // previous element.
+        //println("MERGING STACK: 2 POPS, 1 PUSH")
         val top = SYMBOL_STACK.pop()
         SYMBOL_STACK.pop()
         SYMBOL_STACK.push(top)
     }
 
     fun pop() {
+        //println("Stack poped")
         SYMBOL_STACK.pop()
     }
 
@@ -251,4 +256,15 @@ object SymbolTable {
     fun getNextFunctionNumber() = ++FUNCTION_AMOUNT
 
     override fun toString() = SYMBOL_STACK.toString()
+
+    fun printAll(){
+        val top = SYMBOL_STACK.pop()
+        SYMBOL_STACK.push(top)
+        println("Variables on top of stack table:")
+        for ((type, symbols) in top) {
+            for (symbol in symbols) {
+                println("\t${symbol.name}:${type.getName()}")
+            }
+        }
+    }
 }

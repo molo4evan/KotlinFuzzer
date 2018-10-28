@@ -1,24 +1,22 @@
 package ir.functions
 
-import ir.IRNode
-import ir.types.Type
 import information.FunctionInfo
 import information.Symbol
 import information.SymbolTable
-import ir.NothingNode
+import ir.IRNode
+import ir.types.Type
 import providers.visitors.Visitor
 
 class FunctionDefinition(
         val functionInfo: FunctionInfo,
         argumentDeclarations: List<ArgumentDeclaration>,
         body: IRNode,
-        ret: Return?
+        ret: Return
 ): IRNode(functionInfo.type) {
     init {
         owner = functionInfo.owner
         addChild(body)
-        if (ret == null) addChild(NothingNode())
-        else addChild(ret)
+        addChild(ret)
         addChildren(argumentDeclarations)
     }
 

@@ -5,15 +5,18 @@ import information.FunctionInfo
 import information.Symbol
 import information.TypeList
 import ir.*
-import ir.control_flow.Break
-import ir.control_flow.Continue
-import ir.control_flow.If
-import ir.control_flow.When
-import ir.control_flow.loops.*
+import ir.arrays.ArrayCreation
+import ir.arrays.ArrayElement
+import ir.controlflow.Break
+import ir.controlflow.Continue
+import ir.controlflow.If
+import ir.controlflow.When
+import ir.controlflow.loops.*
 import ir.functions.*
 import ir.operators.*
 import ir.operators.OperatorKind.*
 import ir.types.Type
+import ir.types.TypeArray
 import ir.variables.LocalVariable
 import ir.variables.VariableBase
 import ir.variables.VariableDeclaration
@@ -104,9 +107,47 @@ class KotlinCodeVisitor: Visitor<String> {
         return "${attributes(vi)}${vi.name}: ${vi.type.accept(this)}"
     }
 
+    override fun visit(node: ArrayCreation): String {
+        val arrayElemType = node.arrayType.type
+        val type = arrayElemType.accept(this)
+        val name = node.variable.getName()
+        val code = StringBuilder()
+        code.append(node.variable.accept(this)).append(" = ")
+//        val addBuiltInChance = if (TypeList.isBuiltIn(arrayElemType)){
+//            1.0
+//        } else 0.0
+//        if (PseudoRandom.randomBoolean(addBuiltInChance)){
+//            code.append(builtInCreation(node))
+//        } else {
+//            code.append(genericArrayCreation(node))
+//        }
+        code.append(genericArrayCreation(node))
+        return code.toString()
+    }
 
+//    private fun builtInCreation(node: ArrayCreation): String {
+//        val typeName = node.arrayType.type.getName()
+//        return typeName + "Array(" + node.getChild(0).accept(this) + ")"
+//    }
 
+    private fun genericArrayCreation(node: ArrayCreation): String {
+        return "emptyArray<" + node.arrayType.type.getName() + ">()"
+    }
 
+    override fun visit(node: ArrayElement): String {
+        val array = node.getChild(0)
+        val index = node.getChild(1)
+        val code = StringBuilder()
+        if (array is VariableBase || array is FunctionCall) {
+            code.append(array.accept(this))
+        } else {
+            code.append("(").
+                    append(array.accept(this)).
+                    append(")")
+        }
+        code.append("[${index.accept(this)}]")
+        return code.toString()
+    }
 
     override fun visit(node: BinaryOperator): String {
         val left = node.getChild(Operator.Order.LEFT.ordinal)
@@ -179,7 +220,17 @@ class KotlinCodeVisitor: Visitor<String> {
     }
 
     override fun visit(node: For): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val level = node.level
+        val cond = node.getChild(For.ForPart.HEADER.ordinal)
+        val body = node.getChild(For.ForPart.BODY.ordinal)
+        return StringBuilder().
+                append(PrintingUtils.align(level - 2)).
+                append("for ").
+                append(cond.accept(this)).
+                append(" {\n").
+                append(body.accept(this)).
+                append(PrintingUtils.align(level - 1)).
+                append("}").toString()
     }
 
     override fun visit(node: FunctionCall): String {
@@ -346,7 +397,9 @@ class KotlinCodeVisitor: Visitor<String> {
         val to = node.getChild(RangeOperator.RangeParts.TO.ordinal)
         val step = node.getChild(RangeOperator.RangeParts.STEP.ordinal)
 
-        val stepStr = if (step is NothingNode) "" else " step ${step.accept(this)}"
+        val targetStr = (target as? LocalVariable)?.accept(this) ?: "(${target.accept(this)})"
+
+        val stepStr = if (step is NothingNode) "" else " step (${step.accept(this)})"
 
         val direction = if (node.forward) {
             if (node.inclusive) {
@@ -360,7 +413,7 @@ class KotlinCodeVisitor: Visitor<String> {
 
         val opStr = if (node.opposite) "!" else ""
 
-        return "((${target.accept(this)}) ${opStr}in (${from.accept(this)}) $direction (${to.accept(this)}$stepStr))"
+        return "($targetStr ${opStr}in (${from.accept(this)}) $direction (${to.accept(this)})$stepStr)"
     }
 
     override fun visit(node: Return) = "return ${node.retExpr.accept(this)}"
@@ -368,6 +421,8 @@ class KotlinCodeVisitor: Visitor<String> {
     override fun visit(node: Statement) = node.getChild(0).accept(this)
 
     override fun visit(node: Type) = node.typename
+
+    override fun visit(node: TypeArray) = "Array<" + node.type.accept(this) + ">"
 
     override fun visit(node: UnaryOperator): String {
         val expr = node.getChild(0)
@@ -384,7 +439,7 @@ class KotlinCodeVisitor: Visitor<String> {
 
     override fun visit(node: VariableDeclaration): String {
         val vi = node.variableInfo
-        return attributes(vi) + (if (!vi.isLocal()) "lateinit " else "") + "var " + vi.name + ": " + vi.type.accept(this)   //is correct?
+        return attributes(vi) + (if (!vi.isLocal()) "lateinit " else "") + "var " + vi.name + ": " + vi.type.accept(this)
     }
 
     override fun visit(node: VariableDeclarationBlock): String {

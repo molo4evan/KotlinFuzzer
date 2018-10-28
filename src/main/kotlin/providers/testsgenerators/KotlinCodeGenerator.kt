@@ -1,4 +1,4 @@
-package providers.tests_generators
+package providers.testsgenerators
 
 import exceptions.UnsuccessfullRunningException
 import ir.IRNode
@@ -7,16 +7,13 @@ import utils.ProductionParams
 import java.io.IOException
 
 class KotlinCodeGenerator(
-        prefix: String,
-        preRunActions: (String) -> Array<String>,
-        jtDriverOptions: String
-): TestGenerator(prefix, preRunActions, jtDriverOptions) {
-    constructor(): this(DEFAULT_SUFFIX, {arrayOf("@compile $it.kt")}, "")  //???  TODO: figure out how prerun works
-
-
+        suffix: String
+): TestGenerator(suffix) {
     companion object {
-        private val DEFAULT_SUFFIX = "kotlin_tests"
+        val DEFAULT_SUFFIX = "kotlin_tests"
     }
+
+    constructor(): this(DEFAULT_SUFFIX)
 
     override fun accept(main: IRNode, other: IRNode?) {
         val mainName = main.getName()
@@ -39,7 +36,6 @@ class KotlinCodeGenerator(
         val mainName = main.getName()
         val code = StringBuilder()
         val vis = KotlinCodeVisitor()
-        //code.append(getJtregHeader(mainName))
         if (other != null) {
             code.append(other.accept(vis))
         }
@@ -90,7 +86,6 @@ class KotlinCodeGenerator(
         val pb = ProcessBuilder(
                 KOTLINC_JS,
                 generatorDir.resolve(mainName).resolve("$mainName.kt").toString(),
-                "-mowarn",
                 "-output", generatorDir.resolve(mainName).resolve("$mainName.js").toString(),
                 "-libraries", generatorDir.toString()
         )

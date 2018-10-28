@@ -1,4 +1,4 @@
-package factories.control_flow
+package factories.controlflow
 
 import exceptions.ProductionFailedException
 import factories.SafeFactory
@@ -7,7 +7,7 @@ import factories.utils.IRNodeBuilder
 import information.TypeList
 import ir.IRNode
 import ir.NothingNode
-import ir.control_flow.When
+import ir.controlflow.When
 import ir.types.Type
 import utils.PseudoRandom
 

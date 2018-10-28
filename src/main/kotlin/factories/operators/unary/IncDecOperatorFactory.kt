@@ -20,11 +20,11 @@ internal class IncDecOperatorFactory(
         return resultType.isBuiltIn() && resultType != TypeList.BOOLEAN
     }
 
-    override fun generateProduction(l: Type): UnaryOperator {
+    override fun generateProduction(type: Type): UnaryOperator {
         return UnaryOperator(opKind, IRNodeBuilder().setComplexityLimit(complexityLimit - 1)
                 .setOperatorLimit(operatorLimit - 1)
                 .setOwnerClass(ownerClass)
-                .setResultType(l)
+                .setResultType(type)
                 .setIsConstant(false)
                 .setIsInitialized(true)
                 .setExceptionSafe(exceptionSafe)
