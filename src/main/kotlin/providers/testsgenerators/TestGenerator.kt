@@ -38,21 +38,26 @@ abstract class TestGenerator protected constructor(         //TODO: add compilin
         private val KOTLIN_BIN = getKotlinHome()
         private val JAVA_BIN = getJavaHome()
 
-        val KOTLINC_JVM = Paths.get(KOTLIN_BIN, "kotlinc-jvm").toString()
-        val JAVA = Paths.get(JAVA_BIN, "java").toString()
+        val KOTLINC_JVM = Paths.get(KOTLIN_BIN, checkWin("kotlinc-jvm")).toString()
+        val JAVA = Paths.get(JAVA_BIN, checkWin("java")).toString()
 
         private val KOTLIN_NATIVE_BIN = if (ProductionParams.nativeMode?.value() == true || ProductionParams.joinMode?.value() == true) {
             ((ProductionParams.nativePath?.value() ?: throw NotInitializedOptionException("nativePath")) + "/bin/")
         } else {
             ""
         }
-        val KOTLINC_NATIVE = Paths.get(KOTLIN_NATIVE_BIN, "kotlinc-native").toString()
+        val KOTLINC_NATIVE = Paths.get(KOTLIN_NATIVE_BIN, checkWin("kotlinc-native")).toString()
 
-        val KOTLINC_JS = Paths.get(KOTLIN_BIN, "kotlinc-js").toString()
+        val KOTLINC_JS = Paths.get(KOTLIN_BIN, checkWin("kotlinc-js")).toString()
         val KOTLIN_JS = if (ProductionParams.jsMode?.value() == true || ProductionParams.joinMode?.value() == true) {
             ProductionParams.jsPath?.value() ?: throw NotInitializedOptionException("jsPath")
         } else {
             ""
+        }
+
+        private fun checkWin(command: String): String {
+            val win = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0
+            return if (win) "$command.bat" else command
         }
 
 
